@@ -1,0 +1,252 @@
+# THE MEDIA STACK #
+
+# this docker-compose file will get a selection of media downloading/management webapps
+# I've tried to simplify getting started as much as possible
+#   1. configure your desired variables in the .env file
+#   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
+
+# NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
+
+version: '2'
+services:
+    # nginx reverse proxy container
+    # binds to HTTP (80) and HTTPS (443) ports
+    # then serves requests as a reverse proxy to the different containers defined below 
+    nginx-proxy:
+        image: jwilder/nginx-proxy:alpine
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            # HTTPS certificates
+            - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
+            - /etc/nginx/vhost.d
+            - /usr/share/nginx/html
+            # additional nginx configuration
+            - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
+            - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+        labels:
+            - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+    # letsencrypt container for HTTPS certificate generation
+    nginx-letsencrypt:
+        image: jrcs/letsencrypt-nginx-proxy-companion:latest
+        restart: unless-stopped
+        volumes:
+            - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:rw
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        volumes_from:
+            - nginx-proxy
+        environment:
+            - DHPARAM_BITS=4096
+    # watchtower container to update images
+    # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
+    # NOTE watchtower also updates itself
+    watchtower:
+        image: v2tec/watchtower:latest
+        restart: always
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+    # portainer container for administration of containers
+    portainer:
+        image: portainer/portainer
+        restart: unless-stopped
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ${docker_data_folder}/portainer:/data
+        environment:
+            - VIRTUAL_HOST=portainer.${root_domain}
+            - VIRTUAL_PORT=9000
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=portainer.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # htpc manager container to manage most apps
+    htpc-manager:
+        image: linuxserver/htpcmanager:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/htpcmanager:/config
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=htpc.${root_domain}
+            - VIRTUAL_PORT=8085
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=htpc.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # transmission torrent client container
+    transmission:
+        image: haugene/transmission-openvpn:latest-alpine
+        restart: always
+        cap_add:
+            - NET_ADMIN
+        # settting dns apparently preferable as some DNS resolution in docker containers fails
+        dns:
+            - 1.1.1.1
+            - 1.0.0.1
+        # not sure why this is needed
+        devices:
+            - /dev/net/tun
+        logging:
+            driver: json-file
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/transmission:/config
+            - ${data_folder}/downloads:/data
+            - ${torrent_blackhole}:/blackhole
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            #- TRANSMISSION_WEB_UI=transmission-web-control
+            # max ammount of seeded torrents
+            - TRANSMISSION_SEED_QUEUE_SIZE=10
+            - TRANSMISSION_UMASK=007
+            # stop seeding after ratio
+            - TRANSMISSION_RATIO_LIMIT=6
+            - TRANSMISSION_RATIO_LIMIT_ENABLED=true
+            - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
+            - OPENVPN_PROVIDER=WINDSCRIBE
+            - OPENVPN_CONFIG=FR 
+            - OPENVPN_USERNAME=${openvpn_user}
+            - OPENVPN_PASSWORD=${openvpn_password}
+            - WEBPROXY_ENABLED=false 
+            - LOCAL_NETWORK=192.168.0.0/16 
+            - VIRTUAL_HOST=transmission.${root_domain}
+            - VIRTUAL_PORT=9091
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=transmission.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # jackett tracker site scraper with API
+    jackett:
+        image: linuxserver/jackett:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/jackett:/config
+            - ${torrent_blackhole}:/downloads
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=jackett.${root_domain}
+            - VIRTUAL_PORT=9117
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=jackett.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # radarr, webapp for downloading movies through torrent client
+    # queries are done with jackett
+    radarr:
+        image: linuxserver/radarr:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/radarr:/config
+            - ${data_folder}:/data
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=radarr.${root_domain},movies.${root_domain}
+            - VIRTUAL_PORT=7878
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=radarr.${root_domain},movies.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # sonarr, webapp for downloading series through torrent client
+    # queries are done with jackett
+    sonarr:
+        image: linuxserver/sonarr:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/sonarr:/config
+            - ${data_folder}:/data
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=sonarr.${root_domain},series.${root_domain}
+            - VIRTUAL_PORT=8989
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=sonarr.${root_domain},series.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # lidarr, webapp for downloading music through torrent client
+    # queries are done with jackett
+    lidarr:
+        image: linuxserver/lidarr:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/lidarr:/config
+            - ${data_folder}:/data
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=lidarr.${root_domain},music.${root_domain}
+            - VIRTUAL_PORT=8686
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=lidarr.${root_domain},music.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # mylar, webapp for downloading comics through torrent client
+    # queries are done with jackett
+    mylar:
+        image: linuxserver/mylar:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/mylar:/config
+            - ${data_folder}:/data
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=mylar.${root_domain},comics.${root_domain}
+            - VIRTUAL_PORT=8090
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=mylar.${root_domain},comics.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+    # plex media manager and transcoder
+    # TODO fix plex webapp not detecting plex server
+    plex:
+        image: linuxserver/plex:latest
+        restart: unless-stopped
+        # TODO figure out which ports do what
+        ports:
+            - 32400:32400
+            - 32400:32400/udp
+            - 32469:32469
+            - 32469:32469/udp
+            - 5353:5353/udp
+            - 1900:1900/udp
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/plex:/config
+            - ${torrent_blackhole}:/downloads
+            - ${data_folder}/comics:/comics
+            - ${data_folder}/series:/data/tvshows
+            - ${data_folder}/movies:/data/movies
+            - ${docker_data_folder}/plex/transcode:/transcode
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=plex.${root_domain}
+            - VIRTUAL_PORT=32400
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=plex.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
+            - VERSION=latest
