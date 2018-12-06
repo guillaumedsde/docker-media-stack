@@ -11,7 +11,7 @@ version: '2'
 services:
     # nginx reverse proxy container
     # binds to HTTP (80) and HTTPS (443) ports
-    # then serves requests as a reverse proxy to the different containers defined below 
+    # then serves requests as a reverse proxy to the different containers defined below
     nginx-proxy:
         image: jwilder/nginx-proxy:alpine
         restart: unless-stopped
@@ -63,23 +63,6 @@ services:
             - LETSENCRYPT_HOST=portainer.${root_domain}
             - LETSENCRYPT_EMAIL=${lets_encrypt_email}
             - SSL_POLICY=${ssl_policy}
-    # htpc manager container to manage most apps
-    htpc-manager:
-        image: linuxserver/htpcmanager:latest
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/htpcmanager:/config
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=htpc.${root_domain}
-            - VIRTUAL_PORT=8085
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=htpc.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
     # transmission torrent client container
     transmission:
         image: haugene/transmission-openvpn:latest-alpine
@@ -112,11 +95,11 @@ services:
             - TRANSMISSION_RATIO_LIMIT_ENABLED=true
             - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
             - OPENVPN_PROVIDER=WINDSCRIBE
-            - OPENVPN_CONFIG=FR 
+            - OPENVPN_CONFIG=FR
             - OPENVPN_USERNAME=${openvpn_user}
             - OPENVPN_PASSWORD=${openvpn_password}
-            - WEBPROXY_ENABLED=false 
-            - LOCAL_NETWORK=192.168.0.0/16 
+            - WEBPROXY_ENABLED=false
+            - LOCAL_NETWORK=192.168.0.0/16
             - VIRTUAL_HOST=transmission.${root_domain}
             - VIRTUAL_PORT=9091
             - VIRTUAL_PROTO=http
@@ -218,35 +201,3 @@ services:
             - LETSENCRYPT_HOST=mylar.${root_domain},comics.${root_domain}
             - LETSENCRYPT_EMAIL=${lets_encrypt_email}
             - SSL_POLICY=${ssl_policy}
-    # plex media manager and transcoder
-    # TODO fix plex webapp not detecting plex server
-    plex:
-        image: linuxserver/plex:latest
-        restart: unless-stopped
-        # TODO figure out which ports do what
-        ports:
-            - 32400:32400
-            - 32400:32400/udp
-            - 32469:32469
-            - 32469:32469/udp
-            - 5353:5353/udp
-            - 1900:1900/udp
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/plex:/config
-            - ${torrent_blackhole}:/downloads
-            - ${data_folder}/comics:/comics
-            - ${data_folder}/series:/data/tvshows
-            - ${data_folder}/movies:/data/movies
-            - ${docker_data_folder}/plex/transcode:/transcode
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=plex.${root_domain}
-            - VIRTUAL_PORT=32400
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=plex.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
-            - VERSION=latest
