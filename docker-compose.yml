@@ -50,7 +50,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
         environment:
             - WATCHTOWER_NOTIFICATIONS=slack
-            - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL="${slack_webhook_url}"
+            - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${slack_webhook_url}
             - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
     # portainer container for administration of containers
     portainer:
