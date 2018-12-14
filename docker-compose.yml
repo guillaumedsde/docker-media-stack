@@ -129,6 +129,24 @@ services:
             - LETSENCRYPT_HOST=jackett.${root_domain}
             - LETSENCRYPT_EMAIL=${lets_encrypt_email}
             - SSL_POLICY=${ssl_policy}
+    # jackett tracker site scraper with API
+    hydra:
+        image: linuxserver/hydra2:latest
+        restart: unless-stopped
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ${docker_data_folder}/hydra:/config
+            - ${data_folder}/downloads:/downloads
+        environment:
+            - PGID=${GID}
+            - PUID=${UID}
+            - VIRTUAL_HOST=hydra.${root_domain}
+            - VIRTUAL_PORT=5076
+            - VIRTUAL_PROTO=http
+            - HTTPS_METHOD=redirect
+            - LETSENCRYPT_HOST=hydra.${root_domain}
+            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+            - SSL_POLICY=${ssl_policy}
     # radarr, webapp for downloading movies through torrent client
     # queries are done with jackett
     radarr:
