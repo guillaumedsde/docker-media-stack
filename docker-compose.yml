@@ -70,14 +70,14 @@ services:
             - SSL_POLICY=${ssl_policy}
     # rtorrent torrent client container
     rtorrent:
-        image: binhex/arch-rtorrentvpn:latest
+        image: binhex/arch-rtorrentvpn
         restart: always
         cap_add:
             - NET_ADMIN
         volumes:
             - /etc/localtime:/etc/localtime:ro
             - ${docker_data_folder}/rtorrent:/config
-            - ${data_folder}/downloads:/data
+            - ${data_folder}:/data
             - ${torrent_blackhole}:/blackhole
         environment:
             - PGID=${GID}
@@ -88,7 +88,7 @@ services:
             - VPN_PASS=${openvpn_password}
             - VPN_PROV=custom
             #- VPN_OPTIONS=<additional openvpn cli options>
-            - STRICT_PORT_FORWARD=no
+            - STRICT_PORT_FORWARD=yes
             - ENABLE_PRIVOXY=no
             - ENABLE_FLOOD=yes
             - ENABLE_AUTODL_IRSSI=no
