@@ -79,12 +79,12 @@ services:
             - ${docker_data_folder}/rtorrent:/config
             - ${data_folder}:/data
             - ${torrent_blackhole}:/blackhole
-        devices:
-            - /dev/net/tun
+        #devices:
+        #    - /dev/net/tun
         environment:
             - PGID=${GID}
             - PUID=${UID}
-            - UMASK=007
+            #- UMASK=007
             - VPN_ENABLED=yes
             - VPN_USER=${openvpn_user}
             - VPN_PASS=${openvpn_password}
@@ -92,14 +92,14 @@ services:
             #- VPN_OPTIONS=<additional openvpn cli options>
             - STRICT_PORT_FORWARD=no
             - ENABLE_PRIVOXY=no
-            - ENABLE_FLOOD=no
+            - ENABLE_FLOOD=yes
             - ENABLE_AUTODL_IRSSI=no
             - LAN_NETWORK=192.168.0.0/24
             - NAME_SERVERS=1.1.1.1,1.0.0.1
             - DEBUG=false
             - PHP_TZ=Europe/Paris
             - VIRTUAL_HOST=torrent.${root_domain}
-            - VIRTUAL_PORT=9080
+            - VIRTUAL_PORT=3000
             - VIRTUAL_PROTO=http
             - HTTPS_METHOD=redirect
             - LETSENCRYPT_HOST=torrent.${root_domain}
