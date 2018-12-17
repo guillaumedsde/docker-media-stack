@@ -140,14 +140,14 @@ services:
             - VPN_USER=${openvpn_user}
             - VPN_PASS=${openvpn_password}
             - VPN_PROV=custom
-            #- VPN_OPTIONS=<additional openvpn cli options> \
+            #- VPN_OPTIONS=<additional openvpn cli options>
             - STRICT_PORT_FORWARD=no
             - ENABLE_PRIVOXY=no
             - ENABLE_FLOOD=yes
             - ENABLE_AUTODL_IRSSI=no
             - LAN_NETWORK=192.168.0.0/24
             - NAME_SERVERS=1.1.1.1,1.0.0.1
-            - DEBUG=false
+            - DEBUG=true
             - PHP_TZ=Europe/Paris
             - VIRTUAL_HOST=torrent.${root_domain}
             - VIRTUAL_PORT=3000
