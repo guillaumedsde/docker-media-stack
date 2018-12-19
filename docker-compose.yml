@@ -13,22 +13,22 @@ services:
     # binds to HTTP (80) and HTTPS (443) ports
     # then serves requests as a reverse proxy to the different containers defined below
     nginx-proxy:
-        image: jwilder/nginx-proxy:alpine
-        restart: unless-stopped
-        ports:
-          - 80:80
-          - 443:443
-        volumes:
-          # HTTPS certificates
-          - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
-          - nginx-vhosts:/etc/nginx/vhost.d
-          - nginx-html:/usr/share/nginx/html
-          # additional nginx configuration
-          - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
-          - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
-          - /var/run/docker.sock:/tmp/docker.sock:ro
-        labels:
-          - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+      image: jwilder/nginx-proxy:alpine
+      restart: unless-stopped
+      ports:
+        - 80:80
+        - 443:443
+      volumes:
+        # HTTPS certificates
+        - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
+        - nginx-vhosts:/etc/nginx/vhost.d
+        - nginx-html:/usr/share/nginx/html
+        # additional nginx configuration
+        - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
+        - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+      labels:
+        - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
     # letsencrypt container for HTTPS certificate generation
     nginx-letsencrypt:
       image: jrcs/letsencrypt-nginx-proxy-companion:latest
