@@ -71,7 +71,7 @@ services:
             - NET_ADMIN
         volumes:
             - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/rtorrent:/config
+            - ${docker_data_folder}/deluge:/config
             - ${data_folder}:/data
             - ${torrent_blackhole}:/blackhole
         #devices:
@@ -91,7 +91,7 @@ services:
             - NAME_SERVERS=1.1.1.1,1.0.0.1
             - DEBUG=false
             - VIRTUAL_HOST=torrent.${root_domain}
-            - VIRTUAL_PORT=9080
+            - VIRTUAL_PORT=8112
             - VIRTUAL_PROTO=http
             - HTTPS_METHOD=redirect
             - LETSENCRYPT_HOST=torrent.${root_domain}
