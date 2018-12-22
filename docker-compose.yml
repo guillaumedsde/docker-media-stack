@@ -14,7 +14,7 @@ services:
     # then serves requests as a reverse proxy to the different containers defined below
     nginx-proxy:
       image: jwilder/nginx-proxy:alpine
-      restart: unless-stopped
+      restart: on-failure:5
       ports:
         - 80:80
         - 443:443
@@ -31,10 +31,12 @@ services:
         - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # letsencrypt container for HTTPS certificate generation
     nginx-letsencrypt:
       image: jrcs/letsencrypt-nginx-proxy-companion:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
       volumes:
@@ -46,12 +48,14 @@ services:
         - DHPARAM_BITS=4096
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
     watchtower:
       image: v2tec/watchtower:latest
-      restart: unless-stopped
+      restart: on-failure:5
       read_only: true
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
@@ -61,11 +65,13 @@ services:
         - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
       networks:
         - watchtower
+      security_opt:
+        - no-new-privileges
       command: --cleanup
     # deluge torrent client container
     deluge:
       image: binhex/arch-delugevpn:latest
-      restart: always
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -101,10 +107,12 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # jackett tracker site scraper with API
     jackett:
       image: linuxserver/jackett:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -124,10 +132,12 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # jackett tracker site scraper with API
     hydra:
       image: linuxserver/hydra2:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -148,11 +158,13 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # radarr, webapp for downloading movies through torrent client
     # queries are done with jackett
     radarr:
       image: linuxserver/radarr:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -174,11 +186,13 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # sonarr, webapp for downloading series through torrent client
     # queries are done with jackett
     sonarr:
       image: linuxserver/sonarr:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -200,11 +214,13 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # lidarr, webapp for downloading music through torrent client
     # queries are done with jackett
     lidarr:
       image: linuxserver/lidarr:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -226,11 +242,13 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
     # mylar, webapp for downloading comics through torrent client
     # queries are done with jackett
     mylar:
       image: linuxserver/mylar:latest
-      restart: unless-stopped
+      restart: on-failure:5
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -252,6 +270,8 @@ services:
         - SSL_POLICY=${ssl_policy}
       networks:
         - frontend
+      security_opt:
+        - no-new-privileges
 
 volumes:
   nginx-vhosts:
