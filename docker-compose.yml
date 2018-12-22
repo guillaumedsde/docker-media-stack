@@ -29,6 +29,8 @@ services:
         - /var/run/docker.sock:/tmp/docker.sock:ro
       labels:
         - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+      networks:
+        - frontend
     # letsencrypt container for HTTPS certificate generation
     nginx-letsencrypt:
       image: jrcs/letsencrypt-nginx-proxy-companion:latest
@@ -42,77 +44,85 @@ services:
         - /var/run/docker.sock:/var/run/docker.sock:ro
       environment:
         - DHPARAM_BITS=4096
+      networks:
+        - frontend
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
     watchtower:
-        image: v2tec/watchtower:latest
-        restart: always
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-        environment:
-          - WATCHTOWER_NOTIFICATIONS=slack
-          - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${slack_webhook_url}
-          - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
-        command: --cleanup
+      image: v2tec/watchtower:latest
+      restart: unless-stopped
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      environment:
+        - WATCHTOWER_NOTIFICATIONS=slack
+        - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${slack_webhook_url}
+        - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
+      command: --cleanup
+      networks:
+        - watchtower
     # deluge torrent client container
     deluge:
-        image: binhex/arch-delugevpn:latest
-        restart: always
-        depends_on:
-          - "nginx-proxy"
-          - "nginx-letsencrypt"
-        cap_add:
-          - NET_ADMIN
-        volumes:
-          - /etc/localtime:/etc/localtime:ro
-          - ${docker_data_folder}/deluge:/config
-          - ${data_folder}:/data
-          - ${torrent_blackhole}:/blackhole
-        #devices:
-        #    - /dev/net/tun
-        environment:
-          - PGID=${GID}
-          - PUID=${UID}
-          #- UMASK=007
-          - VPN_ENABLED=yes
-          - VPN_USER=${openvpn_user}
-          - VPN_PASS=${openvpn_password}
-          - VPN_PROV=custom
-          #- VPN_OPTIONS=<additional openvpn cli options>
-          - STRICT_PORT_FORWARD=no
-          - ENABLE_PRIVOXY=no
-          - LAN_NETWORK=192.168.0.0/24
-          - NAME_SERVERS=1.1.1.1,1.0.0.1
-          - DEBUG=false
-          - VIRTUAL_HOST=torrent.${root_domain}
-          - VIRTUAL_PORT=8112
-          - VIRTUAL_PROTO=http
-          - HTTPS_METHOD=redirect
-          - LETSENCRYPT_HOST=torrent.${root_domain}
-          - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-          - SSL_POLICY=${ssl_policy}
+      image: binhex/arch-delugevpn:latest
+      restart: always
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      cap_add:
+        - NET_ADMIN
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/deluge:/config
+        - ${data_folder}:/data
+        - ${torrent_blackhole}:/blackhole
+      #devices:
+      #    - /dev/net/tun
+      environment:
+        - PGID=${GID}
+        - PUID=${UID}
+        #- UMASK=007
+        - VPN_ENABLED=yes
+        - VPN_USER=${openvpn_user}
+        - VPN_PASS=${openvpn_password}
+        - VPN_PROV=custom
+        #- VPN_OPTIONS=<additional openvpn cli options>
+        - STRICT_PORT_FORWARD=no
+        - ENABLE_PRIVOXY=no
+        - LAN_NETWORK=192.168.0.0/24
+        - NAME_SERVERS=1.1.1.1,1.0.0.1
+        - DEBUG=false
+        - VIRTUAL_HOST=torrent.${root_domain}
+        - VIRTUAL_PORT=8112
+        - VIRTUAL_PROTO=http
+        - HTTPS_METHOD=redirect
+        - LETSENCRYPT_HOST=torrent.${root_domain}
+        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+        - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
     # jackett tracker site scraper with API
     jackett:
-        image: linuxserver/jackett:latest
-        restart: unless-stopped
-        depends_on:
-          - "nginx-proxy"
-          - "nginx-letsencrypt"
-        volumes:
-          - /etc/localtime:/etc/localtime:ro
-          - ${docker_data_folder}/jackett:/config
-          - ${torrent_blackhole}:/downloads
-        environment:
-          - PGID=${GID}
-          - PUID=${UID}
-          - VIRTUAL_HOST=jackett.${root_domain}
-          - VIRTUAL_PORT=9117
-          - VIRTUAL_PROTO=http
-          - HTTPS_METHOD=redirect
-          - LETSENCRYPT_HOST=jackett.${root_domain}
-          - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-          - SSL_POLICY=${ssl_policy}
+      image: linuxserver/jackett:latest
+      restart: unless-stopped
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/jackett:/config
+        - ${torrent_blackhole}:/downloads
+      environment:
+        - PGID=${GID}
+        - PUID=${UID}
+        - VIRTUAL_HOST=jackett.${root_domain}
+        - VIRTUAL_PORT=9117
+        - VIRTUAL_PROTO=http
+        - HTTPS_METHOD=redirect
+        - LETSENCRYPT_HOST=jackett.${root_domain}
+        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
+        - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
     # jackett tracker site scraper with API
     hydra:
       image: linuxserver/hydra2:latest
@@ -135,6 +145,8 @@ services:
         - LETSENCRYPT_HOST=hydra.${root_domain}
         - LETSENCRYPT_EMAIL=${lets_encrypt_email}
         - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
     # radarr, webapp for downloading movies through torrent client
     # queries are done with jackett
     radarr:
@@ -159,6 +171,8 @@ services:
         - LETSENCRYPT_HOST=radarr.${root_domain},movies.${root_domain}
         - LETSENCRYPT_EMAIL=${lets_encrypt_email}
         - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
     # sonarr, webapp for downloading series through torrent client
     # queries are done with jackett
     sonarr:
@@ -183,6 +197,8 @@ services:
         - LETSENCRYPT_HOST=sonarr.${root_domain},series.${root_domain}
         - LETSENCRYPT_EMAIL=${lets_encrypt_email}
         - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
     # lidarr, webapp for downloading music through torrent client
     # queries are done with jackett
     lidarr:
@@ -207,6 +223,8 @@ services:
         - LETSENCRYPT_HOST=lidarr.${root_domain},music.${root_domain}
         - LETSENCRYPT_EMAIL=${lets_encrypt_email}
         - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
     # mylar, webapp for downloading comics through torrent client
     # queries are done with jackett
     mylar:
@@ -231,6 +249,13 @@ services:
         - LETSENCRYPT_HOST=mylar.${root_domain},comics.${root_domain}
         - LETSENCRYPT_EMAIL=${lets_encrypt_email}
         - SSL_POLICY=${ssl_policy}
+      networks:
+        - frontend
+
 volumes:
   nginx-vhosts:
   nginx-html:
+
+networks:
+  frontend:
+  watchtower:
