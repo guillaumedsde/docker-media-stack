@@ -55,24 +55,6 @@ services:
           - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${slack_webhook_url}
           - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
         command: --cleanup
-    # portainer container for administration of containers
-    portainer:
-        image: portainer/portainer
-        restart: unless-stopped
-        depends_on:
-          - "nginx-proxy"
-          - "nginx-letsencrypt"
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-          - ${docker_data_folder}/portainer:/data
-        environment:
-          - VIRTUAL_HOST=portainer.${root_domain}
-          - VIRTUAL_PORT=9000
-          - VIRTUAL_PROTO=http
-          - HTTPS_METHOD=redirect
-          - LETSENCRYPT_HOST=portainer.${root_domain}
-          - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-          - SSL_POLICY=${ssl_policy}
     # deluge torrent client container
     deluge:
         image: binhex/arch-delugevpn:latest
