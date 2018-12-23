@@ -98,12 +98,12 @@ services:
         PGID: ${GID}
         PUID: ${UID}
         #UMASK: 007
-        VPN_ENABLED: yes
+        VPN_ENABLED: "yes"
         VPN_USER: ${openvpn_user}
         VPN_PASS: ${openvpn_password}
         VPN_PROV: custom
         #VPN_OPTIONS: <additional openvpn cli options>
-        STRICT_PORT_FORWARD: no
+        STRICT_PORT_FORWARD: "no"
         ENABLE_PRIVOXY: "no"
         LAN_NETWORK: 192.168.0.0/24
         NAME_SERVERS: 1.1.1.1,1.0.0.1
