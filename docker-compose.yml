@@ -104,7 +104,7 @@ services:
         VPN_PROV: custom
         #VPN_OPTIONS: <additional openvpn cli options>
         STRICT_PORT_FORWARD: no
-        ENABLE_PRIVOXY: no
+        ENABLE_PRIVOXY: "no"
         LAN_NETWORK: 192.168.0.0/24
         NAME_SERVERS: 1.1.1.1,1.0.0.1
         DEBUG: false
