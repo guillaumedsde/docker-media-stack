@@ -6,15 +6,24 @@
 #   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
 
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
+version: "3.4"
 
-version: "3"
+x-https: &https
+  VIRTUAL_PROTO: http
+  HTTPS_METHOD: redirect
+  LETSENCRYPT_EMAIL: ${letsencrypt_email}
+  SSL_POLICY: Mozilla-Modern
+
+x-restart: &restart
+  restart: on-failure:5
+
 services:
     # nginx reverse proxy container
     # binds to HTTP (80) and HTTPS (443) ports
     # then serves requests as a reverse proxy to the different containers defined below
     nginx-proxy:
       image: jwilder/nginx-proxy:alpine
-      restart: on-failure:5
+      <<: *restart
       ports:
         - 80:80
         - 443:443
@@ -36,7 +45,7 @@ services:
     # letsencrypt container for HTTPS certificate generation
     nginx-letsencrypt:
       image: jrcs/letsencrypt-nginx-proxy-companion:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
       volumes:
@@ -55,7 +64,7 @@ services:
     # NOTE watchtower also updates itself
     watchtower:
       image: v2tec/watchtower:latest
-      restart: on-failure:5
+      <<: *restart
       read_only: true
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
@@ -71,7 +80,7 @@ services:
     # deluge torrent client container
     deluge:
       image: binhex/arch-delugevpn:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -85,26 +94,23 @@ services:
       #devices:
       #    - /dev/net/tun
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        #- UMASK=007
-        - VPN_ENABLED=yes
-        - VPN_USER=${openvpn_user}
-        - VPN_PASS=${openvpn_password}
-        - VPN_PROV=custom
-        #- VPN_OPTIONS=<additional openvpn cli options>
-        - STRICT_PORT_FORWARD=no
-        - ENABLE_PRIVOXY=no
-        - LAN_NETWORK=192.168.0.0/24
-        - NAME_SERVERS=1.1.1.1,1.0.0.1
-        - DEBUG=false
-        - VIRTUAL_HOST=torrent.${root_domain}
-        - VIRTUAL_PORT=8112
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=torrent.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        #UMASK: 007
+        VPN_ENABLED: yes
+        VPN_USER: ${openvpn_user}
+        VPN_PASS: ${openvpn_password}
+        VPN_PROV: custom
+        #VPN_OPTIONS: <additional openvpn cli options>
+        STRICT_PORT_FORWARD: no
+        ENABLE_PRIVOXY: no
+        LAN_NETWORK: 192.168.0.0/24
+        NAME_SERVERS: 1.1.1.1,1.0.0.1
+        DEBUG: false
+        VIRTUAL_HOST: torrent.${root_domain}
+        VIRTUAL_PORT: 8112
+        LETSENCRYPT_HOST: torrent.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -112,7 +118,7 @@ services:
     # jackett tracker site scraper with API
     jackett:
       image: linuxserver/jackett:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -121,15 +127,12 @@ services:
         - ${docker_data_folder}/jackett:/config
         - ${torrent_blackhole}:/downloads
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        - VIRTUAL_HOST=jackett.${root_domain}
-        - VIRTUAL_PORT=9117
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=jackett.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: jackett.${root_domain}
+        VIRTUAL_PORT: 9117
+        LETSENCRYPT_HOST: jackett.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -137,7 +140,7 @@ services:
     # jackett tracker site scraper with API
     hydra:
       image: linuxserver/hydra2:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -147,15 +150,12 @@ services:
         - ${docker_data_folder}/hydra:/config
         - ${data_folder}/downloads:/downloads
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        - VIRTUAL_HOST=hydra.${root_domain}
-        - VIRTUAL_PORT=5076
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=hydra.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: hydra.${root_domain}
+        VIRTUAL_PORT: 5076
+        LETSENCRYPT_HOST: hydra.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -164,7 +164,7 @@ services:
     # queries are done with jackett
     radarr:
       image: linuxserver/radarr:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -175,15 +175,12 @@ services:
         - ${docker_data_folder}/radarr:/config
         - ${data_folder}:/data
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        - VIRTUAL_HOST=radarr.${root_domain},movies.${root_domain}
-        - VIRTUAL_PORT=7878
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=radarr.${root_domain},movies.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: radarr.${root_domain},movies.${root_domain}
+        VIRTUAL_PORT: 7878
+        LETSENCRYPT_HOST: radarr.${root_domain},movies.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -192,7 +189,7 @@ services:
     # queries are done with jackett
     sonarr:
       image: linuxserver/sonarr:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -203,15 +200,12 @@ services:
         - ${docker_data_folder}/sonarr:/config
         - ${data_folder}:/data
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        - VIRTUAL_HOST=sonarr.${root_domain},series.${root_domain}
-        - VIRTUAL_PORT=8989
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=sonarr.${root_domain},series.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: sonarr.${root_domain},series.${root_domain}
+        VIRTUAL_PORT: 8989
+        LETSENCRYPT_HOST: sonarr.${root_domain},series.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -220,7 +214,7 @@ services:
     # queries are done with jackett
     lidarr:
       image: linuxserver/lidarr:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -231,15 +225,12 @@ services:
         - ${docker_data_folder}/lidarr:/config
         - ${data_folder}:/music
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        - VIRTUAL_HOST=lidarr.${root_domain},music.${root_domain}
-        - VIRTUAL_PORT=8686
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=lidarr.${root_domain},music.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: lidarr.${root_domain},music.${root_domain}
+        VIRTUAL_PORT: 8686
+        LETSENCRYPT_HOST: lidarr.${root_domain},music.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -248,7 +239,7 @@ services:
     # queries are done with jackett
     mylar:
       image: linuxserver/mylar:latest
-      restart: on-failure:5
+      <<: *restart
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -259,15 +250,12 @@ services:
         - ${docker_data_folder}/mylar:/config
         - ${data_folder}:/data
       environment:
-        - PGID=${GID}
-        - PUID=${UID}
-        - VIRTUAL_HOST=mylar.${root_domain},comics.${root_domain}
-        - VIRTUAL_PORT=8090
-        - VIRTUAL_PROTO=http
-        - HTTPS_METHOD=redirect
-        - LETSENCRYPT_HOST=mylar.${root_domain},comics.${root_domain}
-        - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-        - SSL_POLICY=${ssl_policy}
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: mylar.${root_domain},comics.${root_domain}
+        VIRTUAL_PORT: 8090
+        LETSENCRYPT_HOST: mylar.${root_domain},comics.${root_domain}
       networks:
         - frontend
       security_opt:
