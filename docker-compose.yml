@@ -296,8 +296,6 @@ services:
       security_opt:
         - no-new-privileges
 
-
-
 volumes:
   nginx-vhosts:
   nginx-html:
