@@ -287,8 +287,8 @@ services:
         VIRTUAL_HOST: plex.${root_domain}
         VIRTUAL_PORT: 32400
         LETSENCRYPT_HOST: plex.${root_domain}
-      networks:
-        - frontend
+      # networks:
+      #   - frontend
       security_opt:
         - no-new-privileges
     # postgresql for mattermost
