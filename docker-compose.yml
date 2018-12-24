@@ -260,6 +260,38 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # plex
+    plex:
+      image: linuxserver/plex:latest
+      <<: *restart
+
+      ports:
+        - "32400:32400"
+        - "32400:32400/udp"
+        - "32469:32469"
+        - "32469:32469/udp"
+        - "5353:5353/udp"
+        - "1900:1900/udp"
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/plex:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        VERSION: latest
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: plex.${root_domain}
+        VIRTUAL_PORT: 32400
+        LETSENCRYPT_HOST: plex.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # postgresql for mattermost
     mattermost-db:
       environment:
         POSTGRES_PASSWORD: ${mattermost_db_pass}
