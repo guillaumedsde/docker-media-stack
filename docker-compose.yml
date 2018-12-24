@@ -264,14 +264,14 @@ services:
     plex:
       image: linuxserver/plex:latest
       <<: *restart
-      network_mode: "host"
-      # ports:
-      #   - "32400:32400"
-      #   - "32400:32400/udp"
-      #   - "32469:32469"
-      #   - "32469:32469/udp"
-      #   - "5353:5353/udp"
-      #   - "1900:1900/udp"
+      #network_mode: "host"
+      ports:
+        - "32400:32400"
+        - "32400:32400/udp"
+        - "32469:32469"
+        - "32469:32469/udp"
+        - "5353:5353/udp"
+        - "1900:1900/udp"
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
@@ -287,8 +287,8 @@ services:
         VIRTUAL_HOST: plex.${root_domain}
         VIRTUAL_PORT: 32400
         LETSENCRYPT_HOST: plex.${root_domain}
-      # networks:
-      #   - frontend
+      networks:
+        - frontend
       security_opt:
         - no-new-privileges
     # postgresql for mattermost
