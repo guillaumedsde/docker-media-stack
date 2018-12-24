@@ -274,7 +274,7 @@ services:
       image: postgres:alpine
     # mattermost, self hosted slack alternative
     mattermost:
-      image: mattermost/mattermost-team-edition
+      image: mattermost/mattermost-prod-app:latest
       <<: *restart
       depends_on:
         - "nginx-proxy"
