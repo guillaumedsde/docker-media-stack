@@ -260,6 +260,43 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    mattermost-db:
+      environment:
+        POSTGRES_PASSWORD: ${mattermost_db_pass}
+        POSTGRES_USER: ${mattermost_db_user}
+      volumes:
+        - mattermost-db-volume:/var/lib/postgresql/data
+      networks:
+        - mattermost
+      security_opt:
+        - no-new-privileges
+      <<: *restart
+      image: postgres:alpine
+    # mattermost, self hosted slack alternative
+    mattermost:
+      image: mattermost/mattermost-team-edition:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "mattermost-db"
+      environment:
+        <<: *https
+        MM_USERNAME: ${mattermost_db_user}
+        MM_PASSWORD: ${mattermost_db_pass}
+        MM_DBNAME: ${mattermost_db_user}
+        DB_HOST: mattermost-db
+        DB_PORT_NUMBER: 5432
+        VIRTUAL_HOST: chat.${root_domain},mattermost.${root_domain}
+        VIRTUAL_PORT: 80
+        LETSENCRYPT_HOST: chat.${root_domain},mattermost.${root_domain}
+      networks:
+        - frontend
+        - mattermost
+      security_opt:
+        - no-new-privileges
+
+
 
 volumes:
   nginx-vhosts:
@@ -268,3 +305,5 @@ volumes:
 networks:
   frontend:
   watchtower:
+  mattermost:
+    internal: true
