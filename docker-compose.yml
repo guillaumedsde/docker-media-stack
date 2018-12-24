@@ -299,6 +299,7 @@ services:
 volumes:
   nginx-vhosts:
   nginx-html:
+  mattermost-db-volume:
 
 networks:
   frontend:
