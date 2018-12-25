@@ -277,6 +277,7 @@ services:
         - "nginx-letsencrypt"
       volumes:
         - /etc/localtime:/etc/localtime:ro
+        - /etc/hostname:/etc/hostname:ro
         - ${docker_data_folder}/plex:/config
         - ${data_folder}:/data
       environment:
