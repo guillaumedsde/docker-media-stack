@@ -50,7 +50,7 @@ services:
         - "nginx-proxy"
       volumes:
         - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:rw
-        - nginx-vhosts:/etc/nginx/vhost.d
+        - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:ro
         - nginx-html:/usr/share/nginx/html
         - /var/run/docker.sock:/var/run/docker.sock:ro
       environment:
