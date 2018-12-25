@@ -30,7 +30,7 @@ services:
       volumes:
         # HTTPS certificates
         - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
-        - nginx-vhosts:/etc/nginx/vhost.d
+        - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:ro
         - nginx-html:/usr/share/nginx/html
         # additional nginx configuration
         - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
@@ -330,7 +330,6 @@ services:
         - no-new-privileges
 
 volumes:
-  nginx-vhosts:
   nginx-html:
   mattermost-db-volume:
 
