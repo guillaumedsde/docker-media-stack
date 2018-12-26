@@ -235,6 +235,25 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # mylar, webapp for downloading subtitles
+    bazarr:
+      image: linuxserver/bazarr:latest
+      <<: *restart
+      environment:
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: bazarr.${root_domain},subtitles.${root_domain}
+        VIRTUAL_PORT: 6767
+        LETSENCRYPT_HOST: bazarr.${root_domain},subtitles.${root_domain}
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/bazarr:/config
+        - ${data_folder}:/data
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # mylar, webapp for downloading comics through torrent client
     # queries are done with jackett
     mylar:
