@@ -93,6 +93,8 @@ services:
         - ${torrent_blackhole}:/blackhole
       #devices:
       #    - /dev/net/tun
+      ports:
+        - 58846:58846
       environment:
         <<: *https
         PGID: ${GID}
