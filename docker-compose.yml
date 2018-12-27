@@ -77,46 +77,6 @@ services:
       security_opt:
         - no-new-privileges
       command: --cleanup
-    # deluge torrent client container
-    deluge:
-      image: binhex/arch-delugevpn:latest
-      <<: *restart
-      depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
-      cap_add:
-        - NET_ADMIN
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/deluge:/config
-        - ${data_folder}:/data
-        - ${torrent_blackhole}:/blackhole
-      #devices:
-      #    - /dev/net/tun
-      ports:
-        - 58846:58846
-      environment:
-        <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
-        #UMASK: 007
-        VPN_ENABLED: "yes"
-        VPN_USER: ${openvpn_user}
-        VPN_PASS: ${openvpn_password}
-        VPN_PROV: custom
-        #VPN_OPTIONS: <additional openvpn cli options>
-        STRICT_PORT_FORWARD: "no"
-        ENABLE_PRIVOXY: "no"
-        LAN_NETWORK: 192.168.0.0/24
-        NAME_SERVERS: 1.1.1.1,1.0.0.1
-        DEBUG: "false"
-        VIRTUAL_HOST: torrent.${root_domain}
-        VIRTUAL_PORT: 8112
-        LETSENCRYPT_HOST: torrent.${root_domain}
-      networks:
-        - frontend
-      security_opt:
-        - no-new-privileges
     # qbittorrent torrent client container
     qbittorrent:
       image: binhex/arch-qbittorrentvpn:latest
@@ -150,9 +110,9 @@ services:
         NAME_SERVERS: 1.1.1.1,1.0.0.1
         DEBUG: "true"
         WEBUI_PORT: 8080
-        VIRTUAL_HOST: qbittorrent.${root_domain}
+        VIRTUAL_HOST: torrent.${root_domain}
         VIRTUAL_PORT: 8080
-        LETSENCRYPT_HOST: qbittorrent.${root_domain}
+        LETSENCRYPT_HOST: torrent.${root_domain}
       networks:
         - frontend
       security_opt:
@@ -317,6 +277,27 @@ services:
         VIRTUAL_HOST: mylar.${root_domain},comics.${root_domain}
         VIRTUAL_PORT: 8090
         LETSENCRYPT_HOST: mylar.${root_domain},comics.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # heimdall is a homepage
+    heimdall:
+      image: linuxserver/heimdall:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/heimdall:/config
+      environment:
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: home.${root_domain}
+        VIRTUAL_PORT: 80
+        LETSENCRYPT_HOST: home.${root_domain}
       networks:
         - frontend
       security_opt:
