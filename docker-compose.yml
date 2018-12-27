@@ -107,7 +107,7 @@ services:
         STRICT_PORT_FORWARD: "no"
         ENABLE_PRIVOXY: "no"
         LAN_NETWORK: 192.168.0.0/24
-        #NAME_SERVERS: 1.1.1.1,1.0.0.1
+        NAME_SERVERS: 127.0.0.11
         DEBUG: "true"
         WEBUI_PORT: 8080
         VIRTUAL_HOST: torrent.${root_domain}
