@@ -171,7 +171,7 @@ services:
         - "nginx-proxy"
         - "nginx-letsencrypt"
         - "jackett"
-        - "deluge"
+        - "qbittorrent"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/radarr:/config
@@ -196,7 +196,7 @@ services:
         - "nginx-proxy"
         - "nginx-letsencrypt"
         - "jackett"
-        - "deluge"
+        - "qbittorrent"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/sonarr:/config
@@ -221,7 +221,7 @@ services:
         - "nginx-proxy"
         - "nginx-letsencrypt"
         - "jackett"
-        - "deluge"
+        - "qbittorrent"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/lidarr:/config
@@ -265,7 +265,7 @@ services:
         - "nginx-proxy"
         - "nginx-letsencrypt"
         - "jackett"
-        - "deluge"
+        - "qbittorrent"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/mylar:/config
