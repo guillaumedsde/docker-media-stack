@@ -147,7 +147,7 @@ services:
         ENABLE_PRIVOXY: "no"
         LAN_NETWORK: 192.168.0.0/24
         NAME_SERVERS: 1.1.1.1,1.0.0.1
-        DEBUG: "false"
+        DEBUG: "true"
         WEBUI_PORT: 9832
         VIRTUAL_HOST: qbittorrent.${root_domain}
         VIRTUAL_PORT: 9832
