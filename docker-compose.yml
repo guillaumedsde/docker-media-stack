@@ -190,7 +190,7 @@ services:
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/hydra:/config
-        - ${data_folder}/downloads:/downloads
+        - ${torrent_blackhole}:/blackhole
       environment:
         <<: *https
         PGID: ${GID}
