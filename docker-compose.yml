@@ -117,6 +117,45 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # qbittorrent torrent client container
+    qbittorrent:
+      image: binhex/arch-qbittorrentvpn:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      cap_add:
+        - NET_ADMIN
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/qbittorrent:/config
+        - ${data_folder}:/data
+        - ${torrent_blackhole}:/blackhole
+      #devices:
+      #    - /dev/net/tun
+      environment:
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        #UMASK: 007
+        VPN_ENABLED: "yes"
+        VPN_USER: ${openvpn_user}
+        VPN_PASS: ${openvpn_password}
+        VPN_PROV: custom
+        #VPN_OPTIONS: <additional openvpn cli options>
+        STRICT_PORT_FORWARD: "no"
+        ENABLE_PRIVOXY: "no"
+        LAN_NETWORK: 192.168.0.0/24
+        NAME_SERVERS: 1.1.1.1,1.0.0.1
+        DEBUG: "false"
+        WEBUI_PORT: 9832
+        VIRTUAL_HOST: qbittorrent.${root_domain}
+        VIRTUAL_PORT: 9832
+        LETSENCRYPT_HOST: qbittorrent.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # jackett tracker site scraper with API
     jackett:
       image: linuxserver/jackett:latest
