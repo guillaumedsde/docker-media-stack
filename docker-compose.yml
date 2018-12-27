@@ -121,6 +121,7 @@ services:
     qbittorrent:
       image: binhex/arch-qbittorrentvpn:latest
       <<: *restart
+      privileged: true
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
