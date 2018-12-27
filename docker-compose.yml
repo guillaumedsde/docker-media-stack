@@ -148,9 +148,9 @@ services:
         LAN_NETWORK: 192.168.0.0/24
         NAME_SERVERS: 1.1.1.1,1.0.0.1
         DEBUG: "true"
-        WEBUI_PORT: 9832
+        WEBUI_PORT: 8080
         VIRTUAL_HOST: qbittorrent.${root_domain}
-        VIRTUAL_PORT: 9832
+        VIRTUAL_PORT: 8080
         LETSENCRYPT_HOST: qbittorrent.${root_domain}
       networks:
         - frontend
