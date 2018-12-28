@@ -31,7 +31,7 @@ services:
         # HTTPS certificates
         - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
         - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:ro
-        - nginx-html:/usr/share/nginx/html
+        - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
         # additional nginx configuration
         - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
         - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
@@ -51,7 +51,7 @@ services:
       volumes:
         - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:rw
         - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:rw
-        - nginx-html:/usr/share/nginx/html
+        - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
         - /var/run/docker.sock:/var/run/docker.sock:ro
       environment:
         - DHPARAM_BITS=4096
@@ -92,8 +92,6 @@ services:
         - ${docker_data_folder}/qbittorrent:/config
         - ${data_folder}:/data
         - ${torrent_blackhole}:/blackhole
-      #devices:
-      #    - /dev/net/tun
       environment:
         <<: *https
         PGID: ${GID}
@@ -107,8 +105,12 @@ services:
         STRICT_PORT_FORWARD: "no"
         ENABLE_PRIVOXY: "no"
         LAN_NETWORK: 192.168.0.0/24
+        # set DNS to docker DNS, this creates a voluntary DNS leak outside of VPN tunnel
+        # note that in some setups this might be unsafe (I recommed using DNScrypt on the host to make this safe)
+        # but I have not found another way for qbittorrent to resolve the jackett magnet links passed by hydra
+        # which point to jackett's docker DNS name
         NAME_SERVERS: 127.0.0.11
-        DEBUG: "true"
+        DEBUG: "false"
         WEBUI_PORT: 8080
         VIRTUAL_HOST: torrent.${root_domain}
         VIRTUAL_PORT: 8080
@@ -303,11 +305,13 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
-    # plex
+    # plex media server
     plex:
       image: linuxserver/plex:latest
       <<: *restart
-      #network_mode: "host"
+      # note use the host network mode on first startup,
+      # then you can use the regular bridge mode
+      # network_mode: "host"
       ports:
         - "32400:32400"
         - "32400:32400/udp"
@@ -373,7 +377,6 @@ services:
         - no-new-privileges
 
 volumes:
-  nginx-html:
   mattermost-db-volume:
 
 networks:
