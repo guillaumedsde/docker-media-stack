@@ -88,10 +88,10 @@ services:
       cap_add:
         - NET_ADMIN
       volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/qbittorrent:/config
         - ${data_folder}:/data
         - ${torrent_blackhole}:/blackhole
+        - ${docker_data_folder}/qbittorrent:/config
+        - /etc/localtime:/etc/localtime:ro
       environment:
         <<: *https
         PGID: ${GID}
