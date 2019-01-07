@@ -117,8 +117,6 @@ services:
         LETSENCRYPT_HOST: torrent.${root_domain}
       networks:
         - frontend
-      security_opt:
-        - no-new-privileges
     # jackett tracker site scraper with API
     jackett:
       image: linuxserver/jackett:latest
