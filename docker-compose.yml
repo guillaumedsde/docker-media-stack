@@ -76,7 +76,7 @@ services:
         - watchtower
       security_opt:
         - no-new-privileges
-      command: --cleanup --schedule ${watchtower_cron_schedule}
+      command: --cleanup --schedule "${watchtower_cron_schedule}"
     # qbittorrent torrent client container
     qbittorrent:
       image: binhex/arch-qbittorrentvpn:latest
