@@ -225,7 +225,7 @@ services:
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/lidarr:/config
-        - ${data_folder}:/music
+        - ${data_folder}:/data
       environment:
         <<: *https
         PGID: ${GID}
@@ -241,6 +241,11 @@ services:
     bazarr:
       image: linuxserver/bazarr:latest
       <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "radarr"
+        - "sonarr"
       environment:
         <<: *https
         PGID: ${GID}
