@@ -342,6 +342,30 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # tautulli, plex media server monitoring
+    tautulli:
+      image: linuxserver/tautulli:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "plex"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/tautulli:/config
+        - ${data_folder}:/data
+        - ${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro
+      environment:
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: tautulli.${root_domain}
+        VIRTUAL_PORT: 8181
+        LETSENCRYPT_HOST: tautulli.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # postgresql for mattermost
     mattermost-db:
       environment:
