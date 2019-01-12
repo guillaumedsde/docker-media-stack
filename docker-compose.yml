@@ -354,7 +354,7 @@ services:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/tautulli:/config
         - ${data_folder}:/data
-        - ${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro
+        - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
       environment:
         <<: *https
         PGID: ${GID}
