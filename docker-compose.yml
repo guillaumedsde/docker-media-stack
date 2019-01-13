@@ -416,7 +416,7 @@ services:
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/pyload:/config
-        - ${data_folder}:/data
+        - ${data_folder}:/downloads
       environment:
         <<: *https
         PGID: ${GID}
