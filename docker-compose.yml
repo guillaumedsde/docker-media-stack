@@ -40,6 +40,8 @@ services:
         - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
       networks:
         - frontend
+        - mattermost
+        - pyload
       security_opt:
         - no-new-privileges
     # letsencrypt container for HTTPS certificate generation
@@ -57,6 +59,8 @@ services:
         - DHPARAM_BITS=4096
       networks:
         - frontend
+        - mattermost
+        - pyload
       security_opt:
         - no-new-privileges
     # watchtower container to update images
@@ -374,7 +378,7 @@ services:
       volumes:
         - mattermost-db-volume:/var/lib/postgresql/data
       networks:
-        - mattermost
+        - mattermost-backend
       security_opt:
         - no-new-privileges
       <<: *restart
@@ -398,8 +402,30 @@ services:
         VIRTUAL_PORT: 80
         LETSENCRYPT_HOST: chat.${root_domain},mattermost.${root_domain}
       networks:
-        - frontend
         - mattermost
+        - mattermost-backend
+      security_opt:
+        - no-new-privileges
+    # pyload, self hosted download manager
+    pyload:
+      image: cobraeti/pyload:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/pyload:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: pyload.${root_domain},download.${root_domain}
+        VIRTUAL_PORT: 8000
+        LETSENCRYPT_HOST: pyload.${root_domain},download.${root_domain}
+      networks:
+        - pyload
       security_opt:
         - no-new-privileges
 
@@ -408,6 +434,8 @@ volumes:
 
 networks:
   frontend:
-  watchtower:
   mattermost:
+  mattermost-backend:
     internal: true
+  watchtower:
+  pyload:
