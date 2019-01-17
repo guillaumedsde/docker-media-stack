@@ -290,6 +290,31 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # lazylibrarian, webapp for downloading books through torrent client
+    # queries are done with jackett
+    lazylibrarian:
+      image: linuxserver/lazylibrarian:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+        - "qbittorrent"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/lazylibrarian:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        PGID: ${GID}
+        PUID: ${UID}
+        VIRTUAL_HOST: lazylibrarian.${root_domain},books.${root_domain}
+        VIRTUAL_PORT: 5299
+        LETSENCRYPT_HOST: lazylibrarian.${root_domain},books.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # heimdall is a homepage
     heimdall:
       image: linuxserver/heimdall:latest
