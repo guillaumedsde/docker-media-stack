@@ -14,6 +14,11 @@ x-https: &https
   LETSENCRYPT_EMAIL: ${letsencrypt_email}
   SSL_POLICY: Mozilla-Modern
 
+x-conf: &conf
+  TZ: ${TZ}
+  PGID: ${GID}
+  PUID: ${UID}
+
 x-restart: &restart
   restart: on-failure:5
 
@@ -22,6 +27,7 @@ services:
     # binds to HTTP (80) and HTTPS (443) ports
     # then serves requests as a reverse proxy to the different containers defined below
     nginx-proxy:
+      container_name: nginx-proxy
       image: jwilder/nginx-proxy:alpine
       <<: *restart
       ports:
@@ -46,6 +52,7 @@ services:
         - no-new-privileges
     # letsencrypt container for HTTPS certificate generation
     nginx-letsencrypt:
+      container_name: nginx-letsencrypt
       image: jrcs/letsencrypt-nginx-proxy-companion:latest
       <<: *restart
       depends_on:
@@ -67,6 +74,7 @@ services:
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
     watchtower:
+      container_name: watchtower
       image: v2tec/watchtower:latest
       <<: *restart
       read_only: true
@@ -83,6 +91,7 @@ services:
       command: ["--cleanup", "--schedule", "0 0 5 * * *"]
     # qbittorrent torrent client container
     qbittorrent:
+      container_name: qbittorrent
       image: binhex/arch-qbittorrentvpn:latest
       <<: *restart
       privileged: true
@@ -98,9 +107,7 @@ services:
         - /etc/localtime:/etc/localtime:ro
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
-        #UMASK: 007
+        <<: *conf
         VPN_ENABLED: "yes"
         VPN_USER: ${openvpn_user}
         VPN_PASS: ${openvpn_password}
@@ -123,6 +130,7 @@ services:
         - frontend
     # jackett tracker site scraper with API
     jackett:
+      container_name: jackett
       image: linuxserver/jackett:latest
       <<: *restart
       depends_on:
@@ -134,8 +142,7 @@ services:
         - ${torrent_blackhole}:/downloads
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: jackett.${root_domain}
         VIRTUAL_PORT: 9117
         LETSENCRYPT_HOST: jackett.${root_domain}
@@ -145,6 +152,7 @@ services:
         - no-new-privileges
     # jackett tracker site scraper with API
     hydra:
+      container_name: hydra
       image: linuxserver/hydra2:latest
       <<: *restart
       depends_on:
@@ -157,8 +165,7 @@ services:
         - ${torrent_blackhole}:/blackhole
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: hydra.${root_domain}
         VIRTUAL_PORT: 5076
         LETSENCRYPT_HOST: hydra.${root_domain}
@@ -169,6 +176,7 @@ services:
     # radarr, webapp for downloading movies through torrent client
     # queries are done with jackett
     radarr:
+      container_name: radarr
       image: linuxserver/radarr:latest
       <<: *restart
       depends_on:
@@ -182,8 +190,7 @@ services:
         - ${data_folder}:/data
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: radarr.${root_domain},movies.${root_domain}
         VIRTUAL_PORT: 7878
         LETSENCRYPT_HOST: radarr.${root_domain},movies.${root_domain}
@@ -194,6 +201,7 @@ services:
     # sonarr, webapp for downloading series through torrent client
     # queries are done with jackett
     sonarr:
+      container_name: sonarr
       image: linuxserver/sonarr:latest
       <<: *restart
       depends_on:
@@ -207,8 +215,7 @@ services:
         - ${data_folder}:/data
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: sonarr.${root_domain},series.${root_domain}
         VIRTUAL_PORT: 8989
         LETSENCRYPT_HOST: sonarr.${root_domain},series.${root_domain}
@@ -219,6 +226,7 @@ services:
     # lidarr, webapp for downloading music through torrent client
     # queries are done with jackett
     lidarr:
+      container_name: lidarr
       image: linuxserver/lidarr:latest
       <<: *restart
       depends_on:
@@ -232,8 +240,7 @@ services:
         - ${data_folder}:/data
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: lidarr.${root_domain},music.${root_domain}
         VIRTUAL_PORT: 8686
         LETSENCRYPT_HOST: lidarr.${root_domain},music.${root_domain}
@@ -243,6 +250,7 @@ services:
         - no-new-privileges
     # mylar, webapp for downloading subtitles
     bazarr:
+      container_name: bazarr
       image: linuxserver/bazarr:latest
       <<: *restart
       depends_on:
@@ -252,8 +260,7 @@ services:
         - "sonarr"
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: bazarr.${root_domain},subtitles.${root_domain}
         VIRTUAL_PORT: 6767
         LETSENCRYPT_HOST: bazarr.${root_domain},subtitles.${root_domain}
@@ -268,6 +275,7 @@ services:
     # mylar, webapp for downloading comics through torrent client
     # queries are done with jackett
     mylar:
+      container_name: mylar
       image: linuxserver/mylar:latest
       <<: *restart
       depends_on:
@@ -281,8 +289,7 @@ services:
         - ${data_folder}:/data
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: mylar.${root_domain},comics.${root_domain}
         VIRTUAL_PORT: 8090
         LETSENCRYPT_HOST: mylar.${root_domain},comics.${root_domain}
@@ -293,6 +300,7 @@ services:
     # lazylibrarian, webapp for downloading books through torrent client
     # queries are done with jackett
     lazylibrarian:
+      container_name: lazylibrarian
       image: linuxserver/lazylibrarian:latest
       <<: *restart
       depends_on:
@@ -306,8 +314,7 @@ services:
         - ${data_folder}:/data
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: lazylibrarian.${root_domain},books.${root_domain}
         VIRTUAL_PORT: 5299
         LETSENCRYPT_HOST: lazylibrarian.${root_domain},books.${root_domain}
@@ -317,6 +324,7 @@ services:
         - no-new-privileges
     # heimdall is a homepage
     heimdall:
+      container_name: heimdall
       image: linuxserver/heimdall:latest
       <<: *restart
       depends_on:
@@ -327,8 +335,7 @@ services:
         - ${docker_data_folder}/heimdall:/config
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: home.${root_domain}
         VIRTUAL_PROTO: https
         VIRTUAL_PORT: 443
@@ -339,6 +346,7 @@ services:
         - no-new-privileges
     # plex media server
     plex:
+      container_name: plex
       image: linuxserver/plex:latest
       <<: *restart
       # note use the host network mode on first startup,
@@ -362,8 +370,7 @@ services:
       environment:
         <<: *https
         VERSION: latest
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: plex.${root_domain}
         VIRTUAL_PORT: 32400
         LETSENCRYPT_HOST: plex.${root_domain}
@@ -371,8 +378,31 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # ombi, plex media requests
+    ombi:
+      container_name: ombi
+      image: linuxserver/ombi:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "plex"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/ombi:/config
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: ombi.${root_domain},requests.${root_domain},requests.plex.${root_domain}
+        VIRTUAL_PORT: 3579
+        LETSENCRYPT_HOST: ombi.${root_domain},requests.${root_domain},requests.plex.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # tautulli, plex media server monitoring
     tautulli:
+      container_name: tautulli
       image: linuxserver/tautulli:latest
       <<: *restart
       depends_on:
@@ -386,17 +416,17 @@ services:
         - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
-        VIRTUAL_HOST: tautulli.${root_domain}
+        <<: *conf
+        VIRTUAL_HOST: tautulli.${root_domain},stats.plex.${root_domain}
         VIRTUAL_PORT: 8181
-        LETSENCRYPT_HOST: tautulli.${root_domain}
+        LETSENCRYPT_HOST: tautulli.${root_domain},stats.plex.${root_domain}
       networks:
         - frontend
       security_opt:
         - no-new-privileges
     # postgresql for mattermost
     mattermost-db:
+      container_name: mattermost-db
       environment:
         POSTGRES_PASSWORD: ${mattermost_db_pass}
         POSTGRES_USER: ${mattermost_db_user}
@@ -410,6 +440,7 @@ services:
       image: postgres:alpine
     # mattermost, self hosted slack alternative
     mattermost:
+      container_name: mattermost
       image: mattermost/mattermost-prod-app:latest
       <<: *restart
       depends_on:
@@ -433,6 +464,7 @@ services:
         - no-new-privileges
     # pyload, self hosted download manager
     pyload:
+      container_name: pyload
       image: cobraeti/pyload:latest
       <<: *restart
       depends_on:
@@ -444,8 +476,7 @@ services:
         - ${data_folder}:/downloads
       environment:
         <<: *https
-        PGID: ${GID}
-        PUID: ${UID}
+        <<: *conf
         VIRTUAL_HOST: pyload.${root_domain},download.${root_domain}
         VIRTUAL_PORT: 8000
         LETSENCRYPT_HOST: pyload.${root_domain},download.${root_domain}
