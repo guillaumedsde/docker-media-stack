@@ -386,6 +386,9 @@ services:
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
+        - "sonarr"
+        - "radarr"
+        - "lidarr"
         - "plex"
       volumes:
         - /etc/localtime:/etc/localtime:ro
