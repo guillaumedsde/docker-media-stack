@@ -427,6 +427,31 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
+    # tautulli, plex media server monitoring
+    netdata:
+      container_name: netdata
+      hostname: netdata.${root_domain}
+      image: netdata/netdata:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: netdata.${root_domain},status.${root_domain}
+        VIRTUAL_PORT: 19999
+        LETSENCRYPT_HOST: netdata.${root_domain},status.${root_domain}
+      networks:
+        - frontend
+      cap_add:
+        - SYS_PTRACE
+      security_opt:
+        - apparmor:unconfined
     # postgresql for mattermost
     mattermost-db:
       container_name: mattermost-db
