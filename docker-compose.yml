@@ -427,7 +427,7 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
-    # tautulli, plex media server monitoring
+    # netdata, server monitoring
     netdata:
       container_name: netdata
       hostname: netdata.${root_domain}
