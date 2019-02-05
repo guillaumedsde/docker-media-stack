@@ -443,6 +443,7 @@ services:
       environment:
         <<: *https
         <<: *conf
+        PGID: ${docker_group_id}
         VIRTUAL_HOST: netdata.${root_domain},status.${root_domain}
         VIRTUAL_PORT: 19999
         LETSENCRYPT_HOST: netdata.${root_domain},status.${root_domain}
