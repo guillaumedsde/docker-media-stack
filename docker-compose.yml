@@ -6,188 +6,521 @@
 #   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
 
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
+version: "3.4"
 
-version: '2'
+x-https: &https
+  VIRTUAL_PROTO: http
+  HTTPS_METHOD: redirect
+  LETSENCRYPT_EMAIL: ${letsencrypt_email}
+  SSL_POLICY: Mozilla-Modern
+
+x-conf: &conf
+  TZ: ${TZ}
+  PGID: ${GID}
+  PUID: ${UID}
+
+x-restart: &restart
+  restart: on-failure:5
+
 services:
     # nginx reverse proxy container
     # binds to HTTP (80) and HTTPS (443) ports
     # then serves requests as a reverse proxy to the different containers defined below
     nginx-proxy:
-        image: jwilder/nginx-proxy:alpine
-        restart: unless-stopped
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            # HTTPS certificates
-            - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
-            - /etc/nginx/vhost.d
-            - /usr/share/nginx/html
-            # additional nginx configuration
-            - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
-            - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
-            - /var/run/docker.sock:/tmp/docker.sock:ro
-        labels:
-            - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+      container_name: nginx-proxy
+      image: jwilder/nginx-proxy:alpine
+      <<: *restart
+      ports:
+        - 80:80
+        - 443:443
+      volumes:
+        # HTTPS certificates
+        - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
+        - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:ro
+        - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
+        # additional nginx configuration
+        - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
+        - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+      labels:
+        - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+      networks:
+        - frontend
+        - mattermost
+        - pyload
+      security_opt:
+        - no-new-privileges
     # letsencrypt container for HTTPS certificate generation
     nginx-letsencrypt:
-        image: jrcs/letsencrypt-nginx-proxy-companion:latest
-        restart: unless-stopped
-        volumes:
-            - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:rw
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-        volumes_from:
-            - nginx-proxy
-        environment:
-            - DHPARAM_BITS=4096
+      container_name: nginx-letsencrypt
+      image: jrcs/letsencrypt-nginx-proxy-companion:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+      volumes:
+        - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:rw
+        - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:rw
+        - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+      environment:
+        - DHPARAM_BITS=4096
+      networks:
+        - frontend
+        - mattermost
+        - pyload
+      security_opt:
+        - no-new-privileges
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
     watchtower:
-        image: v2tec/watchtower:latest
-        restart: always
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-    # portainer container for administration of containers
-    portainer:
-        image: portainer/portainer
-        restart: unless-stopped
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ${docker_data_folder}/portainer:/data
-        environment:
-            - VIRTUAL_HOST=portainer.${root_domain}
-            - VIRTUAL_PORT=9000
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=portainer.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
-    # deluge torrent client container
-    deluge:
-        image: binhex/arch-delugevpn:latest
-        restart: always
-        cap_add:
-            - NET_ADMIN
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/deluge:/config
-            - ${data_folder}:/data
-            - ${torrent_blackhole}:/blackhole
-        #devices:
-        #    - /dev/net/tun
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            #- UMASK=007
-            - VPN_ENABLED=yes
-            - VPN_USER=${openvpn_user}
-            - VPN_PASS=${openvpn_password}
-            - VPN_PROV=custom
-            #- VPN_OPTIONS=<additional openvpn cli options>
-            - STRICT_PORT_FORWARD=no
-            - ENABLE_PRIVOXY=no
-            - LAN_NETWORK=192.168.0.0/24
-            - NAME_SERVERS=1.1.1.1,1.0.0.1
-            - DEBUG=false
-            - VIRTUAL_HOST=torrent.${root_domain}
-            - VIRTUAL_PORT=8112
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=torrent.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
+      container_name: watchtower
+      image: v2tec/watchtower:latest
+      <<: *restart
+      read_only: true
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      environment:
+        - WATCHTOWER_NOTIFICATIONS=slack
+        - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${slack_webhook_url}
+        - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
+      networks:
+        - watchtower
+      security_opt:
+        - no-new-privileges
+      command: ["--cleanup", "--schedule", "0 0 5 * * *"]
+    # qbittorrent torrent client container
+    qbittorrent:
+      container_name: qbittorrent
+      image: binhex/arch-qbittorrentvpn:latest
+      <<: *restart
+      privileged: true
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      cap_add:
+        - NET_ADMIN
+      volumes:
+        - ${data_folder}:/data
+        - ${torrent_blackhole}:/blackhole
+        - ${docker_data_folder}/qbittorrent:/config
+        - /etc/localtime:/etc/localtime:ro
+      environment:
+        <<: *https
+        <<: *conf
+        VPN_ENABLED: "yes"
+        VPN_USER: ${openvpn_user}
+        VPN_PASS: ${openvpn_password}
+        VPN_PROV: custom
+        #VPN_OPTIONS: <additional openvpn cli options>
+        STRICT_PORT_FORWARD: "no"
+        ENABLE_PRIVOXY: "no"
+        LAN_NETWORK: 192.168.0.0/24
+        # set DNS to docker DNS, this creates a voluntary DNS leak outside of VPN tunnel
+        # note that in some setups this might be unsafe (I recommed using DNScrypt on the host to make this safe)
+        # but I have not found another way for qbittorrent to resolve the jackett magnet links passed by hydra
+        # which point to jackett's docker DNS name
+        NAME_SERVERS: 127.0.0.11
+        DEBUG: "false"
+        WEBUI_PORT: 8080
+        VIRTUAL_HOST: torrent.${root_domain}
+        VIRTUAL_PORT: 8080
+        LETSENCRYPT_HOST: torrent.${root_domain}
+      networks:
+        - frontend
     # jackett tracker site scraper with API
     jackett:
-        image: linuxserver/jackett:latest
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/jackett:/config
-            - ${torrent_blackhole}:/downloads
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=jackett.${root_domain}
-            - VIRTUAL_PORT=9117
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=jackett.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
+      container_name: jackett
+      image: binhex/arch-jackett:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/jackett:/config
+        - ${torrent_blackhole}:/downloads
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: jackett.${root_domain}
+        VIRTUAL_PORT: 9117
+        LETSENCRYPT_HOST: jackett.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # jackett tracker site scraper with API
+    hydra:
+      container_name: hydra
+      image: linuxserver/hydra2:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/hydra:/config
+        - ${torrent_blackhole}:/blackhole
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: hydra.${root_domain}
+        VIRTUAL_PORT: 5076
+        LETSENCRYPT_HOST: hydra.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # radarr, webapp for downloading movies through torrent client
     # queries are done with jackett
     radarr:
-        image: linuxserver/radarr:latest
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/radarr:/config
-            - ${data_folder}:/data
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=radarr.${root_domain},movies.${root_domain}
-            - VIRTUAL_PORT=7878
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=radarr.${root_domain},movies.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
+      container_name: radarr
+      image: linuxserver/radarr:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+        - "qbittorrent"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/radarr:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: radarr.${root_domain},movies.${root_domain}
+        VIRTUAL_PORT: 7878
+        LETSENCRYPT_HOST: radarr.${root_domain},movies.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # sonarr, webapp for downloading series through torrent client
     # queries are done with jackett
     sonarr:
-        image: linuxserver/sonarr:latest
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/sonarr:/config
-            - ${data_folder}:/data
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=sonarr.${root_domain},series.${root_domain}
-            - VIRTUAL_PORT=8989
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=sonarr.${root_domain},series.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
+      container_name: sonarr
+      image: linuxserver/sonarr:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+        - "qbittorrent"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/sonarr:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: sonarr.${root_domain},series.${root_domain}
+        VIRTUAL_PORT: 8989
+        LETSENCRYPT_HOST: sonarr.${root_domain},series.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # lidarr, webapp for downloading music through torrent client
     # queries are done with jackett
     lidarr:
-        image: linuxserver/lidarr:latest
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/lidarr:/config
-            - ${data_folder}:/data
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=lidarr.${root_domain},music.${root_domain}
-            - VIRTUAL_PORT=8686
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=lidarr.${root_domain},music.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
+      container_name: lidarr
+      image: linuxserver/lidarr:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+        - "qbittorrent"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/lidarr:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: lidarr.${root_domain},music.${root_domain}
+        VIRTUAL_PORT: 8686
+        LETSENCRYPT_HOST: lidarr.${root_domain},music.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # mylar, webapp for downloading subtitles
+    bazarr:
+      container_name: bazarr
+      image: linuxserver/bazarr:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "radarr"
+        - "sonarr"
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: bazarr.${root_domain},subtitles.${root_domain}
+        VIRTUAL_PORT: 6767
+        LETSENCRYPT_HOST: bazarr.${root_domain},subtitles.${root_domain}
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/bazarr:/config
+        - ${data_folder}:/data
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # mylar, webapp for downloading comics through torrent client
     # queries are done with jackett
     mylar:
-        image: linuxserver/mylar:latest
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro
-            - ${docker_data_folder}/mylar:/config
-            - ${data_folder}:/data
-        environment:
-            - PGID=${GID}
-            - PUID=${UID}
-            - VIRTUAL_HOST=mylar.${root_domain},comics.${root_domain}
-            - VIRTUAL_PORT=8090
-            - VIRTUAL_PROTO=http
-            - HTTPS_METHOD=redirect
-            - LETSENCRYPT_HOST=mylar.${root_domain},comics.${root_domain}
-            - LETSENCRYPT_EMAIL=${lets_encrypt_email}
-            - SSL_POLICY=${ssl_policy}
+      container_name: mylar
+      image: linuxserver/mylar:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+        - "qbittorrent"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/mylar:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: mylar.${root_domain},comics.${root_domain}
+        VIRTUAL_PORT: 8090
+        LETSENCRYPT_HOST: mylar.${root_domain},comics.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # lazylibrarian, webapp for downloading books through torrent client
+    # queries are done with jackett
+    lazylibrarian:
+      container_name: lazylibrarian
+      image: linuxserver/lazylibrarian:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "jackett"
+        - "qbittorrent"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/lazylibrarian:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: lazylibrarian.${root_domain},books.${root_domain}
+        VIRTUAL_PORT: 5299
+        LETSENCRYPT_HOST: lazylibrarian.${root_domain},books.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # heimdall is a homepage
+    heimdall:
+      container_name: heimdall
+      image: linuxserver/heimdall:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/heimdall:/config
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: home.${root_domain}
+        VIRTUAL_PROTO: https
+        VIRTUAL_PORT: 443
+        LETSENCRYPT_HOST: home.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # plex media server
+    plex:
+      container_name: plex
+      image: linuxserver/plex:latest
+      <<: *restart
+      # note use the host network mode on first startup,
+      # then you can use the regular bridge mode
+      # network_mode: "host"
+      ports:
+        - "32400:32400"
+        - "32400:32400/udp"
+        - "32469:32469"
+        - "32469:32469/udp"
+        - "5353:5353/udp"
+        - "1900:1900/udp"
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /etc/hostname:/etc/hostname:ro
+        - ${docker_data_folder}/plex:/config
+        - ${data_folder}:/data
+      environment:
+        <<: *https
+        VERSION: latest
+        <<: *conf
+        VIRTUAL_HOST: plex.${root_domain}
+        VIRTUAL_PORT: 32400
+        LETSENCRYPT_HOST: plex.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # ombi, plex media requests
+    ombi:
+      container_name: ombi
+      image: linuxserver/ombi:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "sonarr"
+        - "radarr"
+        - "lidarr"
+        - "plex"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/ombi:/config
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: ombi.${root_domain},requests.${root_domain},requests.plex.${root_domain}
+        VIRTUAL_PORT: 3579
+        LETSENCRYPT_HOST: ombi.${root_domain},requests.${root_domain},requests.plex.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # tautulli, plex media server monitoring
+    tautulli:
+      container_name: tautulli
+      image: linuxserver/tautulli:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "plex"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/tautulli:/config
+        - ${data_folder}:/data
+        - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: tautulli.${root_domain},stats.plex.${root_domain}
+        VIRTUAL_PORT: 8181
+        LETSENCRYPT_HOST: tautulli.${root_domain},stats.plex.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # netdata, server monitoring
+    netdata:
+      container_name: netdata
+      hostname: netdata.${root_domain}
+      image: netdata/netdata:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+      environment:
+        <<: *https
+        <<: *conf
+        PGID: ${docker_group_id}
+        VIRTUAL_HOST: netdata.${root_domain},status.${root_domain}
+        VIRTUAL_PORT: 19999
+        LETSENCRYPT_HOST: netdata.${root_domain},status.${root_domain}
+      networks:
+        - frontend
+      cap_add:
+        - SYS_PTRACE
+      security_opt:
+        - apparmor:unconfined
+    # postgresql for mattermost
+    mattermost-db:
+      container_name: mattermost-db
+      environment:
+        POSTGRES_PASSWORD: ${mattermost_db_pass}
+        POSTGRES_USER: ${mattermost_db_user}
+      volumes:
+        - mattermost-db-volume:/var/lib/postgresql/data
+      networks:
+        - mattermost-backend
+      security_opt:
+        - no-new-privileges
+      <<: *restart
+      image: postgres:alpine
+    # mattermost, self hosted slack alternative
+    mattermost:
+      container_name: mattermost
+      image: mattermost/mattermost-prod-app:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+        - "mattermost-db"
+      environment:
+        <<: *https
+        MM_USERNAME: ${mattermost_db_user}
+        MM_PASSWORD: ${mattermost_db_pass}
+        MM_DBNAME: ${mattermost_db_user}
+        DB_HOST: mattermost-db
+        DB_PORT_NUMBER: 5432
+        VIRTUAL_HOST: chat.${root_domain},mattermost.${root_domain}
+        VIRTUAL_PORT: 80
+        LETSENCRYPT_HOST: chat.${root_domain},mattermost.${root_domain}
+      networks:
+        - mattermost
+        - mattermost-backend
+      security_opt:
+        - no-new-privileges
+    # pyload, self hosted download manager
+    pyload:
+      container_name: pyload
+      image: cobraeti/pyload:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/pyload:/config
+        - ${data_folder}:/downloads
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: pyload.${root_domain},download.${root_domain}
+        VIRTUAL_PORT: 8000
+        LETSENCRYPT_HOST: pyload.${root_domain},download.${root_domain}
+      networks:
+        - pyload
+      security_opt:
+        - no-new-privileges
+
+volumes:
+  mattermost-db-volume:
+
+networks:
+  frontend:
+  mattermost:
+  mattermost-backend:
+    internal: true
+  watchtower:
+  pyload:
