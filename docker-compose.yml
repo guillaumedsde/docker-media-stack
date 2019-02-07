@@ -131,7 +131,7 @@ services:
     # jackett tracker site scraper with API
     jackett:
       container_name: jackett
-      image: linuxserver/jackett:latest
+      image: binhex/arch-jackett:latest
       <<: *restart
       depends_on:
         - "nginx-proxy"
