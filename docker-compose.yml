@@ -42,6 +42,9 @@ services:
         - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
         - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
         - /var/run/docker.sock:/tmp/docker.sock:ro
+      environment:
+        DEFAULT_HOST: home.olloix.desusanne.com
+        ENABLE_IPV6: false
       labels:
         - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
       networks:
@@ -63,7 +66,7 @@ services:
         - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
         - /var/run/docker.sock:/var/run/docker.sock:ro
       environment:
-        - DHPARAM_BITS=4096
+        DHPARAM_BITS: 4096
       networks:
         - frontend
         - mattermost
@@ -81,9 +84,9 @@ services:
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
       environment:
-        - WATCHTOWER_NOTIFICATIONS=slack
-        - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${slack_webhook_url}
-        - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER="watchtower_${root_domain}
+        WATCHTOWER_NOTIFICATIONS: slack
+        WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL: ${slack_webhook_url}
+        WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER: watchtower_${root_domain}
       networks:
         - watchtower
       security_opt:
