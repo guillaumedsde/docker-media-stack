@@ -8,19 +8,29 @@
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
 version: "3.4"
 
+# NGINX proxy related settings
 x-https: &https
   VIRTUAL_PROTO: http
   HTTPS_METHOD: redirect
   LETSENCRYPT_EMAIL: ${letsencrypt_email}
   SSL_POLICY: Mozilla-Modern
 
+# basic common configuration for most containers
 x-conf: &conf
   TZ: ${TZ}
   PGID: ${GID}
   PUID: ${UID}
 
+# container restart policy
 x-restart: &restart
   restart: on-failure:5
+
+# list of networks to be proxied by NGINX
+x-proxiednetworks: &proxiednetworks
+    frontend:
+    mattermost:
+    pyload:
+    playmaker:
 
 services:
     # nginx reverse proxy container
@@ -48,9 +58,7 @@ services:
       labels:
         - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
       networks:
-        - frontend
-        - mattermost
-        - pyload
+        <<: *proxiednetworks
       security_opt:
         - no-new-privileges
     # letsencrypt container for HTTPS certificate generation
@@ -68,9 +76,7 @@ services:
       environment:
         DHPARAM_BITS: 4096
       networks:
-        - frontend
-        - mattermost
-        - pyload
+        <<: *proxiednetworks
       security_opt:
         - no-new-privileges
     # watchtower container to update images
@@ -516,14 +522,35 @@ services:
         - pyload
       security_opt:
         - no-new-privileges
+    # pyload, self hosted download manager
+    playmaker:
+      container_name: playmaker
+      image: nomore201/playmaker:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/fdroid:/data/fdroid
+        - LANG_TIMEZONE=${TZ}
+        - DEVICE_CODE="hammerhead"
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: playmaker.${root_domain},play.${root_domain},apk.${root_domain}
+        VIRTUAL_PORT: 5000
+        LETSENCRYPT_HOST: playmaker.${root_domain},play.${root_domain},apk.${root_domain}
+      networks:
+        - playmaker
+      security_opt:
+        - no-new-privileges
 
 volumes:
   mattermost-db-volume:
 
 networks:
-  frontend:
-  mattermost:
+  <<: *proxiednetworks
   mattermost-backend:
     internal: true
   watchtower:
-  pyload:
