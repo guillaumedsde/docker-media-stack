@@ -79,6 +79,31 @@ services:
         <<: *proxiednetworks
       security_opt:
         - no-new-privileges
+    # Oauth Proxy
+    oauth2_proxy:
+      container_name: oauth2_proxy
+      image: quay.io/pusher/oauth2_proxy:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/oauth2_proxy:/config
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: oauth.${root_domain}
+        VIRTUAL_PORT: 4180
+        LETSENCRYPT_HOST: oauth.${root_domain}
+        OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+        OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+        OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+        OAUTH2_PROXY_COOKIE_REFRESH: ${OAUTH2_PROXY_COOKIE_REFRESH}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
