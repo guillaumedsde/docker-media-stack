@@ -84,6 +84,8 @@ services:
       container_name: oauth2_proxy
       image: quay.io/pusher/oauth2_proxy:latest
       <<: *restart
+      ports:
+        - 4180:4180
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
