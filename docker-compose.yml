@@ -80,8 +80,8 @@ services:
       security_opt:
         - no-new-privileges
     # Oauth Proxy
-    oauth2_proxy:
-      container_name: oauth2_proxy
+    oauth2:
+      container_name: oauth2
       image: quay.io/pusher/oauth2_proxy:latest
       <<: *restart
       ports:
