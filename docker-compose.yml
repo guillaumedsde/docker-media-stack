@@ -239,7 +239,7 @@ services:
     # queries are done with jackett
     sonarr:
       container_name: sonarr
-      image: linuxserver/sonarr:latest
+      image: linuxserver/sonarr:preview
       <<: *restart
       depends_on:
         - "nginx-proxy"
