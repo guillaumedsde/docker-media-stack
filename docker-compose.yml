@@ -106,7 +106,7 @@ services:
         - frontend
       security_opt:
         - no-new-privileges
-      command: ["--authenticated-emails-file=/config/emails", "--redirect-url=https://oauth.${root_domain}/oauth2/callback", "--http-address=0.0.0.0:4180", "--whitelist-domain=.${root_domain}", "--cookie-domain=.${root_domain}", "--set-xauthrequest=True", "--pass-access-token=True"]
+      command: ["--authenticated-emails-file=/config/emails", "--http-address=0.0.0.0:4180", "--whitelist-domain=.${root_domain}", "--cookie-domain=.${root_domain}", "--set-xauthrequest=True", "--pass-access-token=True"]
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
