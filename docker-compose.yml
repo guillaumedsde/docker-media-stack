@@ -30,7 +30,6 @@ x-proxiednetworks: &proxiednetworks
     frontend:
     mattermost:
     pyload:
-    playmaker:
 
 services:
     # nginx reverse proxy container
