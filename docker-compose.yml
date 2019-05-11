@@ -580,6 +580,7 @@ services:
       depends_on:
         - "nginx-proxy"
         - "nginx-letsencrypt"
+        - "bookstack-db"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/bookstack:/config
