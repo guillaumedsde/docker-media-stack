@@ -611,7 +611,7 @@ services:
         DB_USER: ${bookstack_db_user}
         DB_PASS: ${bookstack_db_pass}
         DB_DATABASE: bookstack-db
-        #APP_URL: doc.${root_domain}
+        APP_URL: https://doc.${root_domain}/
       networks:
         - bookstack
         - bookstack-backend
