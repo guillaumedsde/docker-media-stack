@@ -573,21 +573,22 @@ services:
         - pyload
       security_opt:
         - no-new-privileges
-    # postgresql for bookstack
+    # mariadb for bookstack
     bookstack-db:
       container_name: bookstack-db
       environment:
-        POSTGRES_PASSWORD: ${bookstack_db_pass}
-        POSTGRES_USER: ${bookstack_db_user}
-        POSTGRES_DB: bookstackapp
+        MYSQL_ROOT_PASSWORD: ${bookstack_root_db_pass}
+        MYSQL_PASSWORD: ${bookstack_db_pass}
+        MYSQL_USER: ${bookstack_db_user}
+        MYSQL_DATABASE: bookstack-db
       volumes:
-        - bookstack-db-volume:/var/lib/postgresql/data
+        - bookstack-db-volume:/var/lib/mysql
       networks:
         - bookstack-backend
       security_opt:
         - no-new-privileges
       <<: *restart
-      image: postgres:alpine
+      image: mariadb:latest
     # bookstack for hosting documentation
     bookstack:
       container_name: bookstack
@@ -609,7 +610,7 @@ services:
         DB_HOST: bookstack-db
         DB_USER: ${bookstack_db_user}
         DB_PASS: ${bookstack_db_pass}
-        DB_DATABASE: bookstackapp
+        DB_DATABASE: bookstack-db
         APP_URL: doc.${root_domain}
       networks:
         - bookstack
