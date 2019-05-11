@@ -30,6 +30,7 @@ x-proxiednetworks: &proxiednetworks
     frontend:
     mattermost:
     pyload:
+    bookstack:
 
 services:
     # nginx reverse proxy container
@@ -596,7 +597,7 @@ services:
         DB_DATABASE: bookstack-db
         APP_URL: doc.${root_domain}
       networks:
-        - frontend
+        - bookstack
         - bookstack-backend
       security_opt:
         - no-new-privileges
