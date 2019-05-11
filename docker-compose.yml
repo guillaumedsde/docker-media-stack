@@ -591,10 +591,10 @@ services:
         VIRTUAL_HOST: doc.${root_domain},bookstack.${root_domain}
         VIRTUAL_PORT: 80
         LETSENCRYPT_HOST: doc.${root_domain},bookstack.${root_domain}
-        DB_HOST:
+        DB_HOST: bookstack-db
         DB_USER: ${bookstack_db_user}
         DB_PASS: ${bookstack_db_pass}
-        DB_DATABASE: bookstack-db
+        DB_DATABASE: bookstack
         APP_URL: doc.${root_domain}
       networks:
         - bookstack
