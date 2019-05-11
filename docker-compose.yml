@@ -587,7 +587,7 @@ services:
         <<: *https
         <<: *conf
         VIRTUAL_HOST: doc.${root_domain},bookstack.${root_domain}
-        VIRTUAL_PORT: 6875
+        VIRTUAL_PORT: 80
         LETSENCRYPT_HOST: doc.${root_domain},bookstack.${root_domain}
       networks:
         - frontend
