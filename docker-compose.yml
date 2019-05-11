@@ -616,6 +616,7 @@ services:
 
 volumes:
   mattermost-db-volume:
+  bookstack-db-volume:
 
 networks:
   <<: *proxiednetworks
