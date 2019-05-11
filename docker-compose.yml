@@ -573,6 +573,20 @@ services:
         - pyload
       security_opt:
         - no-new-privileges
+    # postgresql for bookstack
+    bookstack-db:
+      container_name: bookstack-db
+      environment:
+        POSTGRES_PASSWORD: ${bookstack_db_pass}
+        POSTGRES_USER: ${bookstack_db_user}
+      volumes:
+        - bookstack-db-volume:/var/lib/postgresql/data
+      networks:
+        - bookstack-backend
+      security_opt:
+        - no-new-privileges
+      <<: *restart
+      image: postgres:alpine
     # bookstack for hosting documentation
     bookstack:
       container_name: bookstack
@@ -601,20 +615,6 @@ services:
         - bookstack-backend
       security_opt:
         - no-new-privileges
-    # postgresql for bookstack
-    bookstack-db:
-      container_name: bookstack-db
-      environment:
-        POSTGRES_PASSWORD: ${bookstack_db_pass}
-        POSTGRES_USER: ${bookstack_db_user}
-      volumes:
-        - bookstack-db-volume:/var/lib/postgresql/data
-      networks:
-        - bookstack-backend
-      security_opt:
-        - no-new-privileges
-      <<: *restart
-      image: postgres:alpine
 
 volumes:
   mattermost-db-volume:
