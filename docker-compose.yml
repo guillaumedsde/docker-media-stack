@@ -589,10 +589,30 @@ services:
         VIRTUAL_HOST: doc.${root_domain},bookstack.${root_domain}
         VIRTUAL_PORT: 80
         LETSENCRYPT_HOST: doc.${root_domain},bookstack.${root_domain}
+        DB_HOST:
+        DB_USER: ${bookstack_db_user}
+        DB_PASS: ${bookstack_db_pass}
+        DB_DATABASE: bookstack-db
+        APP_URL: doc.${root_domain}
       networks:
         - frontend
+        - bookstack
       security_opt:
         - no-new-privileges
+    # postgresql for bookstack
+    bookstack-db:
+      container_name: bookstack-db
+      environment:
+        POSTGRES_PASSWORD: ${bookstack_db_pass}
+        POSTGRES_USER: ${bookstack_db_user}
+      volumes:
+        - bookstack-db-volume:/var/lib/postgresql/data
+      networks:
+        - bookstack-backend
+      security_opt:
+        - no-new-privileges
+      <<: *restart
+      image: postgres:alpine
 
 volumes:
   mattermost-db-volume:
@@ -602,3 +622,5 @@ networks:
   mattermost-backend:
     internal: true
   watchtower:
+  bookstack-backend:
+    internal: true
