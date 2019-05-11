@@ -594,7 +594,7 @@ services:
         DB_HOST: bookstack-db
         DB_USER: ${bookstack_db_user}
         DB_PASS: ${bookstack_db_pass}
-        DB_DATABASE: bookstack
+        DB_DATABASE: ${bookstack_db_user}
         APP_URL: doc.${root_domain}
       networks:
         - bookstack
