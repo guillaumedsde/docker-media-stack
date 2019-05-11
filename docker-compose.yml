@@ -596,7 +596,7 @@ services:
         APP_URL: doc.${root_domain}
       networks:
         - frontend
-        - bookstack
+        - bookstack-backend
       security_opt:
         - no-new-privileges
     # postgresql for bookstack
