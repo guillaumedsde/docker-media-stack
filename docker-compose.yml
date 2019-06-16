@@ -72,7 +72,7 @@ services:
     # Oauth Proxy
     oauth2:
       container_name: oauth2
-      hostname: "oauth.${root_domain}"
+      hostname: oauth.${root_domain}
       image: quay.io/pusher/oauth2_proxy:latest
       <<: *restart
       ports:
@@ -122,7 +122,7 @@ services:
     # qbittorrent torrent client container
     qbittorrent:
       container_name: qbittorrent
-      hostname: "torrent.${root_domain}"
+      hostname: torrent.${root_domain}
       image: binhex/arch-qbittorrentvpn:latest
       <<: *restart
       privileged: true
@@ -164,7 +164,7 @@ services:
     # jackett tracker site scraper with API
     jackett:
       container_name: jackett
-      hostname: "jackett.${root_domain}"
+      hostname: jackett.${root_domain}
       image: linuxserver/jackett:latest
       <<: *restart
       depends_on:
@@ -190,7 +190,7 @@ services:
     hydra:
       container_name: hydra
       image: linuxserver/hydra2:latest
-      hostname: "hydra.${root_domain}"
+      hostname: hydra.${root_domain}
       <<: *restart
       depends_on:
         - "traefik"
@@ -216,7 +216,7 @@ services:
     # queries are done with jackett
     radarr:
       container_name: radarr
-      hostname: "movies.${root_domain}"
+      hostname: movies.${root_domain}
       image: linuxserver/radarr:latest
       <<: *restart
       depends_on:
@@ -244,7 +244,7 @@ services:
     # queries are done with jackett
     sonarr:
       container_name: sonarr
-      hostname: "series.${root_domain}"
+      hostname: series.${root_domain}
       image: linuxserver/sonarr:preview
       <<: *restart
       depends_on:
@@ -272,7 +272,7 @@ services:
     # queries are done with jackett
     lidarr:
       container_name: lidarr
-      hostname: "music.${root_domain}"
+      hostname: music.${root_domain}
       image: linuxserver/lidarr:latest
       <<: *restart
       depends_on:
@@ -299,7 +299,7 @@ services:
     # mylar, webapp for downloading subtitles
     bazarr:
       container_name: bazarr
-      hostname: "subtitles.${root_domain}"
+      hostname: subtitles.${root_domain}
       image: linuxserver/bazarr:latest
       <<: *restart
       depends_on:
@@ -327,7 +327,7 @@ services:
     # queries are done with jackett
     mylar:
       container_name: mylar
-      hostname: "comics.${root_domain}"
+      hostname: comics.${root_domain}
       image: linuxserver/mylar:latest
       <<: *restart
       depends_on:
@@ -355,7 +355,7 @@ services:
     # queries are done with jackett
     lazylibrarian:
       container_name: lazylibrarian
-      hostname: "books.${root_domain}"
+      hostname: books.${root_domain}
       image: linuxserver/lazylibrarian:latest
       <<: *restart
       depends_on:
@@ -382,7 +382,7 @@ services:
     # heimdall is a homepage
     heimdall:
       container_name: heimdall
-      hostname: "home.${root_domain}"
+      hostname: home.${root_domain}
       image: linuxserver/heimdall:latest
       <<: *restart
       depends_on:
@@ -406,7 +406,7 @@ services:
     # plex media server
     plex:
       container_name: plex
-      hostname: "plex.${root_domain}"
+      hostname: plex.${root_domain}
       image: linuxserver/plex:latest
       <<: *restart
       # note use the host network mode on first startup,
@@ -443,7 +443,7 @@ services:
     # jellyfin media server
     jellyfin:
       container_name: jellyfin
-      hostname: "jellyfin.${root_domain}"
+      hostname: jellyfin.${root_domain}
       image: binhex/arch-jellyfin:latest
       <<: *restart
       depends_on:
@@ -468,7 +468,7 @@ services:
     # ombi, plex media requests
     ombi:
       container_name: ombi
-      hostname: "ombi.${root_domain}"
+      hostname: ombi.${root_domain}
       image: linuxserver/ombi:latest
       <<: *restart
       depends_on:
@@ -496,7 +496,7 @@ services:
     # tautulli, plex media server monitoring
     tautulli:
       container_name: tautulli
-      hostname: "tautulli.${root_domain}"
+      hostname: tautulli.${root_domain}
       image: linuxserver/tautulli:latest
       <<: *restart
       depends_on:
@@ -523,7 +523,7 @@ services:
     # netdata, server monitoring
     netdata:
       container_name: netdata
-      hostname: "netdata.${root_domain}"
+      hostname: netdata.${root_domain}
       image: netdata/netdata:latest
       <<: *restart
       depends_on:
@@ -566,7 +566,7 @@ services:
     # mattermost, self hosted slack alternative
     mattermost:
       container_name: mattermost
-      hostname: "chat.${root_domain}"
+      hostname: chat.${root_domain}
       image: mattermost/mattermost-prod-app:latest
       <<: *restart
       depends_on:
@@ -610,7 +610,7 @@ services:
     # bookstack for hosting documentation
     bookstack:
       container_name: bookstack
-      hostname: "doc.${root_domain}"
+      hostname: doc.${root_domain}
       image: linuxserver/bookstack:latest
       <<: *restart
       depends_on:
