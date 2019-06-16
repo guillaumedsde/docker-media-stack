@@ -583,7 +583,7 @@ services:
         traefik.enable: "true"
         traefik.backend: "mattermost"
         traefik.frontend.rule: "Host:chat.${root_domain}, mattermost.${root_domain}"
-        traefik.docker.network: "proxy"
+        traefik.docker.network: "mattermost"
         traefik.port: "80"
       networks:
         - mattermost
@@ -630,7 +630,7 @@ services:
         traefik.enable: "true"
         traefik.backend: "mattermost"
         traefik.frontend.rule: "Host:doc.${root_domain},bookstack.${root_domain}"
-        traefik.docker.network: "proxy"
+        traefik.docker.network: "bookstack"
         traefik.port: "80"
       networks:
         - bookstack
