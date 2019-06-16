@@ -43,32 +43,32 @@ x-securityHeaders: &securityHeaders
 
 services:
     traefik:
-    image: traefik:alpine
-    command: --docker
-    container_name: traefik
-    hostname: traefik.${tld}
-    expose:
-      - 8080
-    environment:
-      OVH_ENDPOINT: ${OVH_ENDPOINT}
-      OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
-      OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
-      OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
-    labels:
-      traefik.enable: "true"
-      traefik.frontend.rule: Host:traefik.${tld}
-      traefik.port: "8080"
-      traefik.frontend.auth.basic.users: ${traefik_credentials}
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${docker_data_dir}/traefik/traefik.toml:/traefik.toml
-      - ${docker_data_dir}/traefik/acme.json:/acme.json
-    networks:
-      <<: *proxiednetworks
-    ports:
-      - 80:80
-      - 443:443
+      image: traefik:alpine
+      command: --docker
+      container_name: traefik
+      hostname: traefik.${tld}
+      expose:
+        - 8080
+      environment:
+        OVH_ENDPOINT: ${OVH_ENDPOINT}
+        OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
+        OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
+        OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
+      labels:
+        traefik.enable: "true"
+        traefik.frontend.rule: Host:traefik.${tld}
+        traefik.port: "8080"
+        traefik.frontend.auth.basic.users: ${traefik_credentials}
+      restart: always
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ${docker_data_dir}/traefik/traefik.toml:/traefik.toml
+        - ${docker_data_dir}/traefik/acme.json:/acme.json
+      networks:
+        <<: *proxiednetworks
+      ports:
+        - 80:80
+        - 443:443
     # Oauth Proxy
     oauth2:
       container_name: oauth2
@@ -423,7 +423,6 @@ services:
         - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
-        - /etc/hostname:/etc/hostname:ro
         - ${docker_data_folder}/plex:/config
         - ${data_folder}:/data
       environment:
