@@ -1,19 +1,10 @@
 # THE MEDIA STACK #
-
 # this docker-compose file will get a selection of media downloading/management webapps
 # I've tried to simplify getting started as much as possible
 #   1. configure your desired variables in the .env file
 #   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
-
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
 version: "3.4"
-
-# NGINX proxy related settings
-x-https: &https
-  VIRTUAL_PROTO: http
-  HTTPS_METHOD: redirect
-  LETSENCRYPT_EMAIL: ${letsencrypt_email}
-  SSL_POLICY: Mozilla-Modern
 
 # basic common configuration for most containers
 x-conf: &conf
@@ -31,79 +22,81 @@ x-proxiednetworks: &proxiednetworks
     mattermost:
     pyload:
     bookstack:
+    proxy:
+
+# containers' restart policy
+x-securityHeaders: &securityHeaders
+  # redirect non SSL requests to SSL
+  traefik.frontend.headers.SSLRedirect: "true"
+  # default is same host as request, which is what we want
+  #traefik.frontend.headers.SSLHost: "${tld}"
+  traefik.frontend.headers.STSSeconds: "315360000"
+  #traefik.frontend.headers.STSIncludeSubdomains: "true"
+  #traefik.frontend.headers.STSPreload: "true"
+  # forbid iframes
+  traefik.frontend.headers.frameDeny: "true"
+  traefik.frontend.headers.browserXSSFilter: "true"
+  traefik.frontend.headers.contentTypeNosniff: "true"
+  traefik.frontend.headers.customFrameOptionsValue: "SAMEORIGIN"
+  traefik.frontend.headers.customResponseHeaders: "Feature-Policy:camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';||server:''||X-Powered-By:''"
+
 
 services:
-    # nginx reverse proxy container
-    # binds to HTTP (80) and HTTPS (443) ports
-    # then serves requests as a reverse proxy to the different containers defined below
-    nginx-proxy:
-      container_name: nginx-proxy
-      image: jwilder/nginx-proxy:alpine
-      <<: *restart
-      ports:
-        - 80:80
-        - 443:443
-      volumes:
-        # HTTPS certificates
-        - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:ro
-        - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:ro
-        - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
-        # additional nginx configuration
-        - ${docker_data_folder}/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
-        - ${docker_data_folder}/nginx-proxy/.htpasswd:/.htpasswd:ro
-        - /var/run/docker.sock:/tmp/docker.sock:ro
-      environment:
-        DEFAULT_HOST: home.${root_domain}
-        ENABLE_IPV6: "false"
-      labels:
-        - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
-      networks:
-        <<: *proxiednetworks
-      security_opt:
-        - no-new-privileges
-    # letsencrypt container for HTTPS certificate generation
-    nginx-letsencrypt:
-      container_name: nginx-letsencrypt
-      image: jrcs/letsencrypt-nginx-proxy-companion:latest
-      <<: *restart
-      depends_on:
-        - "nginx-proxy"
-      volumes:
-        - ${docker_data_folder}/nginx-proxy/certificates:/etc/nginx/certs:rw
-        - ${docker_data_folder}/nginx-proxy/nginx-vhosts:/etc/nginx/vhost.d:rw
-        - ${docker_data_folder}/nginx-proxy/nginx-html:/usr/share/nginx/html
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-      environment:
-        DHPARAM_BITS: 4096
-      networks:
-        <<: *proxiednetworks
-      security_opt:
-        - no-new-privileges
+    traefik:
+    image: traefik:alpine
+    command: --docker
+    container_name: traefik
+    hostname: traefik.${tld}
+    expose:
+      - 8080
+    environment:
+      OVH_ENDPOINT: ${OVH_ENDPOINT}
+      OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
+      OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
+      OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: Host:traefik.${tld}
+      traefik.port: "8080"
+      traefik.frontend.auth.basic.users: ${traefik_credentials}
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${docker_data_dir}/traefik/traefik.toml:/traefik.toml
+      - ${docker_data_dir}/traefik/acme.json:/acme.json
+    networks:
+      <<: *proxiednetworks
+    ports:
+      - 80:80
+      - 443:443
     # Oauth Proxy
     oauth2:
       container_name: oauth2
+      hostname: "oauth.${root_domain}"
       image: quay.io/pusher/oauth2_proxy:latest
       <<: *restart
       ports:
         - 4180:4180
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/oauth2_proxy:/config
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: oauth.${root_domain}
-        VIRTUAL_PORT: 4180
-        LETSENCRYPT_HOST: oauth.${root_domain}
         OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
         OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
         OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
         OAUTH2_PROXY_COOKIE_REFRESH: ${OAUTH2_PROXY_COOKIE_REFRESH}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "oauth"
+        traefik.frontend.rule: "Host:oauth.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "4180"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
       command: ["--authenticated-emails-file=/config/emails", "--redirect-url=https://oauth.${root_domain}/oauth2/callback", "--http-address=0.0.0.0:4180", "--whitelist-domain=.${root_domain}", "--cookie-domain=.${root_domain}", "--set-xauthrequest=True", "--pass-access-token=True"]
@@ -129,12 +122,12 @@ services:
     # qbittorrent torrent client container
     qbittorrent:
       container_name: qbittorrent
+      hostname: "torrent.${root_domain}"
       image: binhex/arch-qbittorrentvpn:latest
       <<: *restart
       privileged: true
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       cap_add:
         - NET_ADMIN
       volumes:
@@ -143,7 +136,6 @@ services:
         - ${docker_data_folder}/qbittorrent:/config
         - /etc/localtime:/etc/localtime:ro
       environment:
-        <<: *https
         <<: *conf
         VPN_ENABLED: "yes"
         VPN_USER: ${openvpn_user}
@@ -160,65 +152,75 @@ services:
         NAME_SERVERS: 127.0.0.11
         DEBUG: "false"
         WEBUI_PORT: 8080
-        VIRTUAL_HOST: torrent.${root_domain}
-        VIRTUAL_PORT: 8080
-        LETSENCRYPT_HOST: torrent.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "qbittorrent"
+        traefik.frontend.rule: "Host:torrent.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8080"
       networks:
-        - frontend
+        - proxy
     # jackett tracker site scraper with API
     jackett:
       container_name: jackett
+      hostname: "jackett.${root_domain}"
       image: linuxserver/jackett:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/jackett:/config
         - ${torrent_blackhole}:/downloads
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: jackett.${root_domain}
-        VIRTUAL_PORT: 9117
-        LETSENCRYPT_HOST: jackett.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "jackett"
+        traefik.frontend.rule: "Host:jackett.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "9117"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # jackett tracker site scraper with API
     hydra:
       container_name: hydra
       image: linuxserver/hydra2:latest
+      hostname: "hydra.${root_domain}"
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "jackett"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/hydra:/config
         - ${torrent_blackhole}:/blackhole
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: hydra.${root_domain}
-        VIRTUAL_PORT: 5076
-        LETSENCRYPT_HOST: hydra.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "jackett"
+        traefik.frontend.rule: "Host:hydra.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "5076"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # radarr, webapp for downloading movies through torrent client
     # queries are done with jackett
     radarr:
       container_name: radarr
+      hostname: "movies.${root_domain}"
       image: linuxserver/radarr:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -226,24 +228,27 @@ services:
         - ${docker_data_folder}/radarr:/config
         - ${data_folder}:/data
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: radarr.${root_domain},movies.${root_domain}
-        VIRTUAL_PORT: 7878
-        LETSENCRYPT_HOST: radarr.${root_domain},movies.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "radarr"
+        traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "7878"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # sonarr, webapp for downloading series through torrent client
     # queries are done with jackett
     sonarr:
       container_name: sonarr
+      hostname: "series.${root_domain}"
       image: linuxserver/sonarr:preview
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -251,24 +256,27 @@ services:
         - ${docker_data_folder}/sonarr:/config
         - ${data_folder}:/data
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: sonarr.${root_domain},series.${root_domain}
-        VIRTUAL_PORT: 8989
-        LETSENCRYPT_HOST: sonarr.${root_domain},series.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "sonarr"
+        traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8989"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # lidarr, webapp for downloading music through torrent client
     # queries are done with jackett
     lidarr:
       container_name: lidarr
+      hostname: "music.${root_domain}"
       image: linuxserver/lidarr:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -276,48 +284,54 @@ services:
         - ${docker_data_folder}/lidarr:/config
         - ${data_folder}:/data
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: lidarr.${root_domain},music.${root_domain}
-        VIRTUAL_PORT: 8686
-        LETSENCRYPT_HOST: lidarr.${root_domain},music.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "lidarr"
+        traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8686"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # mylar, webapp for downloading subtitles
     bazarr:
       container_name: bazarr
+      hostname: "subtitles.${root_domain}"
       image: linuxserver/bazarr:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "radarr"
         - "sonarr"
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: bazarr.${root_domain},subtitles.${root_domain}
-        VIRTUAL_PORT: 6767
-        LETSENCRYPT_HOST: bazarr.${root_domain},subtitles.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "bazarr"
+        traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "6767"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/bazarr:/config
         - ${data_folder}:/data
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # mylar, webapp for downloading comics through torrent client
     # queries are done with jackett
     mylar:
       container_name: mylar
+      hostname: "comics.${root_domain}"
       image: linuxserver/mylar:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -325,24 +339,27 @@ services:
         - ${docker_data_folder}/mylar:/config
         - ${data_folder}:/data
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: mylar.${root_domain},comics.${root_domain}
-        VIRTUAL_PORT: 8090
-        LETSENCRYPT_HOST: mylar.${root_domain},comics.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "mylar"
+        traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8090"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # lazylibrarian, webapp for downloading books through torrent client
     # queries are done with jackett
     lazylibrarian:
       container_name: lazylibrarian
+      hostname: "books.${root_domain}"
       image: linuxserver/lazylibrarian:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -350,40 +367,46 @@ services:
         - ${docker_data_folder}/lazylibrarian:/config
         - ${data_folder}:/data
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: lazylibrarian.${root_domain},books.${root_domain}
-        VIRTUAL_PORT: 5299
-        LETSENCRYPT_HOST: lazylibrarian.${root_domain},books.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "mylar"
+        traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "5299"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # heimdall is a homepage
     heimdall:
       container_name: heimdall
+      hostname: "home.${root_domain}"
       image: linuxserver/heimdall:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/heimdall:/config
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: home.${root_domain}
-        VIRTUAL_PROTO: https
-        VIRTUAL_PORT: 443
-        LETSENCRYPT_HOST: home.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "heimdall"
+        traefik.frontend.rule: "Host:home.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "80"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # plex media server
     plex:
       container_name: plex
+      hostname: "plex.${root_domain}"
       image: linuxserver/plex:latest
       <<: *restart
       # note use the host network mode on first startup,
@@ -397,54 +420,59 @@ services:
         - "5353:5353/udp"
         - "1900:1900/udp"
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - /etc/hostname:/etc/hostname:ro
         - ${docker_data_folder}/plex:/config
         - ${data_folder}:/data
       environment:
-        <<: *https
         VERSION: latest
         <<: *conf
-        VIRTUAL_HOST: plex.${root_domain}
-        VIRTUAL_PORT: 32400
-        LETSENCRYPT_HOST: plex.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "plex"
+        traefik.frontend.rule: "Host:plex.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "32400"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # jellyfin media server
     jellyfin:
       container_name: jellyfin
+      hostname: "jellyfin.${root_domain}"
       image: binhex/arch-jellyfin:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/jellyfin:/config
         - ${data_folder}:/media
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: jellyfin.${root_domain}
-        VIRTUAL_PORT: 8096
-        LETSENCRYPT_HOST: jellyfin.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "jellyfin"
+        traefik.frontend.rule: "Host:jellyfin.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8096"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # ombi, plex media requests
     ombi:
       container_name: ombi
+      hostname: "ombi.${root_domain}"
       image: linuxserver/ombi:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "sonarr"
         - "radarr"
         - "lidarr"
@@ -453,23 +481,26 @@ services:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/ombi:/config
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: ombi.${root_domain},requests.${root_domain},requests.plex.${root_domain}
-        VIRTUAL_PORT: 3579
-        LETSENCRYPT_HOST: ombi.${root_domain},requests.${root_domain},requests.plex.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "ombi"
+        traefik.frontend.rule: "Host:ombi.${root_domain}, requests.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "3579"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # tautulli, plex media server monitoring
     tautulli:
       container_name: tautulli
+      hostname: "tautulli.${root_domain}"
       image: linuxserver/tautulli:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "plex"
       volumes:
         - /etc/localtime:/etc/localtime:ro
@@ -477,38 +508,43 @@ services:
         - ${data_folder}:/data
         - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: tautulli.${root_domain},stats.plex.${root_domain}
-        VIRTUAL_PORT: 8181
-        LETSENCRYPT_HOST: tautulli.${root_domain},stats.plex.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "tautulli"
+        traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8181"
       networks:
-        - frontend
+        - proxy
       security_opt:
         - no-new-privileges
     # netdata, server monitoring
     netdata:
       container_name: netdata
-      hostname: netdata.${root_domain}
+      hostname: "netdata.${root_domain}"
       image: netdata/netdata:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
       volumes:
         - /proc:/host/proc:ro
         - /sys:/host/sys:ro
         - /var/run/docker.sock:/var/run/docker.sock:ro
         - ${docker_data_folder}/netdata:/config
       environment:
-        <<: *https
         <<: *conf
         PGID: ${docker_group_id}
-        VIRTUAL_HOST: netdata.${root_domain},status.${root_domain}
-        VIRTUAL_PORT: 19999
-        LETSENCRYPT_HOST: netdata.${root_domain},status.${root_domain}
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "netdata"
+        traefik.frontend.rule: "Host:status.${root_domain}, netdata.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "19999"
       networks:
-        - frontend
+        - proxy
       cap_add:
         - SYS_PTRACE
       security_opt:
@@ -530,47 +566,29 @@ services:
     # mattermost, self hosted slack alternative
     mattermost:
       container_name: mattermost
+      hostname: "chat.${root_domain}"
       image: mattermost/mattermost-prod-app:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "mattermost-db"
       environment:
-        <<: *https
         MM_USERNAME: ${mattermost_db_user}
         MM_PASSWORD: ${mattermost_db_pass}
         MM_DBNAME: ${mattermost_db_user}
         DB_HOST: mattermost-db
         DB_PORT_NUMBER: 5432
-        VIRTUAL_HOST: chat.${root_domain},mattermost.${root_domain}
-        VIRTUAL_PORT: 80
-        LETSENCRYPT_HOST: chat.${root_domain},mattermost.${root_domain}
+
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "mattermost"
+        traefik.frontend.rule: "Host:chat.${root_domain}, mattermost.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "80"
       networks:
         - mattermost
         - mattermost-backend
-      security_opt:
-        - no-new-privileges
-    # pyload, self hosted download manager
-    pyload:
-      container_name: pyload
-      image: cobraeti/pyload:latest
-      <<: *restart
-      depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/pyload:/config
-        - ${data_folder}:/downloads
-      environment:
-        <<: *https
-        <<: *conf
-        VIRTUAL_HOST: pyload.${root_domain},download.${root_domain}
-        VIRTUAL_PORT: 8000
-        LETSENCRYPT_HOST: pyload.${root_domain},download.${root_domain}
-      networks:
-        - pyload
       security_opt:
         - no-new-privileges
     # mariadb for bookstack
@@ -592,26 +610,29 @@ services:
     # bookstack for hosting documentation
     bookstack:
       container_name: bookstack
+      hostname: "doc.${root_domain}"
       image: linuxserver/bookstack:latest
       <<: *restart
       depends_on:
-        - "nginx-proxy"
-        - "nginx-letsencrypt"
+        - "traefik"
         - "bookstack-db"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/bookstack:/config
       environment:
-        <<: *https
         <<: *conf
-        VIRTUAL_HOST: doc.${root_domain},bookstack.${root_domain}
-        VIRTUAL_PORT: 80
-        LETSENCRYPT_HOST: doc.${root_domain},bookstack.${root_domain}
         DB_HOST: bookstack-db
         DB_USER: ${bookstack_db_user}
         DB_PASS: ${bookstack_db_pass}
         DB_DATABASE: bookstack-db
         APP_URL: https://doc.${root_domain}/
+      labels:
+        <<: *securityHeaders
+        traefik.enable: "true"
+        traefik.backend: "mattermost"
+        traefik.frontend.rule: "Host:doc.${root_domain},bookstack.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "80"
       networks:
         - bookstack
         - bookstack-backend
