@@ -46,7 +46,7 @@ services:
       image: traefik:alpine
       command: --docker
       container_name: traefik
-      hostname: traefik.${tld}
+      hostname: traefik.${root_domain}
       expose:
         - 8080
       environment:
@@ -56,14 +56,14 @@ services:
         OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
       labels:
         traefik.enable: "true"
-        traefik.frontend.rule: Host:traefik.${tld}
+        traefik.frontend.rule: Host:traefik.${root_domain}
         traefik.port: "8080"
         traefik.frontend.auth.basic.users: ${traefik_credentials}
       restart: always
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - ${docker_data_dir}/traefik/traefik.toml:/traefik.toml
-        - ${docker_data_dir}/traefik/acme.json:/acme.json
+        - ${docker_data_folder}/traefik/traefik.toml:/traefik.toml
+        - ${docker_data_folder}/traefik/acme.json:/acme.json
       networks:
         <<: *proxiednetworks
       ports:
