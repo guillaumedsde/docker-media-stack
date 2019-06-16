@@ -204,7 +204,7 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "jackett"
+        traefik.backend: "hydra"
         traefik.frontend.rule: "Host:hydra.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "5076"
@@ -371,7 +371,7 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "mylar"
+        traefik.backend: "lazylibrarian"
         traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "5299"
@@ -628,7 +628,7 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "mattermost"
+        traefik.backend: "bookstack"
         traefik.frontend.rule: "Host:doc.${root_domain},bookstack.${root_domain}"
         traefik.docker.network: "bookstack"
         traefik.port: "80"
