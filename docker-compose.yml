@@ -24,7 +24,7 @@ x-proxiednetworks: &proxiednetworks
     bookstack:
     proxy:
 
-# containers' restart policy
+# traefik security headers
 x-securityHeaders: &securityHeaders
   # redirect non SSL requests to SSL
   traefik.frontend.headers.SSLRedirect: "true"
@@ -40,6 +40,14 @@ x-securityHeaders: &securityHeaders
   traefik.frontend.headers.customFrameOptionsValue: "SAMEORIGIN"
   traefik.frontend.headers.customResponseHeaders: "Feature-Policy:camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';||server:''||X-Powered-By:''"
 
+# oauth configuration
+x-oauthLabels: &oauthLabels
+  traefik.frontend.auth.forward.address: "https://oauth.${root_domain}/oauth2/auth"
+  traefik.frontend.auth.forward.trustForwardHeader: "true"
+  traefik.frontend.auth.forward.authResponseHeaders: "X-Auth-Request-User,X-Auth-Request-Email,Authorization,Set-Cookie"
+  traefik.frontend.errors.401.backend: "oauth2"
+  traefik.frontend.errors.401.status: "401"
+  traefik.frontend.errors.401.query: "/oauth2/sign_in"
 
 services:
     traefik:
@@ -99,7 +107,7 @@ services:
         - proxy
       security_opt:
         - no-new-privileges
-      command: ["--authenticated-emails-file=/config/emails", "--redirect-url=https://oauth.${root_domain}/oauth2/callback", "--http-address=0.0.0.0:4180", "--whitelist-domain=.${root_domain}", "--cookie-domain=.${root_domain}", "--set-xauthrequest=True", "--pass-access-token=True"]
+      command: ["--authenticated-emails-file=/config/emails", "--redirect-url=https://oauth.${root_domain}/oauth2/callback", "--http-address=0.0.0.0:4180", "--whitelist-domain=.${root_domain}", "--cookie-domain=.${root_domain}", "--set-xauthrequest=True", "--pass-access-token=True", "--set-authorization-header"]
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
@@ -154,6 +162,7 @@ services:
         WEBUI_PORT: 8080
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "qbittorrent"
         traefik.frontend.rule: "Host:torrent.${root_domain}"
@@ -177,6 +186,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "jackett"
         traefik.frontend.rule: "Host:jackett.${root_domain}"
@@ -203,6 +213,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "hydra"
         traefik.frontend.rule: "Host:hydra.${root_domain}"
@@ -231,6 +242,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "radarr"
         traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
@@ -259,6 +271,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "sonarr"
         traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
@@ -287,6 +300,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "lidarr"
         traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
@@ -310,6 +324,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "bazarr"
         traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
@@ -342,6 +357,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "mylar"
         traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
@@ -370,6 +386,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "lazylibrarian"
         traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
@@ -510,6 +527,7 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "tautulli"
         traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
@@ -537,6 +555,7 @@ services:
         PGID: ${docker_group_id}
       labels:
         <<: *securityHeaders
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "netdata"
         traefik.frontend.rule: "Host:status.${root_domain}, netdata.${root_domain}"
