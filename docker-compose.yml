@@ -105,7 +105,7 @@ services:
         - "traefik.backend=oauth2" # necessary for custom error pages
         - "traefik.frontend.rule=Host:oauth.${root_domain};PathPrefix:/oauth2"
       networks: # optional
-      - backend
+      - proxy
       restart: unless-stopped
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
