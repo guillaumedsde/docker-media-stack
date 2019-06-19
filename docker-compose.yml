@@ -42,7 +42,7 @@ x-securityHeaders: &securityHeaders
 
 # oauth configuration
 x-oauthLabels: &oauthLabels
-  traefik.frontend.auth.forward.address: "https://oauth.${root_domain}/oauth2/auth"
+  traefik.frontend.auth.forward.address: "http://oauth:4181/oauth2/auth"
   traefik.frontend.auth.forward.trustForwardHeader: "true"
   traefik.frontend.auth.forward.authResponseHeaders: "X-Auth-Request-User,X-Auth-Request-Email,Authorization,Set-Cookie"
   traefik.frontend.errors.401.backend: "oauth"
@@ -79,7 +79,7 @@ services:
         - 443:443
     # Oauth Proxy
     oauth:
-      container_name: oauth2
+      container_name: oauth
       hostname: oauth.${root_domain}
       image: quay.io/pusher/oauth2_proxy:latest
       <<: *restart
