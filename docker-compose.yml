@@ -83,10 +83,6 @@ services:
       hostname: oauth.${root_domain}
       image: quay.io/pusher/oauth2_proxy:latest
       <<: *restart
-      ports:
-        - 4180:4180
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/oauth2_proxy:/config
@@ -100,7 +96,7 @@ services:
         #<<: *securityHeaders
         traefik.enable: "true"
         traefik.backend: "oauth"
-        traefik.frontend.rule: "Host:oauth.${root_domain};PathPrefix:/oauth2"
+        traefik.frontend.rule: "Host:oauth.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "4180"
       networks:
