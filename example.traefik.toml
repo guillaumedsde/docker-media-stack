@@ -7,9 +7,6 @@ defaultEntryPoints = ["https","http"]
   [entryPoints.http]
   address = ":80"
   compress = true
-  [entryPoints.http.auth.forward]
-    address = "http://oauth:4180"
-    authResponseHeaders = ["X-Forwarded-User"]
     [entryPoints.http.redirect]
     entryPoint = "https"
   [entryPoints.https]
