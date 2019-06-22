@@ -95,8 +95,6 @@ services:
         traefik.backend: "traefik-forward-auth"
         traefik.frontend.rule: "Host:oauth.${root_domain}"
         traefik.port: "4181"
-        traefik.frontend.auth.forward.address: "http://traefik-forward-auth:4181"
-        traefik.frontend.auth.forward.trustForwardHeader: "true"
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
