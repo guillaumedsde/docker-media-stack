@@ -42,12 +42,9 @@ x-securityHeaders: &securityHeaders
 
 # oauth configuration
 x-oauthLabels: &oauthLabels
-  traefik.frontend.auth.forward.address: "http://oauth:4181/oauth2/auth"
+  traefik.frontend.auth.forward.address: "http://traefik-forward-auth:4181"
+  traefik.frontend.auth.forward.authResponseHeaders: "X-Forwarded-User"
   traefik.frontend.auth.forward.trustForwardHeader: "true"
-  traefik.frontend.auth.forward.authResponseHeaders: "X-Auth-Request-User,X-Auth-Request-Email,Authorization,Set-Cookie"
-  traefik.frontend.errors.401.backend: "oauth2"
-  traefik.frontend.errors.401.status: "401"
-  traefik.frontend.errors.401.query: "/oauth2/sign_in"
 
 services:
     traefik:
@@ -78,35 +75,27 @@ services:
       ports:
         - 80:80
         - 443:443
-    oauth2:
-      command:
-      # - -client-id     # environment
-      # - -client-secret # environment
-      # - -cookie-secret # environment
-      - "-cookie-domain=${root_domain}"
-      - "-cookie-secure=true"
-      - "-email-domain=*"
-      - "-http-address=0.0.0.0:4180"
-      - "-pass-access-token"
-      - "-provider=google"
-      - "-redirect-url=https://oauth.${root_domain}/oauth2/callback"
-      - "-set-authorization-header"
-      - "-set-xauthrequest"
+    # OIDC forward authentication for traefik
+    traefik-forward-auth:
+      container_name: traefik-forward-auth
+      hostname: oauth.${root_domain}
+      image: funkypenguin/traefik-forward-auth:latest
+      <<: *restart
       environment:
-        <<: *conf
-        OAUTH2_PROXY_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
-        OAUTH2_PROXY_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
-        OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
-        OAUTH2_PROXY_COOKIE_REFRESH: ${OAUTH2_PROXY_COOKIE_REFRESH}
-      expose:
-        - "4180"
-      image: quay.io/pusher/oauth2_proxy:v3.1.0
+        CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+        CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+        SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+        OIDC_ISSUER: https://accounts.google.com
+        COOKIE_DOMAINS: "${root_domain}"
+        WHITELIST: "${allowed_emails}"
+        AUTH_HOST: "oauth.${root_domain}"
       labels:
-        - "traefik.backend=oauth2" # necessary for custom error pages
-        - "traefik.frontend.rule=Host:oauth.${root_domain};PathPrefix:/oauth2"
-      networks: # optional
-      - proxy
-      restart: unless-stopped
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.frontend.rule: "Host:oauth.${root_domain}"
+        traefik.port: "4181"
+        traefik.frontend.auth.forward.address: "http://traefik-forward-auth:4181"
+        traefik.frontend.auth.forward.trustForwardHeader: "true"
     # watchtower container to update images
     # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
     # NOTE watchtower also updates itself
