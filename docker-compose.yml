@@ -18,11 +18,11 @@ x-restart: &restart
 
 # list of networks to be proxied by NGINX
 x-proxiednetworks: &proxiednetworks
-    frontend:
     mattermost:
     pyload:
     bookstack:
     proxy:
+      external: true
 
 # traefik security headers
 x-securityHeaders: &securityHeaders
