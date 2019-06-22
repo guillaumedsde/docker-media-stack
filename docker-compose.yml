@@ -21,8 +21,6 @@ x-proxiednetworks: &proxiednetworks
     mattermost:
     pyload:
     bookstack:
-    proxy:
-      external: true
 
 # traefik security headers
 x-securityHeaders: &securityHeaders
@@ -72,6 +70,7 @@ services:
         - ${docker_data_folder}/traefik/acme.json:/acme.json
       networks:
         <<: *proxiednetworks
+        proxy:
       ports:
         - 80:80
         - 443:443
@@ -651,6 +650,8 @@ volumes:
 
 networks:
   <<: *proxiednetworks
+  proxy:
+    external: true
   mattermost-backend:
     internal: true
   watchtower:
