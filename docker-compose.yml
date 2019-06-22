@@ -88,6 +88,7 @@ services:
         COOKIE_DOMAINS: "${root_domain}"
         WHITELIST: "${allowed_emails}"
         AUTH_HOST: "oauth.${root_domain}"
+        LOG_LEVEL: "debug"
       labels:
         <<: *oauthLabels
         traefik.enable: "true"
