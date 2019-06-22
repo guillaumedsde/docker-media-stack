@@ -47,7 +47,7 @@ x-oauthLabels: &oauthLabels
 services:
     traefik:
       image: traefik:alpine
-      command: --docker
+      command: --docker --logLevel=DEBUG
       container_name: traefik
       hostname: traefik.${root_domain}
       expose:
@@ -91,6 +91,7 @@ services:
       labels:
         <<: *oauthLabels
         traefik.enable: "true"
+        traefik.backend: "traefik-forward-auth"
         traefik.frontend.rule: "Host:oauth.${root_domain}"
         traefik.port: "4181"
         traefik.frontend.auth.forward.address: "http://traefik-forward-auth:4181"
