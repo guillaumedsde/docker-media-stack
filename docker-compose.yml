@@ -90,7 +90,7 @@ services:
         AUTH_HOST: "oauth.${root_domain}"
         LOG_LEVEL: "debug"
       labels:
-        <<: *oauthLabels
+        #<<: *securityHeaders
         traefik.enable: "true"
         traefik.backend: "traefik-forward-auth"
         traefik.frontend.rule: "Host:oauth.${root_domain}"
