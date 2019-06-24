@@ -490,7 +490,7 @@ services:
     netdata:
       container_name: netdata
       hostname: netdata.${root_domain}
-      image: netdata/netdata:latest
+      image: netdata/netdata:v1.15.0
       <<: *restart
       depends_on:
         - "nginx-proxy"
