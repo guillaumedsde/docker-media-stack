@@ -77,7 +77,7 @@ services:
     traefik-forward-auth:
       container_name: traefik-forward-auth
       hostname: oauth.${root_domain}
-      image: funkypenguin/traefik-forward-auth:latest
+      image: thomseddon/traefik-forward-auth:latest
       <<: *restart
       environment:
         CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
@@ -585,7 +585,6 @@ services:
         MM_DBNAME: ${mattermost_db_user}
         DB_HOST: mattermost-db
         DB_PORT_NUMBER: 5432
-
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
