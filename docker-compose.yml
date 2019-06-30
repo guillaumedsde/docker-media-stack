@@ -617,6 +617,50 @@ services:
         - bookstack-backend
       security_opt:
         - no-new-privileges
+    # self hosted photo gallery
+    lychee:
+      container_name: lychee
+      image: linuxserver/lychee:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/lychee:/config
+        - ${data_folder}/pictures:/pictures
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: lychee.${root_domain},photos.${root_domain}
+        VIRTUAL_PORT: 80
+        LETSENCRYPT_HOST: lychee.${root_domain},photos.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
+    # self hosted music player
+    airsonic:
+      container_name: airsonic
+      image: linuxserver/airsonic:latest
+      <<: *restart
+      depends_on:
+        - "nginx-proxy"
+        - "nginx-letsencrypt"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/airsonic:/config
+        - ${data_folder}/music:/music
+      environment:
+        <<: *https
+        <<: *conf
+        VIRTUAL_HOST: listen.${root_domain}
+        VIRTUAL_PORT: 4040
+        LETSENCRYPT_HOST: listen.${root_domain}
+      networks:
+        - frontend
+      security_opt:
+        - no-new-privileges
 
 volumes:
   mattermost-db-volume:
