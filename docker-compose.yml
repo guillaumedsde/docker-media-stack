@@ -628,7 +628,7 @@ services:
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/lychee:/config
-        - ${data_folder}/pictures:/pictures
+        - ${data_folder}/pictures:/pictures:ro
       environment:
         <<: *https
         <<: *conf
@@ -637,8 +637,25 @@ services:
         LETSENCRYPT_HOST: lychee.${root_domain},photos.${root_domain}
       networks:
         - frontend
+        - lychee
       security_opt:
         - no-new-privileges
+    # mariadb for lychee
+    lychee-db:
+      container_name: lychee-db
+      environment:
+        MYSQL_ROOT_PASSWORD: ${lychee_root_db_pass}
+        MYSQL_PASSWORD: ${lychee_db_pass}
+        MYSQL_USER: ${lychee_db_user}
+        MYSQL_DATABASE: lychee-db
+      volumes:
+        - lychee-db-volume:/var/lib/mysql
+      networks:
+        - lychee
+      security_opt:
+        - no-new-privileges
+      <<: *restart
+      image: mariadb:latest
     # self hosted music player
     airsonic:
       container_name: airsonic
@@ -650,7 +667,7 @@ services:
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/airsonic:/config
-        - ${data_folder}/music:/music
+        - ${data_folder}/music:/music:ro
       environment:
         <<: *https
         <<: *conf
@@ -672,4 +689,6 @@ networks:
     internal: true
   watchtower:
   bookstack-backend:
+    internal: true
+  lychee:
     internal: true
