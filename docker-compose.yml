@@ -682,6 +682,7 @@ services:
 volumes:
   mattermost-db-volume:
   bookstack-db-volume:
+  lychee-db-volume:
 
 networks:
   <<: *proxiednetworks
