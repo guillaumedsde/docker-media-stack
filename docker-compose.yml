@@ -90,7 +90,8 @@ services:
         COOKIE_DOMAINS: "${root_domain}"
         LOG_LEVEL: "info"
       labels:
-        <<: *oauthLabels
+        traefik.frontend.auth.forward.address: "http://oauth.${root_domain}"
+        traefik.frontend.auth.forward.trustForwardHeader: "true"
         traefik.enable: "true"
         traefik.backend: "traefik-forward-auth"
         traefik.frontend.rule: "Host:oauth.${root_domain}"
