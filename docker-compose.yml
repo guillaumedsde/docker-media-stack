@@ -29,7 +29,7 @@ x-securityHeaders: &securityHeaders
   # default is same host as request, which is what we want
   #traefik.frontend.headers.SSLHost: "${tld}"
   traefik.frontend.headers.STSSeconds: "315360000"
-  #traefik.frontend.headers.STSIncludeSubdomains: "true"
+  traefik.frontend.headers.STSIncludeSubdomains: "true"
   #traefik.frontend.headers.STSPreload: "true"
   # forbid iframes
   traefik.frontend.headers.frameDeny: "true"
@@ -48,7 +48,7 @@ x-oauthLabels: &oauthLabels
 services:
     traefik:
       image: traefik:alpine
-      command: --docker
+      command: --docker --logLevel="DEBUG"
       container_name: traefik
       hostname: traefik.${root_domain}
       expose:
@@ -88,10 +88,9 @@ services:
         WHITELIST: "${allowed_emails}"
         AUTH_HOST: "oauth.${root_domain}"
         COOKIE_DOMAINS: "${root_domain}"
-        LOG_LEVEL: "info"
+        LOG_LEVEL: "debug"
       labels:
-        traefik.frontend.auth.forward.address: "http://oauth.${root_domain}"
-        traefik.frontend.auth.forward.trustForwardHeader: "true"
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "traefik-forward-auth"
         traefik.frontend.rule: "Host:oauth.${root_domain}"
