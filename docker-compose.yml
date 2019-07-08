@@ -36,7 +36,7 @@ x-securityHeaders: &securityHeaders
   traefik.frontend.headers.browserXSSFilter: "true"
   traefik.frontend.headers.contentTypeNosniff: "true"
   traefik.frontend.headers.customFrameOptionsValue: "SAMEORIGIN"
-  traefik.frontend.headers.contentSecurityPolicy: "default-src https:; script-src 'unsafe-inline' https://*.${root_domain}; object-src https://*.${root_domain}; style-src 'unsafe-inline' https:; img-src *; frame-src https://*.${root_domain}; connect-src https://*.${root_domain}"
+  traefik.frontend.headers.contentSecurityPolicy: "default-src https:; script-src 'unsafe-inline' https://*.${root_domain}; object-src https://*.${root_domain}; style-src 'unsafe-inline' https:; img-src *; media-src https:; frame-src https://*.${root_domain}; connect-src https:"
   traefik.frontend.headers.customResponseHeaders: "Feature-Policy:camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';||server:''||X-Powered-By:''"
 
 # oauth configuration
