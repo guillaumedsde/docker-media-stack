@@ -29,7 +29,7 @@ x-securityHeaders: &securityHeaders
   # default is same host as request, which is what we want
   #traefik.frontend.headers.SSLHost: "${tld}"
   traefik.frontend.headers.STSSeconds: "315360000"
-  traefik.frontend.headers.STSIncludeSubdomains: "true"
+  #traefik.frontend.headers.STSIncludeSubdomains: "true"
   #traefik.frontend.headers.STSPreload: "true"
   # forbid iframes
   traefik.frontend.headers.frameDeny: "true"
