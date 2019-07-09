@@ -59,7 +59,6 @@ services:
         OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
         OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
       labels:
-        <<: *oauthLabels
         traefik.enable: "true"
         traefik.frontend.rule: Host:traefik.${root_domain}
         traefik.port: "8080"
