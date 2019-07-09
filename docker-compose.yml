@@ -654,6 +654,8 @@ services:
         - ${data_folder}/books/calibre_library:/config
       environment:
         <<: *conf
+        GUAC_USER: ${calibre_user}
+        GUAC_PASS: ${calibre_password}
       labels:
         <<: *securityHeaders
         <<: *oauthLabels
