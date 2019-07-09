@@ -657,7 +657,6 @@ services:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/calibre-web:/config
         - ${data_folder}/books:/books
-        - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
       environment:
         <<: *conf
         DOCKER_MODS: linuxserver/calibre-web:calibre
