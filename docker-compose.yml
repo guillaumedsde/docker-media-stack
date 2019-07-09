@@ -645,6 +645,33 @@ services:
         - bookstack-backend
       security_opt:
         - no-new-privileges
+    calibre:
+      container_name: calibre
+      hostname: calibre.${root_domain}
+      image: linuxserver/calibre:latest
+      <<: *restart
+      depends_on:
+        - "traefik"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${data_folder}/books/calibre_library:/config
+      environment:
+        <<: *conf
+        GUAC_USER: ${calibre_user}
+        GUAC_PASS: ${calibre_password}
+      labels:
+        <<: *securityHeaders
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.backend: "calibre"
+        traefik.frontend.rule: "Host:calibre.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8080"
+      networks:
+        - proxy
+      security_opt:
+        - no-new-privileges
+      restart: unless-stopped
     # calibre-web, for reading ebooks
     calibre-web:
       container_name: calibre-web
@@ -665,7 +692,7 @@ services:
         <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "calibre-web"
-        traefik.frontend.rule: "Host:read.${root_domain},calibre.${root_domain}"
+        traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8083"
       networks:
