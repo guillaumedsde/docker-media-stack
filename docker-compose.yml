@@ -51,8 +51,6 @@ services:
       command: --docker --logLevel="DEBUG"
       container_name: traefik
       hostname: traefik.${root_domain}
-      expose:
-        - 8080
       environment:
         OVH_ENDPOINT: ${OVH_ENDPOINT}
         OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
@@ -656,8 +654,6 @@ services:
         - ${data_folder}/books/calibre_library:/config
       environment:
         <<: *conf
-        GUAC_USER: ${calibre_user}
-        GUAC_PASS: ${calibre_password}
       labels:
         <<: *securityHeaders
         <<: *oauthLabels
