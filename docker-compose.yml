@@ -59,6 +59,7 @@ services:
         OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
         OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
       labels:
+        <<: *oauthLabels
         traefik.enable: "true"
         traefik.frontend.rule: Host:traefik.${root_domain}
         traefik.port: "8080"
@@ -154,7 +155,7 @@ services:
         <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "qbittorrent"
-        traefik.frontend.rule: "Host:torrent.${root_domain}"
+        traefik.frontend.rule: "Host:torrent.${root_domain}, qbittorrent.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
       networks:
@@ -402,7 +403,7 @@ services:
         <<: *securityHeaders
         traefik.enable: "true"
         traefik.backend: "heimdall"
-        traefik.frontend.rule: "Host:home.${root_domain}"
+        traefik.frontend.rule: "Host:home.${root_domain}, heimdall.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "80"
       networks:
@@ -642,6 +643,34 @@ services:
       networks:
         - bookstack
         - bookstack-backend
+      security_opt:
+        - no-new-privileges
+    # calibre-web, for reading ebooks
+    calibre-web:
+      container_name: calibre-web
+      hostname: read.${root_domain}
+      image: linuxserver/calibre-web:latest
+      <<: *restart
+      depends_on:
+        - "traefik"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/calibre-web:/config
+        - ${data_folder}/books:/books
+        - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
+      environment:
+        <<: *conf
+        DOCKER_MODS: linuxserver/calibre-web:calibre
+      labels:
+        <<: *securityHeaders
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.backend: "calibre-web"
+        traefik.frontend.rule: "Host:read.${root_domain},calibre.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8083"
+      networks:
+        - proxy
       security_opt:
         - no-new-privileges
 
