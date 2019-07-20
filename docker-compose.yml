@@ -114,7 +114,6 @@ services:
       command: ["--cleanup", "--schedule", "0 0 5 * * *"]
     openvpn:
       <<: *restart
-      privileged: true
       depends_on:
         - "traefik"
       cap_add:
@@ -131,9 +130,6 @@ services:
         OPENVPN_PASSWORD: ${openvpn_password}
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
-      expose:
-        - 8080
-        - 9091
       image: haugene/transmission-openvpn
     qbittorrent-standalone:
       image: linuxserver/qbittorrent
