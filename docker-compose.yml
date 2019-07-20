@@ -140,11 +140,10 @@ services:
         traefik.docker.network: "proxy"
         traefik.port: "8080"
       expose:
-        - '8080'
-        - '9091'
+        - 8080
+        - 9091
       image: haugene/transmission-openvpn
     qbittorrent-standalone:
-      hostname: qbittorrent.${root_domain}
       image: linuxserver/qbittorrent
       container_name: qbittorrent-standalone
       <<: *restart
