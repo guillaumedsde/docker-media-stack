@@ -131,7 +131,7 @@ services:
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
       ports:
-        8080:8080
+        - 8080:8080
       image: haugene/transmission-openvpn
     qbittorrent-standalone:
       image: linuxserver/qbittorrent
