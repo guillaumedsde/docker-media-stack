@@ -136,7 +136,7 @@ services:
         <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "openvpn"
-        traefik.frontend.rule: "Host:qbittorrent.${root_domain}"
+        traefik.frontend.rule: "Host:qbittorrent-vpn.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
       expose:
@@ -157,6 +157,14 @@ services:
         - ${data_folder}:/data
         - ${torrent_blackhole}:/blackhole
         - ${docker_data_folder}/qbittorrent-standalone:/config
+      labels:
+        <<: *securityHeaders
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.backend: "openvpn"
+        traefik.frontend.rule: "Host:qbittorrent.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8080"
       network_mode: "service:openvpn"
     # qbittorrent torrent client container
     qbittorrent:
