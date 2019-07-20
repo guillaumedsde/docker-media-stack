@@ -18,9 +18,7 @@ x-restart: &restart
 
 # list of networks to be proxied by NGINX
 x-proxiednetworks: &proxiednetworks
-    mattermost:
     pyload:
-    bookstack:
 
 # traefik security headers
 x-securityHeaders: &securityHeaders
@@ -554,94 +552,6 @@ services:
         - SYS_PTRACE
       security_opt:
         - apparmor:unconfined
-    # postgresql for mattermost
-    mattermost-db:
-      container_name: mattermost-db
-      environment:
-        POSTGRES_PASSWORD: ${mattermost_db_pass}
-        POSTGRES_USER: ${mattermost_db_user}
-      volumes:
-        - mattermost-db-volume:/var/lib/postgresql/data
-      networks:
-        - mattermost-backend
-      security_opt:
-        - no-new-privileges
-      <<: *restart
-      image: postgres:alpine
-    # mattermost, self hosted slack alternative
-    mattermost:
-      container_name: mattermost
-      hostname: chat.${root_domain}
-      image: mattermost/mattermost-prod-app:latest
-      <<: *restart
-      depends_on:
-        - "traefik"
-        - "mattermost-db"
-      environment:
-        MM_USERNAME: ${mattermost_db_user}
-        MM_PASSWORD: ${mattermost_db_pass}
-        MM_DBNAME: ${mattermost_db_user}
-        DB_HOST: mattermost-db
-        DB_PORT_NUMBER: 5432
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.backend: "mattermost"
-        traefik.frontend.rule: "Host:chat.${root_domain}, mattermost.${root_domain}"
-        traefik.docker.network: "mattermost"
-        traefik.port: "80"
-      networks:
-        - mattermost
-        - mattermost-backend
-      security_opt:
-        - no-new-privileges
-    # mariadb for bookstack
-    bookstack-db:
-      container_name: bookstack-db
-      environment:
-        MYSQL_ROOT_PASSWORD: ${bookstack_root_db_pass}
-        MYSQL_PASSWORD: ${bookstack_db_pass}
-        MYSQL_USER: ${bookstack_db_user}
-        MYSQL_DATABASE: bookstack-db
-      volumes:
-        - bookstack-db-volume:/var/lib/mysql
-      networks:
-        - bookstack-backend
-      security_opt:
-        - no-new-privileges
-      <<: *restart
-      image: mariadb:latest
-    # bookstack for hosting documentation
-    bookstack:
-      container_name: bookstack
-      hostname: doc.${root_domain}
-      image: linuxserver/bookstack:latest
-      <<: *restart
-      depends_on:
-        - "traefik"
-        - "bookstack-db"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/bookstack:/config
-      environment:
-        <<: *conf
-        DB_HOST: bookstack-db
-        DB_USER: ${bookstack_db_user}
-        DB_PASS: ${bookstack_db_pass}
-        DB_DATABASE: bookstack-db
-        APP_URL: https://doc.${root_domain}/
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.backend: "bookstack"
-        traefik.frontend.rule: "Host:doc.${root_domain},bookstack.${root_domain}"
-        traefik.docker.network: "bookstack"
-        traefik.port: "80"
-      networks:
-        - bookstack
-        - bookstack-backend
-      security_opt:
-        - no-new-privileges
     calibre:
       container_name: calibre
       hostname: calibre.${root_domain}
@@ -696,17 +606,7 @@ services:
         - proxy
       security_opt:
         - no-new-privileges
-
-volumes:
-  mattermost-db-volume:
-  bookstack-db-volume:
-
 networks:
   <<: *proxiednetworks
   proxy:
-    external: true
-  mattermost-backend:
-    internal: true
   watchtower:
-  bookstack-backend:
-    internal: true
