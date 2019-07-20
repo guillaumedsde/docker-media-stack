@@ -131,14 +131,6 @@ services:
         OPENVPN_PASSWORD: ${openvpn_password}
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.backend: "openvpn"
-        traefik.frontend.rule: "Host:qbittorrent-vpn.${root_domain}"
-        traefik.docker.network: "proxy"
-        traefik.port: "8080"
       expose:
         - 8080
         - 9091
@@ -161,7 +153,7 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "openvpn"
+        traefik.backend: "qbittorrent-standalone"
         traefik.frontend.rule: "Host:qbittorrent.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
