@@ -130,14 +130,16 @@ services:
         OPENVPN_PASSWORD: ${openvpn_password}
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
+      ports:
+        8080:8080
       image: haugene/transmission-openvpn
     qbittorrent-standalone:
       image: linuxserver/qbittorrent
       container_name: qbittorrent-standalone
       <<: *restart
       depends_on:
-        - "traefik"
-        - "openvpn"
+        - traefik
+        - openvpn
       environment:
         <<: *conf
         WEBUI_PORT: 8080
@@ -149,7 +151,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "openvpn"
         traefik.frontend.rule: "Host:qbittorrent.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
