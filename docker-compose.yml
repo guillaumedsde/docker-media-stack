@@ -149,7 +149,7 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "qbittorrent-standalone"
+        traefik.backend: "openvpn"
         traefik.frontend.rule: "Host:qbittorrent.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
