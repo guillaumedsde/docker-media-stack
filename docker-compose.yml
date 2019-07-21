@@ -114,27 +114,32 @@ services:
       command: ["--cleanup", "--schedule", "0 0 5 * * *"]
     openvpn:
       <<: *restart
-      container_name: openvpn
       depends_on:
         - "traefik"
       cap_add:
         - NET_ADMIN
-      devices:
-        - /dev/net/tun:/dev/net/tun
       volumes:
-        - ${data_folder}:/data
-        - /etc/localtime:/etc/localtime:ro
+          - ${data_folder}:/data
+          - /etc/localtime:/etc/localtime:ro
       environment:
         <<: *conf
         CREATE_TUN_DEVICE: "true"
-        VPNPORT: 1194
-        VPNHOST: fr.windscribe.com
-        USERNAME: ${openvpn_user}
-        PASSWORD: ${openvpn_password}
+        OPENVPN_PROVIDER: WINDSCRIBE
+        OPENVPN_CONFIG: France-udp
+        OPENVPN_USERNAME: ${openvpn_user}
+        OPENVPN_PASSWORD: ${openvpn_password}
+        WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
+      labels:
+        <<: *securityHeaders
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.frontend.rule: "Host:qbittorrents.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "8080"
       ports:
         - 8080:8080
-      image: trananhtuan/windscribe-openvpn-proxy
+      image: haugene/transmission-openvpn
     qbittorrent-standalone:
       image: linuxserver/qbittorrent
       container_name: qbittorrent-standalone
