@@ -138,7 +138,6 @@ services:
     qbittorrent:
       image: linuxserver/qbittorrent
       container_name: qbittorrent
-      hostname: torrent.${root_domain}
       <<: *restart
       depends_on:
         - traefik
