@@ -130,21 +130,15 @@ services:
         OPENVPN_PASSWORD: ${openvpn_password}
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:qbittorrents.${root_domain}"
-        traefik.docker.network: "proxy"
-        traefik.port: "8080"
       ports:
         - 8080:8080
       networks:
         - proxy
       image: haugene/transmission-openvpn
-    qbittorrent-standalone:
+    qbittorrent:
       image: linuxserver/qbittorrent
-      container_name: qbittorrent-standalone
+      container_name: qbittorrent
+      hostname: torrent.${root_domain}
       <<: *restart
       depends_on:
         - traefik
@@ -155,59 +149,17 @@ services:
       volumes:
         - ${data_folder}:/data
         - ${torrent_blackhole}:/blackhole
-        - ${docker_data_folder}/qbittorrent-standalone:/config
+        - ${docker_data_folder}/qbittorrent:/config
+        - /etc/localtime:/etc/localtime:ro
       labels:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.frontend.rule: "Host:qbittorrent.${root_domain}"
-        traefik.backend: "qbittorrent-standalone"
+        traefik.frontend.rule: "Host:torrent.${root_domain}"
+        traefik.backend: "qbittorrent"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
       network_mode: "service:openvpn"
-    # qbittorrent torrent client container
-    qbittorrent:
-      container_name: qbittorrent
-      hostname: torrent.${root_domain}
-      image: binhex/arch-qbittorrentvpn:latest
-      <<: *restart
-      privileged: true
-      depends_on:
-        - "traefik"
-      cap_add:
-        - NET_ADMIN
-      volumes:
-        - ${data_folder}:/data
-        - ${torrent_blackhole}:/blackhole
-        - ${docker_data_folder}/qbittorrent:/config
-        - /etc/localtime:/etc/localtime:ro
-      environment:
-        <<: *conf
-        VPN_ENABLED: "yes"
-        VPN_USER: ${openvpn_user}
-        VPN_PASS: ${openvpn_password}
-        VPN_PROV: custom
-        #VPN_OPTIONS: <additional openvpn cli options>
-        STRICT_PORT_FORWARD: "no"
-        ENABLE_PRIVOXY: "no"
-        LAN_NETWORK: 192.168.0.0/24
-        # set DNS to docker DNS, this creates a voluntary DNS leak outside of VPN tunnel
-        # note that in some setups this might be unsafe (I recommed using DNScrypt on the host to make this safe)
-        # but I have not found another way for qbittorrent to resolve the jackett magnet links passed by hydra
-        # which point to jackett's docker DNS name
-        NAME_SERVERS: 127.0.0.11
-        DEBUG: "false"
-        WEBUI_PORT: 8080
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.backend: "qbittorrent"
-        traefik.frontend.rule: "Host:torrent.${root_domain}"
-        traefik.docker.network: "proxy"
-        traefik.port: "8080"
-      networks:
-        - proxy
     # jackett tracker site scraper with API
     jackett:
       container_name: jackett
