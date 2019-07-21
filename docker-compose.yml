@@ -46,7 +46,7 @@ x-oauthLabels: &oauthLabels
 services:
     traefik:
       image: traefik:alpine
-      command: --docker --logLevel="DEBUG"
+      command: --docker
       container_name: traefik
       hostname: traefik.${root_domain}
       environment:
@@ -84,7 +84,6 @@ services:
         WHITELIST: "${allowed_emails}"
         AUTH_HOST: "oauth.${root_domain}"
         COOKIE_DOMAINS: "${root_domain}"
-        LOG_LEVEL: "debug"
       labels:
         <<: *oauthLabels
         traefik.enable: "true"
