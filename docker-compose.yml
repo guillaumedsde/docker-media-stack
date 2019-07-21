@@ -14,7 +14,7 @@ x-conf: &conf
 
 # container restart policy
 x-restart: &restart
-  restart: on-failure:5
+  restart: always
 
 # list of networks to be proxied by NGINX
 x-proxiednetworks: &proxiednetworks
