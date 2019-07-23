@@ -118,7 +118,7 @@ services:
       cap_add:
         - NET_ADMIN
       volumes:
-          - ${data_folder}:/data
+          - ${docker_data_folder}/transmission-openvpn:/data
           - /etc/localtime:/etc/localtime:ro
       environment:
         <<: *conf
@@ -127,6 +127,7 @@ services:
         OPENVPN_CONFIG: France-udp
         OPENVPN_USERNAME: ${openvpn_user}
         OPENVPN_PASSWORD: ${openvpn_password}
+        OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
       ports:
@@ -605,6 +606,32 @@ services:
         traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "8083"
+      networks:
+        - proxy
+      security_opt:
+        - no-new-privileges
+    # gollum for hosting documentation
+    gollum:
+      container_name: gollum
+      hostname: doc.${root_domain}
+      image: cuotos/gollum-alpine:latest
+      <<: *restart
+      depends_on:
+        - "traefik"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${docker_data_folder}/gollum:/wiki
+      environment:
+        <<: *conf
+        GOLLUMARGS: "--live-preview --allow-uploads dir"
+      labels:
+        <<: *securityHeaders
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.backend: "gollum"
+        traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
+        traefik.docker.network: "proxy"
+        traefik.port: "4567"
       networks:
         - proxy
       security_opt:
