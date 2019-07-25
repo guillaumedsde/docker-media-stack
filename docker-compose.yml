@@ -487,7 +487,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        #traefik.backend: "gollum"
         traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
         traefik.port: "4567"
 networks:
