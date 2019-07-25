@@ -113,8 +113,6 @@ services:
       command: ["--cleanup", "--schedule", "0 0 5 * * *"]
     openvpn:
       <<: *restart
-      depends_on:
-        - "traefik"
       cap_add:
         - NET_ADMIN
       volumes:
@@ -131,8 +129,8 @@ services:
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
       dns:
-        - 1.1.1.1
-        - 1.0.0.1
+        - 8.8.8.8
+        - ;
       networks:
         - proxy
       image: haugene/transmission-openvpn
@@ -141,7 +139,6 @@ services:
       container_name: qbittorrent
       <<: *restart
       depends_on:
-        - traefik
         - openvpn
       environment:
         <<: *conf
@@ -166,8 +163,6 @@ services:
       hostname: jackett.${root_domain}
       image: linuxserver/jackett:latest
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/jackett:/config
@@ -193,7 +188,6 @@ services:
       hostname: hydra.${root_domain}
       <<: *restart
       depends_on:
-        - "traefik"
         - "jackett"
       volumes:
         - /etc/localtime:/etc/localtime:ro
@@ -221,7 +215,6 @@ services:
       image: linuxserver/radarr:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -250,7 +243,6 @@ services:
       image: linuxserver/sonarr:preview
       <<: *restart
       depends_on:
-        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -279,7 +271,6 @@ services:
       image: linuxserver/lidarr:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -307,7 +298,6 @@ services:
       image: linuxserver/bazarr:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "radarr"
         - "sonarr"
       environment:
@@ -336,7 +326,6 @@ services:
       image: linuxserver/mylar:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -365,7 +354,6 @@ services:
       image: linuxserver/lazylibrarian:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "jackett"
         - "qbittorrent"
       volumes:
@@ -392,8 +380,6 @@ services:
       hostname: home.${root_domain}
       image: linuxserver/heimdall:latest
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/heimdall:/config
@@ -426,8 +412,6 @@ services:
         - "32469:32469/udp"
         - "5353:5353/udp"
         - "1900:1900/udp"
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/plex:/config
@@ -452,8 +436,6 @@ services:
       hostname: jellyfin.${root_domain}
       image: binhex/arch-jellyfin:latest
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/jellyfin:/config
@@ -478,7 +460,6 @@ services:
       image: linuxserver/ombi:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "sonarr"
         - "radarr"
         - "lidarr"
@@ -506,7 +487,6 @@ services:
       image: linuxserver/tautulli:latest
       <<: *restart
       depends_on:
-        - "traefik"
         - "plex"
       volumes:
         - /etc/localtime:/etc/localtime:ro
@@ -533,8 +513,6 @@ services:
       hostname: netdata.${root_domain}
       image: netdata/netdata:v1.15.0
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /proc:/host/proc:ro
         - /sys:/host/sys:ro
@@ -562,8 +540,6 @@ services:
       hostname: calibre.${root_domain}
       image: linuxserver/calibre:latest
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${data_folder}/books/calibre_library:/config
@@ -590,8 +566,6 @@ services:
       hostname: read.${root_domain}
       image: linuxserver/calibre-web:latest
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/calibre-web:/config
@@ -617,8 +591,6 @@ services:
       hostname: doc.${root_domain}
       image: cuotos/gollum-alpine:latest
       <<: *restart
-      depends_on:
-        - "traefik"
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/gollum:/wiki
