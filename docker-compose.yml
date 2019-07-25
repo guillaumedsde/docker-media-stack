@@ -75,7 +75,6 @@ services:
       labels:
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "traefik-forward-auth"
         traefik.frontend.rule: "Host:oauth.${root_domain}"
         traefik.port: "4181"
     # watchtower container to update images
@@ -136,7 +135,6 @@ services:
         <<: *oauthLabels
         traefik.enable: "true"
         traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
-        traefik.backend: "qbittorrent"
         traefik.port: "8080"
       network_mode: "service:openvpn"
     # jackett tracker site scraper with API
@@ -155,7 +153,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "jackett"
         traefik.frontend.rule: "Host:jackett.${root_domain}"
         traefik.port: "9117"
     # jackett tracker site scraper with API
@@ -176,7 +173,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "hydra"
         traefik.frontend.rule: "Host:hydra.${root_domain}"
         traefik.port: "5076"
     # radarr, webapp for downloading movies through torrent client
@@ -199,7 +195,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "radarr"
         traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
         traefik.port: "7878"
     # sonarr, webapp for downloading series through torrent client
@@ -222,7 +217,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "sonarr"
         traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
         traefik.port: "8989"
     # lidarr, webapp for downloading music through torrent client
@@ -245,7 +239,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "lidarr"
         traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
         traefik.port: "8686"
     # mylar, webapp for downloading subtitles
@@ -263,7 +256,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "bazarr"
         traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
         traefik.port: "6767"
       volumes:
@@ -290,7 +282,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "mylar"
         traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
         traefik.port: "8090"
     # lazylibrarian, webapp for downloading books through torrent client
@@ -313,7 +304,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "lazylibrarian"
         traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
         traefik.port: "5299"
     # heimdall is a homepage
@@ -330,7 +320,6 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "heimdall"
         traefik.frontend.rule: "Host:home.${root_domain}, heimdall.${root_domain}"
         traefik.port: "80"
     # plex media server
@@ -359,7 +348,6 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "plex"
         traefik.frontend.rule: "Host:plex.${root_domain}"
         traefik.port: "32400"
     # jellyfin media server
@@ -377,7 +365,6 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "jellyfin"
         traefik.frontend.rule: "Host:jellyfin.${root_domain}"
         traefik.port: "8096"
     # ombi, plex media requests
@@ -399,7 +386,6 @@ services:
       labels:
         <<: *securityHeaders
         traefik.enable: "true"
-        traefik.backend: "ombi"
         traefik.frontend.rule: "Host:ombi.${root_domain},requests.${root_domain}"
         traefik.port: "3579"
     # tautulli, plex media server monitoring
@@ -421,7 +407,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "tautulli"
         traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
         traefik.port: "8181"
     # netdata, server monitoring
@@ -442,7 +427,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "netdata"
         traefik.frontend.rule: "Host:status.${root_domain},netdata.${root_domain}"
         traefik.port: "19999"
       cap_add:
@@ -465,7 +449,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "calibre"
         traefik.frontend.rule: "Host:calibre.${root_domain}"
         traefik.port: "8080"
       restart: unless-stopped
@@ -486,7 +469,6 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.backend: "calibre-web"
         traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
         traefik.port: "8083"
     # gollum for hosting documentation
