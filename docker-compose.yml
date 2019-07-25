@@ -16,10 +16,6 @@ x-conf: &conf
 x-restart: &restart
   restart: always
 
-# list of networks to be proxied by NGINX
-x-proxiednetworks: &proxiednetworks
-    pyload:
-
 # traefik security headers
 x-securityHeaders: &securityHeaders
   # redirect non SSL requests to SSL
@@ -65,8 +61,8 @@ services:
         - ${docker_data_folder}/traefik/traefik.toml:/traefik.toml
         - ${docker_data_folder}/traefik/acme.json:/acme.json
       networks:
-        <<: *proxiednetworks
         proxy:
+        default:
       ports:
         - 80:80
         - 443:443
@@ -579,6 +575,4 @@ services:
 
 networks:
   <<: *proxiednetworks
-  default:
-    name: proxy
   watchtower:
