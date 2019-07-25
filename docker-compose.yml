@@ -83,7 +83,7 @@ services:
         #OIDC_ISSUER: https://accounts.google.com
         WHITELIST: "${allowed_emails}"
         AUTH_HOST: "oauth.${root_domain}"
-        COOKIE_DOMAINS: "${root_domain}"
+        COOKIE_DOMAIN: "${root_domain}"
       labels:
         <<: *oauthLabels
         traefik.enable: "true"
@@ -130,9 +130,6 @@ services:
         LOCAL_NETWORK: 192.168.0.0/24
       networks:
         - proxy
-      dns:
-        - "1.1.1.1"
-        - "1.0.0.1"
       image: haugene/transmission-openvpn:latest-alpine
     qbittorrent:
       image: linuxserver/qbittorrent
