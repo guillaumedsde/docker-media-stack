@@ -130,8 +130,9 @@ services:
         OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
-      ports:
-        - 8080:8080
+      dns:
+        - 1.1.1.1
+        - 1.0.0.1
       networks:
         - proxy
       image: haugene/transmission-openvpn
