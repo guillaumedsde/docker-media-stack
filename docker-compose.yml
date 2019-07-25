@@ -574,5 +574,4 @@ services:
         - proxy
 
 networks:
-  <<: *proxiednetworks
   watchtower:
