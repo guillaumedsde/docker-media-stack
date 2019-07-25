@@ -130,6 +130,9 @@ services:
         LOCAL_NETWORK: 192.168.0.0/24
       networks:
         - proxy
+      dns:
+        - "1.1.1.1"
+        - "1.0.0.1"
       image: haugene/transmission-openvpn:latest-alpine
     qbittorrent:
       image: linuxserver/qbittorrent
