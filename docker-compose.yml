@@ -128,7 +128,8 @@ services:
         LOCAL_NETWORK: 192.168.0.0/24
         HEALTH_CHECK_HOST: 1.1.1.1
       dns:
-        - 8.8.8.8
+        - 1.1.1.1
+        - 1.0.0.1
       networks:
         - proxy
       image: haugene/transmission-openvpn:latest-alpine
@@ -150,7 +151,7 @@ services:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
-        traefik.frontend.rule: "Host:torrent.${root_domain}"
+        traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
         traefik.backend: "qbittorrent"
         traefik.docker.network: "proxy"
         traefik.port: "8080"
@@ -449,7 +450,7 @@ services:
         <<: *securityHeaders
         traefik.enable: "true"
         traefik.backend: "ombi"
-        traefik.frontend.rule: "Host:ombi.${root_domain}, requests.${root_domain}"
+        traefik.frontend.rule: "Host:ombi.${root_domain},requests.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "3579"
       networks:
@@ -498,7 +499,7 @@ services:
         <<: *oauthLabels
         traefik.enable: "true"
         traefik.backend: "netdata"
-        traefik.frontend.rule: "Host:status.${root_domain}, netdata.${root_domain}"
+        traefik.frontend.rule: "Host:status.${root_domain},netdata.${root_domain}"
         traefik.docker.network: "proxy"
         traefik.port: "19999"
       networks:
@@ -572,12 +573,12 @@ services:
         traefik.enable: "true"
         traefik.backend: "gollum"
         traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
-        traefik.docker.network: "proxy"
         traefik.port: "4567"
       networks:
         - proxy
 
 networks:
   <<: *proxiednetworks
-  proxy:
+  default:
+    name: proxy
   watchtower:
