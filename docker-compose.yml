@@ -126,6 +126,7 @@ services:
         OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
+        HEALTH_CHECK_HOST: 1.1.1.1
       dns:
         - 8.8.8.8
       networks:
