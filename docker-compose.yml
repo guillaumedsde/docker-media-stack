@@ -527,5 +527,22 @@ services:
         traefik.enable: "true"
         traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
         traefik.port: "8000"
+    # youtube-dl
+    youtube-dl:
+      image: kmb32123/youtube-dl-server
+      <<: *restart
+      container_name: youtube-dl
+      hostname: youtube-dl.${root_domain}
+      environment:
+        <<: *conf
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ${data_folder}/documentaries:/youtube-dl
+      labels:
+        <<: *securityHeaders
+        <<: *oauthLabels
+        traefik.enable: "true"
+        traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
+        traefik.port: "8080"
 networks:
   watchtower:
