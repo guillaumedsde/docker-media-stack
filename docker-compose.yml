@@ -488,5 +488,44 @@ services:
         traefik.enable: "true"
         traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
         traefik.port: "4567"
+      # unmanic, transcode video files in the background
+      unmanic:
+        container_name: unmanic
+        hostname: transcode.${root_domain}
+        image: josh5/unmanic:latest
+        <<: *restart
+        volumes:
+          - /etc/localtime:/etc/localtime:ro
+          - ${docker_data_folder}/unmanic:/config
+          - ${data_folder}/documentaries:/library/documentaries
+          - /tmp/unmanic:/tmp/unmanic
+        environment:
+          <<: *conf
+        labels:
+          <<: *securityHeaders
+          <<: *oauthLabels
+          traefik.enable: "true"
+          traefik.frontend.rule: "Host:transcode.${root_domain},unmanic.${root_domain}"
+          traefik.port: "8888"
+      pyload:
+        image: linuxserver/pyload
+        container_name: pyload
+        hostname: download.${root_domain}
+        environment:
+          <<: *conf
+        volumes:
+          - /etc/localtime:/etc/localtime:ro
+          - ${docker_data_folder}/pyload:/config
+          - ${data_folder}/downloads:/downloads/downloads
+          - ${data_folder}/documentaries:/downloads/documentaries
+          - ${data_folder}/software:/downloads/software
+          - ${data_folder}/games:/downloads/games
+        labels:
+          <<: *securityHeaders
+          <<: *oauthLabels
+          traefik.enable: "true"
+          traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
+          traefik.port: "8000"
+        restart: unless-stopped
 networks:
   watchtower:
