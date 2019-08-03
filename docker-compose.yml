@@ -497,7 +497,7 @@ services:
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - ${docker_data_folder}/unmanic:/config
-        - ${data_folder}/documentaries:/library/documentaries
+        - ${data_folder}/documentaries:/library/
         - /tmp/unmanic:/tmp/unmanic
       environment:
         <<: *conf
