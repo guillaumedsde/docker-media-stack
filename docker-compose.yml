@@ -202,7 +202,7 @@ services:
     sonarr:
       container_name: sonarr
       hostname: series.${root_domain}
-      image: linuxserver/sonarr:preview
+      image: linuxserver/sonarr:latest
       <<: *restart
       depends_on:
         - "jackett"
