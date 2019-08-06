@@ -151,7 +151,6 @@ services:
         <<: *conf
       labels:
         <<: *securityHeaders
-        <<: *oauthLabels
         traefik.enable: "true"
         traefik.frontend.rule: "Host:jackett.${root_domain}"
         traefik.port: "9117"
