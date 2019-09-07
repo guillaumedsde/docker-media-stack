@@ -94,7 +94,7 @@ services:
       networks:
         - watchtower
       command: ["--cleanup", "--schedule", "0 0 5 * * *"]
-    openvpn:
+    qbittorrent:
       <<: *restart
       cap_add:
         - NET_ADMIN
