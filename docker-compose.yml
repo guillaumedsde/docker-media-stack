@@ -99,7 +99,9 @@ services:
       cap_add:
         - NET_ADMIN
       volumes:
-        - ${docker_data_folder}/transmission-openvpn:/data
+        - ${docker_data_folder}/qbittorrent-openvpn:/config
+        - ${data_folder}:/data
+        - ${torrent_blackhole}:/blackhole
         - /etc/localtime:/etc/localtime:ro
       environment:
         <<: *conf
@@ -108,34 +110,20 @@ services:
         OPENVPN_CONFIG: France-udp
         OPENVPN_USERNAME: ${openvpn_user}
         OPENVPN_PASSWORD: ${openvpn_password}
-        #OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
+        OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
         WEBPROXY_ENABLED: "false"
         LOCAL_NETWORK: 192.168.0.0/24
         HEALTH_CHECK_HOST: 1.1.1.1
       dns:
         - 1.1.1.1
         - 1.0.0.1
-      image: haugene/transmission-openvpn:latest-alpine
-    qbittorrent:
-      image: linuxserver/qbittorrent
-      <<: *restart
-      depends_on:
-        - openvpn
-      environment:
-        <<: *conf
-        WEBUI_PORT: 8080
-      volumes:
-        - ${data_folder}:/data
-        - ${torrent_blackhole}:/blackhole
-        - ${docker_data_folder}/qbittorrent:/config
-        - /etc/localtime:/etc/localtime:ro
       labels:
         <<: *securityHeaders
         <<: *oauthLabels
         traefik.enable: "true"
         traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
         traefik.port: "8080"
-      network_mode: "service:openvpn"
+      image: guillaumedsde/qbittorrent-openvpn:latest
     # jackett tracker site scraper with API
     jackett:
       container_name: jackett
