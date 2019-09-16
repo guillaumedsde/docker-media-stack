@@ -82,15 +82,15 @@ services:
     # NOTE watchtower also updates itself
     watchtower:
       container_name: watchtower
-      image: v2tec/watchtower:latest
+      image: containrrr/watchtower:latest
       <<: *restart
       read_only: true
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
       environment:
-        WATCHTOWER_NOTIFICATIONS: slack
-        WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL: ${slack_webhook_url}
-        WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER: watchtower_${root_domain}
+        WATCHTOWER_NOTIFICATIONS: "gotify"
+        WATCHTOWER_NOTIFICATION_GOTIFY_URL: "${WATCHTOWER_NOTIFICATION_GOTIFY_URL}"
+        WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: "${WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN}"
       networks:
         - watchtower
       command: ["--cleanup", "--schedule", "0 0 5 * * *"]
