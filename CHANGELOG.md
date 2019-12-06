@@ -1,3 +1,8 @@
+# Changelog
+
+* 2.1
+  * added calibredb to lazylibrarian
+  * `.prettierrc` config for linting
 * 2.0
   * added oauth2_proxy for authentication
   * configure default routes

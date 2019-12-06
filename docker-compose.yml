@@ -14,8 +14,7 @@ x-conf: &conf
 x-restart: &restart
   restart: always
 # traefik security headers
-x-securityHeaders: &securityHeaders
-  # redirect non SSL requests to SSL
+x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
   traefik.frontend.headers.SSLRedirect: "true"
   # default is same host as request, which is what we want
   #traefik.frontend.headers.SSLHost: "${tld}"
@@ -35,499 +34,500 @@ x-oauthLabels: &oauthLabels
   traefik.frontend.auth.forward.authResponseHeaders: "X-Forwarded-User"
   traefik.frontend.auth.forward.trustForwardHeader: "true"
 services:
-    traefik:
-      image: traefik:alpine
-      command: --docker
-      container_name: traefik
-      hostname: traefik.${root_domain}
-      environment:
-        OVH_ENDPOINT: ${OVH_ENDPOINT}
-        OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
-        OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
-        OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
-      labels:
-        traefik.enable: "true"
-        traefik.frontend.rule: Host:traefik.${root_domain}
-        traefik.port: "8080"
-        traefik.frontend.auth.basic.users: ${traefik_credentials}
-      <<: *restart
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-        - ${docker_data_folder}/traefik/traefik.toml:/traefik.toml
-        - ${docker_data_folder}/traefik/acme.json:/acme.json
-      ports:
-        - 80:80
-        - 443:443
-    # OIDC forward authentication for traefik
-    traefik-forward-auth:
-      container_name: traefik-forward-auth
-      hostname: oauth.${root_domain}
-      image: thomseddon/traefik-forward-auth:latest
-      <<: *restart
-      environment:
-        CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
-        CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
-        SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
-        #OIDC_ISSUER: https://accounts.google.com
-        WHITELIST: "${allowed_emails}"
-        AUTH_HOST: "oauth.${root_domain}"
-        COOKIE_DOMAIN: "${root_domain}"
-      labels:
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:oauth.${root_domain}"
-        traefik.port: "4181"
-    # watchtower container to update images
-    # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
-    # NOTE watchtower also updates itself
-    watchtower:
-      container_name: watchtower
-      image: containrrr/watchtower:latest
-      <<: *restart
-      read_only: true
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-      environment:
-        WATCHTOWER_NOTIFICATIONS: "gotify"
-        WATCHTOWER_NOTIFICATION_GOTIFY_URL: "${WATCHTOWER_NOTIFICATION_GOTIFY_URL}"
-        WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: "${WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN}"
-      networks:
-        - watchtower
-      command: ["--cleanup", "--schedule", "0 0 5 * * *"]
-    qbittorrent:
-      <<: *restart
-      cap_add:
-        - NET_ADMIN
-      volumes:
-        - ${docker_data_folder}/qbittorrent-openvpn:/config
-        - ${data_folder}:/data
-        - ${torrent_blackhole}:/blackhole
-        - /etc/localtime:/etc/localtime:ro
-      environment:
-        <<: *conf
-        CREATE_TUN_DEVICE: "true"
-        OPENVPN_PROVIDER: WINDSCRIBE
-        OPENVPN_CONFIG: France-udp
-        OPENVPN_USERNAME: ${openvpn_user}
-        OPENVPN_PASSWORD: ${openvpn_password}
-        #OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
-        WEBPROXY_ENABLED: "false"
-        LOCAL_NETWORK: 192.168.0.0/24
-      dns:
-        - 1.1.1.1
-        - 1.0.0.1
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
-        traefik.port: "8080"
-      image: guillaumedsde/qbittorrent-openvpn:latest
-    # jackett tracker site scraper with API
-    jackett:
-      container_name: jackett
-      hostname: jackett.${root_domain}
-      image: linuxserver/jackett:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/jackett:/config
-        - ${torrent_blackhole}:/downloads
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:jackett.${root_domain}"
-        traefik.port: "9117"
-    # jackett tracker site scraper with API
-    hydra:
-      container_name: hydra
-      image: linuxserver/hydra2:latest
-      hostname: hydra.${root_domain}
-      <<: *restart
-      depends_on:
-        - "jackett"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/hydra:/config
-        - ${torrent_blackhole}:/blackhole
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:hydra.${root_domain}"
-        traefik.port: "5076"
-    # radarr, webapp for downloading movies through torrent client
-    # queries are done with jackett
-    radarr:
-      container_name: radarr
-      hostname: movies.${root_domain}
-      image: linuxserver/radarr:latest
-      <<: *restart
-      depends_on:
-        - "jackett"
-        - "qbittorrent"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/radarr:/config
-        - ${data_folder}:/data
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
-        traefik.port: "7878"
-    # sonarr, webapp for downloading series through torrent client
-    # queries are done with jackett
-    sonarr:
-      container_name: sonarr
-      hostname: series.${root_domain}
-      image: linuxserver/sonarr:preview
-      <<: *restart
-      depends_on:
-        - "jackett"
-        - "qbittorrent"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/sonarr:/config
-        - ${data_folder}:/data
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
-        traefik.port: "8989"
-    # lidarr, webapp for downloading music through torrent client
-    # queries are done with jackett
-    lidarr:
-      container_name: lidarr
-      hostname: music.${root_domain}
-      image: linuxserver/lidarr:latest
-      <<: *restart
-      depends_on:
-        - "jackett"
-        - "qbittorrent"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/lidarr:/config
-        - ${data_folder}:/data
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
-        traefik.port: "8686"
-    # mylar, webapp for downloading subtitles
-    bazarr:
-      container_name: bazarr
-      hostname: subtitles.${root_domain}
-      image: linuxserver/bazarr:latest
-      <<: *restart
-      depends_on:
-        - "radarr"
-        - "sonarr"
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
-        traefik.port: "6767"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/bazarr:/config
-        - ${data_folder}:/data
-    # mylar, webapp for downloading comics through torrent client
-    # queries are done with jackett
-    mylar:
-      container_name: mylar
-      hostname: comics.${root_domain}
-      image: linuxserver/mylar:latest
-      <<: *restart
-      depends_on:
-        - "jackett"
-        - "qbittorrent"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/mylar:/config
-        - ${data_folder}:/data
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
-        traefik.port: "8090"
-    # lazylibrarian, webapp for downloading books through torrent client
-    # queries are done with jackett
-    lazylibrarian:
-      container_name: lazylibrarian
-      hostname: books.${root_domain}
-      image: linuxserver/lazylibrarian:latest
-      <<: *restart
-      depends_on:
-        - "jackett"
-        - "qbittorrent"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/lazylibrarian:/config
-        - ${data_folder}:/data
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
-        traefik.port: "5299"
-    # heimdall is a homepage
-    heimdall:
-      container_name: heimdall
-      hostname: home.${root_domain}
-      image: linuxserver/heimdall:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/heimdall:/config
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:home.${root_domain}, heimdall.${root_domain}"
-        traefik.port: "80"
-    # plex media server
-    plex:
-      container_name: plex
-      hostname: plex.${root_domain}
-      image: linuxserver/plex:latest
-      <<: *restart
-      # note use the host network mode on first startup,
-      # then you can use the regular bridge mode
-      # network_mode: "host"
-      ports:
-        - "32400:32400"
-        - "32400:32400/udp"
-        - "32469:32469"
-        - "32469:32469/udp"
-        - "5353:5353/udp"
-        - "1900:1900/udp"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/plex:/config
-        - ${data_folder}:/data
-      environment:
-        VERSION: latest
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:plex.${root_domain}"
-        traefik.port: "32400"
-    # jellyfin media server
-    jellyfin:
-      container_name: jellyfin
-      hostname: jellyfin.${root_domain}
-      image: binhex/arch-jellyfin:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/jellyfin:/config
-        - ${data_folder}:/media
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:jellyfin.${root_domain}"
-        traefik.port: "8096"
-    # ombi, plex media requests
-    ombi:
-      container_name: ombi
-      hostname: ombi.${root_domain}
-      image: linuxserver/ombi:latest
-      <<: *restart
-      depends_on:
-        - "sonarr"
-        - "radarr"
-        - "lidarr"
-        - "plex"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/ombi:/config
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:ombi.${root_domain},requests.${root_domain}"
-        traefik.port: "3579"
-    # tautulli, plex media server monitoring
-    tautulli:
-      container_name: tautulli
-      hostname: tautulli.${root_domain}
-      image: linuxserver/tautulli:latest
-      <<: *restart
-      depends_on:
-        - "plex"
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/tautulli:/config
-        - ${data_folder}:/data
-        - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
-        traefik.port: "8181"
-    # netdata, server monitoring
-    netdata:
-      container_name: netdata
-      hostname: netdata.${root_domain}
-      image: netdata/netdata:v1.15.0
-      <<: *restart
-      volumes:
-        - /proc:/host/proc:ro
-        - /sys:/host/sys:ro
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-        - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
-      environment:
-        <<: *conf
-        PGID: ${docker_group_id}
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:status.${root_domain},netdata.${root_domain}"
-        traefik.port: "19999"
-      cap_add:
-        - SYS_PTRACE
-      security_opt:
-        - apparmor:unconfined
-    calibre:
-      container_name: calibre
-      hostname: calibre.${root_domain}
-      image: linuxserver/calibre:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${data_folder}/books/calibre_library:/config
-      environment:
-        <<: *conf
-        GUAC_USER: ${calibre_user}
-        GUAC_PASS: ${calibre_password}
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:calibre.${root_domain}"
-        traefik.port: "8080"
-    # calibre-web, for reading ebooks
-    calibre-web:
-      container_name: calibre-web
-      hostname: read.${root_domain}
-      image: linuxserver/calibre-web:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/calibre-web:/config
-        - ${data_folder}/books:/books
-      environment:
-        <<: *conf
-        DOCKER_MODS: linuxserver/calibre-web:calibre
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
-        traefik.port: "8083"
-    # gollum for hosting documentation
-    gollum:
-      container_name: gollum
-      hostname: doc.${root_domain}
-      image: cuotos/gollum-alpine:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/gollum:/wiki
-      environment:
-        <<: *conf
-        GOLLUMARGS: "--live-preview --allow-uploads dir"
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
-        traefik.port: "4567"
-    # unmanic, transcode video files in the background
-    unmanic:
-      container_name: unmanic
-      hostname: transcode.${root_domain}
-      image: josh5/unmanic:latest
-      <<: *restart
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/unmanic:/config
-        - ${data_folder}/documentaries:/library/
-        - /tmp/unmanic:/tmp/unmanic
-      environment:
-        <<: *conf
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:transcode.${root_domain},unmanic.${root_domain}"
-        traefik.port: "8888"
-    pyload:
-      image: linuxserver/pyload
-      <<: *restart
-      container_name: pyload
-      hostname: download.${root_domain}
-      environment:
-        <<: *conf
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${docker_data_folder}/pyload:/config
-        - ${data_folder}/downloads:/downloads/downloads
-        - ${data_folder}/documentaries:/downloads/documentaries
-        - ${data_folder}/software:/downloads/software
-        - ${data_folder}/games:/downloads/games
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
-        traefik.port: "8000"
-    # youtube-dl
-    youtube-dl:
-      image: kmb32123/youtube-dl-server
-      <<: *restart
-      container_name: youtube-dl
-      hostname: youtube-dl.${root_domain}
-      environment:
-        <<: *conf
-      volumes:
-        - /etc/localtime:/etc/localtime:ro
-        - ${data_folder}/documentaries:/youtube-dl
-      labels:
-        <<: *securityHeaders
-        <<: *oauthLabels
-        traefik.enable: "true"
-        traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
-        traefik.port: "8080"
+  traefik:
+    image: traefik:alpine
+    command: --docker
+    container_name: traefik
+    hostname: traefik.${root_domain}
+    environment:
+      OVH_ENDPOINT: ${OVH_ENDPOINT}
+      OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
+      OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
+      OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: Host:traefik.${root_domain}
+      traefik.port: "8080"
+      traefik.frontend.auth.basic.users: ${traefik_credentials}
+    <<: *restart
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${docker_data_folder}/traefik/traefik.toml:/traefik.toml
+      - ${docker_data_folder}/traefik/acme.json:/acme.json
+    ports:
+      - 80:80
+      - 443:443
+  # OIDC forward authentication for traefik
+  traefik-forward-auth:
+    container_name: traefik-forward-auth
+    hostname: oauth.${root_domain}
+    image: thomseddon/traefik-forward-auth:latest
+    <<: *restart
+    environment:
+      CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+      CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+      SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+      #OIDC_ISSUER: https://accounts.google.com
+      WHITELIST: "${allowed_emails}"
+      AUTH_HOST: "oauth.${root_domain}"
+      COOKIE_DOMAIN: "${root_domain}"
+    labels:
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:oauth.${root_domain}"
+      traefik.port: "4181"
+  # watchtower container to update images
+  # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
+  # NOTE watchtower also updates itself
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    <<: *restart
+    read_only: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_NOTIFICATIONS: "gotify"
+      WATCHTOWER_NOTIFICATION_GOTIFY_URL: "${WATCHTOWER_NOTIFICATION_GOTIFY_URL}"
+      WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: "${WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN}"
+    networks:
+      - watchtower
+    command: ["--cleanup", "--schedule", "0 0 5 * * *"]
+  qbittorrent:
+    <<: *restart
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ${docker_data_folder}/qbittorrent-openvpn:/config
+      - ${data_folder}:/data
+      - ${torrent_blackhole}:/blackhole
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      <<: *conf
+      CREATE_TUN_DEVICE: "true"
+      OPENVPN_PROVIDER: WINDSCRIBE
+      OPENVPN_CONFIG: France-udp
+      OPENVPN_USERNAME: ${openvpn_user}
+      OPENVPN_PASSWORD: ${openvpn_password}
+      #OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
+      WEBPROXY_ENABLED: "false"
+      LOCAL_NETWORK: 192.168.0.0/24
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
+      traefik.port: "8080"
+    image: guillaumedsde/qbittorrent-openvpn:latest
+  # jackett tracker site scraper with API
+  jackett:
+    container_name: jackett
+    hostname: jackett.${root_domain}
+    image: linuxserver/jackett:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/jackett:/config
+      - ${torrent_blackhole}:/downloads
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:jackett.${root_domain}"
+      traefik.port: "9117"
+  # jackett tracker site scraper with API
+  hydra:
+    container_name: hydra
+    image: linuxserver/hydra2:latest
+    hostname: hydra.${root_domain}
+    <<: *restart
+    depends_on:
+      - "jackett"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/hydra:/config
+      - ${torrent_blackhole}:/blackhole
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:hydra.${root_domain}"
+      traefik.port: "5076"
+  # radarr, webapp for downloading movies through torrent client
+  # queries are done with jackett
+  radarr:
+    container_name: radarr
+    hostname: movies.${root_domain}
+    image: linuxserver/radarr:latest
+    <<: *restart
+    depends_on:
+      - "jackett"
+      - "qbittorrent"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/radarr:/config
+      - ${data_folder}:/data
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
+      traefik.port: "7878"
+  # sonarr, webapp for downloading series through torrent client
+  # queries are done with jackett
+  sonarr:
+    container_name: sonarr
+    hostname: series.${root_domain}
+    image: linuxserver/sonarr:preview
+    <<: *restart
+    depends_on:
+      - "jackett"
+      - "qbittorrent"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/sonarr:/config
+      - ${data_folder}:/data
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
+      traefik.port: "8989"
+  # lidarr, webapp for downloading music through torrent client
+  # queries are done with jackett
+  lidarr:
+    container_name: lidarr
+    hostname: music.${root_domain}
+    image: linuxserver/lidarr:latest
+    <<: *restart
+    depends_on:
+      - "jackett"
+      - "qbittorrent"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/lidarr:/config
+      - ${data_folder}:/data
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
+      traefik.port: "8686"
+  # mylar, webapp for downloading subtitles
+  bazarr:
+    container_name: bazarr
+    hostname: subtitles.${root_domain}
+    image: linuxserver/bazarr:latest
+    <<: *restart
+    depends_on:
+      - "radarr"
+      - "sonarr"
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
+      traefik.port: "6767"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/bazarr:/config
+      - ${data_folder}:/data
+  # mylar, webapp for downloading comics through torrent client
+  # queries are done with jackett
+  mylar:
+    container_name: mylar
+    hostname: comics.${root_domain}
+    image: linuxserver/mylar:latest
+    <<: *restart
+    depends_on:
+      - "jackett"
+      - "qbittorrent"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/mylar:/config
+      - ${data_folder}:/data
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
+      traefik.port: "8090"
+  # lazylibrarian, webapp for downloading books through torrent client
+  # queries are done with jackett
+  lazylibrarian:
+    container_name: lazylibrarian
+    hostname: books.${root_domain}
+    image: linuxserver/lazylibrarian:latest
+    <<: *restart
+    depends_on:
+      - "jackett"
+      - "qbittorrent"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/lazylibrarian:/config
+      - ${data_folder}:/data
+    environment:
+      <<: *conf
+      DOCKER_MODS: linuxserver/calibre-web:calibre
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
+      traefik.port: "5299"
+  # heimdall is a homepage
+  heimdall:
+    container_name: heimdall
+    hostname: home.${root_domain}
+    image: linuxserver/heimdall:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/heimdall:/config
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:home.${root_domain}, heimdall.${root_domain}"
+      traefik.port: "80"
+  # plex media server
+  plex:
+    container_name: plex
+    hostname: plex.${root_domain}
+    image: linuxserver/plex:latest
+    <<: *restart
+    # note use the host network mode on first startup,
+    # then you can use the regular bridge mode
+    # network_mode: "host"
+    ports:
+      - "32400:32400"
+      - "32400:32400/udp"
+      - "32469:32469"
+      - "32469:32469/udp"
+      - "5353:5353/udp"
+      - "1900:1900/udp"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/plex:/config
+      - ${data_folder}:/data
+    environment:
+      VERSION: latest
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:plex.${root_domain}"
+      traefik.port: "32400"
+  # jellyfin media server
+  jellyfin:
+    container_name: jellyfin
+    hostname: jellyfin.${root_domain}
+    image: binhex/arch-jellyfin:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/jellyfin:/config
+      - ${data_folder}:/media
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:jellyfin.${root_domain}"
+      traefik.port: "8096"
+  # ombi, plex media requests
+  ombi:
+    container_name: ombi
+    hostname: ombi.${root_domain}
+    image: linuxserver/ombi:latest
+    <<: *restart
+    depends_on:
+      - "sonarr"
+      - "radarr"
+      - "lidarr"
+      - "plex"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/ombi:/config
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:ombi.${root_domain},requests.${root_domain}"
+      traefik.port: "3579"
+  # tautulli, plex media server monitoring
+  tautulli:
+    container_name: tautulli
+    hostname: tautulli.${root_domain}
+    image: linuxserver/tautulli:latest
+    <<: *restart
+    depends_on:
+      - "plex"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/tautulli:/config
+      - ${data_folder}:/data
+      - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
+      traefik.port: "8181"
+  # netdata, server monitoring
+  netdata:
+    container_name: netdata
+    hostname: netdata.${root_domain}
+    image: netdata/netdata:v1.15.0
+    <<: *restart
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
+    environment:
+      <<: *conf
+      PGID: ${docker_group_id}
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:status.${root_domain},netdata.${root_domain}"
+      traefik.port: "19999"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+  calibre:
+    container_name: calibre
+    hostname: calibre.${root_domain}
+    image: linuxserver/calibre:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${data_folder}/books/calibre_library:/config
+    environment:
+      <<: *conf
+      GUAC_USER: ${calibre_user}
+      GUAC_PASS: ${calibre_password}
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:calibre.${root_domain}"
+      traefik.port: "8080"
+  # calibre-web, for reading ebooks
+  calibre-web:
+    container_name: calibre-web
+    hostname: read.${root_domain}
+    image: linuxserver/calibre-web:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/calibre-web:/config
+      - ${data_folder}/books:/books
+    environment:
+      <<: *conf
+      DOCKER_MODS: linuxserver/calibre-web:calibre
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
+      traefik.port: "8083"
+  # gollum for hosting documentation
+  gollum:
+    container_name: gollum
+    hostname: doc.${root_domain}
+    image: cuotos/gollum-alpine:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/gollum:/wiki
+    environment:
+      <<: *conf
+      GOLLUMARGS: "--live-preview --allow-uploads dir"
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
+      traefik.port: "4567"
+  # unmanic, transcode video files in the background
+  unmanic:
+    container_name: unmanic
+    hostname: transcode.${root_domain}
+    image: josh5/unmanic:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/unmanic:/config
+      - ${data_folder}/documentaries:/library/
+      - /tmp/unmanic:/tmp/unmanic
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:transcode.${root_domain},unmanic.${root_domain}"
+      traefik.port: "8888"
+  pyload:
+    image: linuxserver/pyload
+    <<: *restart
+    container_name: pyload
+    hostname: download.${root_domain}
+    environment:
+      <<: *conf
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/pyload:/config
+      - ${data_folder}/downloads:/downloads/downloads
+      - ${data_folder}/documentaries:/downloads/documentaries
+      - ${data_folder}/software:/downloads/software
+      - ${data_folder}/games:/downloads/games
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
+      traefik.port: "8000"
+  # youtube-dl
+  youtube-dl:
+    image: kmb32123/youtube-dl-server
+    <<: *restart
+    container_name: youtube-dl
+    hostname: youtube-dl.${root_domain}
+    environment:
+      <<: *conf
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${data_folder}/documentaries:/youtube-dl
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
+      traefik.port: "8080"
 networks:
   watchtower:
