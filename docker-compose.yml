@@ -281,7 +281,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lazylibrarian:/config
-      - ${data_folder}:/data
+      - ${data_folder}/books:/books
     environment:
       <<: *conf
       DOCKER_MODS: linuxserver/calibre-web:calibre
