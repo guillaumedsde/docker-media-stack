@@ -418,24 +418,24 @@ services:
       - SYS_PTRACE
     security_opt:
       - apparmor:unconfined
-  calibre:
-    container_name: calibre
-    hostname: calibre.${root_domain}
-    image: linuxserver/calibre:latest
+  # Alternative to Calibre content server for storing books
+  cops:
+    container_name: cops
+    hostname: cops.${root_domain}
+    image: linuxserver/cops:latest
     <<: *restart
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${data_folder}/books/calibre_library:/config
+      - ${docker_data_folder}/cops:/config
+      - ${data_folder}/books:/books
     environment:
       <<: *conf
-      GUAC_USER: ${calibre_user}
-      GUAC_PASS: ${calibre_password}
     labels:
       <<: *securityHeaders
       <<: *oauthLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:calibre.${root_domain}"
-      traefik.port: "8080"
+      traefik.frontend.rule: "Host:cops.${root_domain}"
+      traefik.port: "80"
   # calibre-web, for reading ebooks
   calibre-web:
     container_name: calibre-web
