@@ -518,7 +518,6 @@ services:
       <<: *conf
       REDIS_HOST: diskover-redis
       ES_HOST: diskover-es
-      ES_USER: ${DISKOVER_ES_USER}
       ES_PASS: ${DISKOVER_ES_PASS}
     volumes:
       - ${docker_data_folder}/diskover:/config
@@ -541,8 +540,9 @@ services:
     volumes:
       - ${docker_data_folder}/diskover-es:/usr/share/elasticsearch/data
     environment:
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      bootstrap.memory_lock: true
+      ES_JAVA_OPTS: -Xms2048m -Xmx2048m
+      ELASTIC_PASSWORD: ${DISKOVER_ES_PASS}
     ulimits:
       memlock:
         soft: -1
