@@ -525,6 +525,9 @@ services:
     depends_on:
       - diskover-es
       - diskover-redis
+    networks:
+      - default
+      - diskover
     labels:
       <<: *securityHeaders
       <<: *oauthLabels
@@ -540,6 +543,8 @@ services:
       ES_JAVA_OPTS: -Xms2048m -Xmx2048m
       # This env variable does not do anything in ES<6.0.0
       # ELASTIC_PASSWORD: ${DISKOVER_ES_PASS}
+    networks:
+      - diskover
     ulimits:
       memlock:
         soft: -1
@@ -547,8 +552,12 @@ services:
   diskover-redis:
     container_name: redis
     image: redis:alpine
+    networks:
+      - diskover
     volumes:
       - ${docker_data_folder}/diskover-redis:/data
 
 networks:
   watchtower:
+  diskover:
+    internal: true
