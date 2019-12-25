@@ -538,7 +538,8 @@ services:
     environment:
       bootstrap.memory_lock: "true"
       ES_JAVA_OPTS: -Xms2048m -Xmx2048m
-      ELASTIC_PASSWORD: ${DISKOVER_ES_PASS}
+      # This env variable does not do anything in ES<6.0.0
+      # ELASTIC_PASSWORD: ${DISKOVER_ES_PASS}
     ulimits:
       memlock:
         soft: -1
