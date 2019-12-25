@@ -527,7 +527,6 @@ services:
       - 80:80
       - 9181:9181
       - 9999:9999
-    mem_limit: 2048m
     depends_on:
       - diskover-es
       - diskover-redis
