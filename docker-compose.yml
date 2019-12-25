@@ -225,7 +225,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
       traefik.port: "8686"
-  # mylar, webapp for downloading subtitles
+  # bazarr, webapp for downloading subtitles
   bazarr:
     container_name: bazarr
     hostname: subtitles.${root_domain}
@@ -248,26 +248,26 @@ services:
       - ${data_folder}:/data
   # mylar, webapp for downloading comics through torrent client
   # queries are done with jackett
-  mylar:
-    container_name: mylar
-    hostname: comics.${root_domain}
-    image: linuxserver/mylar:latest
-    <<: *restart
-    depends_on:
-      - "jackett"
-      - "qbittorrent"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/mylar:/config
-      - ${data_folder}:/data
-    environment:
-      <<: *conf
-    labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
-      traefik.port: "8090"
+  # mylar:
+  #   container_name: mylar
+  #   hostname: comics.${root_domain}
+  #   image: linuxserver/mylar:latest
+  #   <<: *restart
+  #   depends_on:
+  #     - "jackett"
+  #     - "qbittorrent"
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${docker_data_folder}/mylar:/config
+  #     - ${data_folder}:/data
+  #   environment:
+  #     <<: *conf
+  #   labels:
+  #     <<: *securityHeaders
+  #     <<: *oauthLabels
+  #     traefik.enable: "true"
+  #     traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
+  #     traefik.port: "8090"
   # lazylibrarian, webapp for downloading books through torrent client
   # queries are done with jackett
   lazylibrarian:
@@ -338,22 +338,22 @@ services:
       traefik.frontend.rule: "Host:plex.${root_domain}"
       traefik.port: "32400"
   # jellyfin media server
-  jellyfin:
-    container_name: jellyfin
-    hostname: jellyfin.${root_domain}
-    image: binhex/arch-jellyfin:latest
-    <<: *restart
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/jellyfin:/config
-      - ${data_folder}:/media
-    environment:
-      <<: *conf
-    labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:jellyfin.${root_domain}"
-      traefik.port: "8096"
+  # jellyfin:
+  #   container_name: jellyfin
+  #   hostname: jellyfin.${root_domain}
+  #   image: binhex/arch-jellyfin:latest
+  #   <<: *restart
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${docker_data_folder}/jellyfin:/config
+  #     - ${data_folder}:/media
+  #   environment:
+  #     <<: *conf
+  #   labels:
+  #     <<: *securityHeaders
+  #     traefik.enable: "true"
+  #     traefik.frontend.rule: "Host:jellyfin.${root_domain}"
+  #     traefik.port: "8096"
   # ombi, plex media requests
   ombi:
     container_name: ombi
