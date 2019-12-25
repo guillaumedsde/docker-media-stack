@@ -37,7 +37,7 @@ x-oauthLabels: &oauthLabels
 services:
   traefik:
     image: traefik:alpine
-    command: --docker --debug --loglevel=DEBUG
+    command: --docker --loglevel=WARN
     hostname: traefik.${root_domain}
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
@@ -494,53 +494,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
       traefik.port: "8080"
-  diskover:
-    image: linuxserver/diskover
-    <<: *restart
-    environment:
-      <<: *conf
-      REDIS_HOST: diskover-redis
-      ES_HOST: diskover-es
-      ES_PASS: ${DISKOVER_ES_PASS}
-    volumes:
-      - ${docker_data_folder}/diskover:/config
-      - ${data_folder}:/data:ro
-    depends_on:
-      - diskover-es
-      - diskover-redis
-    networks:
-      - traefik
-      - diskover
-    labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:diskover.${root_domain}"
-      traefik.port: "80"
-  diskover-es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.9
-    volumes:
-      - ${docker_data_folder}/diskover-es:/usr/share/elasticsearch/data
-    environment:
-      bootstrap.memory_lock: "true"
-      ES_JAVA_OPTS: -Xms2048m -Xmx2048m
-      # This env variable does not do anything in ES<6.0.0
-      # ELASTIC_PASSWORD: ${DISKOVER_ES_PASS}
-    networks:
-      - diskover
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-  diskover-redis:
-    image: redis:alpine
-    networks:
-      - diskover
-    volumes:
-      - ${docker_data_folder}/diskover-redis:/data
 
 networks:
   watchtower:
   traefik:
-  diskover:
-    internal: true
