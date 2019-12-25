@@ -540,7 +540,7 @@ services:
     volumes:
       - ${docker_data_folder}/diskover-es:/usr/share/elasticsearch/data
     environment:
-      bootstrap.memory_lock: true
+      bootstrap.memory_lock: "true"
       ES_JAVA_OPTS: -Xms2048m -Xmx2048m
       ELASTIC_PASSWORD: ${DISKOVER_ES_PASS}
     ulimits:
