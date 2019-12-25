@@ -1,5 +1,8 @@
 # Changelog
 
+- 4.0
+  - removed pyload
+  - added diskover
 - 3.0
   - replace calibre with COPS
 - 2.1

@@ -509,5 +509,48 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
       traefik.port: "8080"
+  diskover:
+    image: linuxserver/diskover
+    <<: *restart
+    environment:
+      <<: *conf
+      REDIS_HOST: diskover-redis
+      ES_HOST: diskover-es
+      ES_USER: ${DISKOVER_ES_USER}
+      ES_PASS: ${DISKOVER_ES_PASS}
+    volumes:
+      - ${docker_data_folder}/diskover:/config
+      - ${data_folder}:/data:ro
+    ports:
+      - 80:80
+      - 9181:9181
+      - 9999:9999
+    mem_limit: 2048m
+    depends_on:
+      - diskover-es
+      - diskover-redis
+    labels:
+      <<: *securityHeaders
+      <<: *oauthLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:diskover.${root_domain}"
+      traefik.port: "80"
+  diskover-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.9
+    volumes:
+      - ${docker_data_folder}/diskover-es:/usr/share/elasticsearch/data
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  diskover-redis:
+    container_name: redis
+    image: redis:alpine
+    volumes:
+      - ${docker_data_folder}/diskover-redis:/data
+
 networks:
   watchtower:
