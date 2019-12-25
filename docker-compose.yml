@@ -37,7 +37,7 @@ x-oauthLabels: &oauthLabels
 services:
   traefik:
     image: traefik:alpine
-    command: --docker
+    command: --docker --log.level=DEBUG
     hostname: traefik.${root_domain}
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
