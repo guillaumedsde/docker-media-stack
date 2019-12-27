@@ -297,6 +297,8 @@ services:
       - ${data_folder}/comics:/comics
       - ${data_folder}/download/comics:/downloads
       - ${data_folder}:/data
+    networks:
+      - traefik
     environment:
       <<: *conf
     labels:
