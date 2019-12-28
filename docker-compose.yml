@@ -36,7 +36,7 @@ x-oauthLabels: &oauthLabels
 
 services:
   traefik:
-    image: traefik:latest
+    image: traefik:maroilles-alpine
     hostname: traefik.${root_domain}
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
