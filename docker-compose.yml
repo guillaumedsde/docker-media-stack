@@ -529,6 +529,7 @@ services:
       - traefik
     environment:
       <<: *conf
+      SUDO_PASSWORD: ${VSCODE_SUDO_PASSWORD}
     labels:
       <<: *securityHeaders
       <<: *oauthLabels
