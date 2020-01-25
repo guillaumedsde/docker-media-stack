@@ -26,6 +26,7 @@ x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
   traefik.frontend.headers.browserXSSFilter: "true"
   traefik.frontend.headers.contentTypeNosniff: "true"
   traefik.frontend.headers.customFrameOptionsValue: "SAMEORIGIN"
+  traefik.frontend.passHostHeader: "true"
   #traefik.frontend.headers.contentSecurityPolicy: "default-src data: https:; script-src data: 'unsafe-inline' https://*.${root_domain}; style-src data: 'unsafe-inline' https:; frame-src https://*.${root_domain}"
   traefik.frontend.headers.customResponseHeaders: "Feature-Policy:camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';||server:''||X-Powered-By:''"
 # oauth configuration
@@ -37,6 +38,7 @@ x-oauthLabels: &oauthLabels
 services:
   traefik:
     image: traefik:maroilles-alpine
+    command: --logLevel=DEBUG
     hostname: traefik.${root_domain}
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
