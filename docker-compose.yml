@@ -362,12 +362,12 @@ services:
   jellyfin:
     container_name: jellyfin
     hostname: jellyfin.${root_domain}
-    image: binhex/arch-jellyfin:latest
+    image: linuxserver/jellyfin:latest
     <<: *restart
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jellyfin:/config
-      - ${data_folder}:/media
+      - ${data_folder}:/data
     environment:
       <<: *conf
     labels:
