@@ -174,7 +174,7 @@ services:
   # queries are done with jackett
   radarr:
     hostname: movies.${root_domain}
-    image: linuxserver/radarr:latest
+    image: linuxserver/radarr:nightly
     <<: *restart
     depends_on:
       - "jackett"
