@@ -37,7 +37,7 @@ x-oauthLabels: &oauthLabels
 
 services:
   traefik:
-    image: traefik:maroilles-alpine
+    image: traefik:maroilles
     command: --logLevel=DEBUG
     hostname: traefik.${root_domain}
     environment:
