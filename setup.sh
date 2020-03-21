@@ -19,7 +19,6 @@ for user in "${USERS[@]}"; do
         [ "$password" = "$password2" ] && break
         echo "Please try again"
     done
-    passwd
     usermod --password ${user} ${password}
     smbpasswd -a ${user}
     (
