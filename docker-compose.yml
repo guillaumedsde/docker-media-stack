@@ -351,7 +351,8 @@ services:
     networks:
       - traefik
     environment:
-      VERSION: latest
+      VERSION: docker
+      PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
       <<: *conf
     labels:
       <<: *securityHeaders
