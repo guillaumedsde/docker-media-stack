@@ -26,5 +26,6 @@ for user in "${USERS[@]}"; do
     ) | smbpasswd -a -s ${user}
     echo "Setting ownership and Permission to user ${user} on directory ${DATA_DIRECTORY}/${user}"
     chown -R ${user}:${GROUP} "${DATA_DIRECTORY}/${user}"
-    chmod -R 600 "${DATA_DIRECTORY}/${user}"
+    find "${DATA_DIRECTORY}/${user}" -type d -print0 | xargs -0 chmod 700
+    find "${DATA_DIRECTORY}/${user}" -type f -print0 | xargs -0 chmod 600
 done
