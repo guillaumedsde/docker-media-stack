@@ -151,7 +151,7 @@ services:
       traefik.port: "9117"
   # jackett tracker site scraper with API
   hydra:
-    image: linuxserver/hydra2:latest
+    image: linuxserver/nzbhydra2:latest
     hostname: hydra.${root_domain}
     <<: *restart
     depends_on:
@@ -360,22 +360,22 @@ services:
       traefik.frontend.rule: "Host:plex.${root_domain}"
       traefik.port: "32400"
   # jellyfin media server
-  jellyfin:
-    container_name: jellyfin
-    hostname: jellyfin.${root_domain}
-    image: linuxserver/jellyfin:latest
-    <<: *restart
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/jellyfin:/config
-      - ${data_folder}:/data
-    environment:
-      <<: *conf
-    labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:jellyfin.${root_domain}"
-      traefik.port: "8096"
+  # jellyfin:
+  #   container_name: jellyfin
+  #   hostname: jellyfin.${root_domain}
+  #   image: linuxserver/jellyfin:latest
+  #   <<: *restart
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${docker_data_folder}/jellyfin:/config
+  #     - ${data_folder}:/data
+  #   environment:
+  #     <<: *conf
+  #   labels:
+  #     <<: *securityHeaders
+  #     traefik.enable: "true"
+  #     traefik.frontend.rule: "Host:jellyfin.${root_domain}"
+  #     traefik.port: "8096"
   # ombi, plex media requests
   ombi:
     hostname: ombi.${root_domain}
