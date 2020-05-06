@@ -560,6 +560,23 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:vscode.${root_domain}"
       traefik.port: "8443"
+  # JS CMS
+  ghost_margot:
+    environment:
+      <<: *conf
+      url: "https://margot.${tld}"
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:margot.${tld}"
+      traefik.port: "2368"
+    volumes:
+      - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    <<: *restart
+    image: ghost:alpine
 
 networks:
   watchtower:
