@@ -543,6 +543,8 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
       traefik.port: "8000"
+    networks:
+      - traefik
   # youtube-dl
   youtube-dl:
     image: kmb32123/youtube-dl-server:latest
