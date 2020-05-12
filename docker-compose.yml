@@ -533,7 +533,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/pyload:/config
-      - ${data_folder}/downloads:/downloads/
+      - ${data_folder}/download/other:/downloads/
       - ${data_folder}/documentaries:/documentaries
       - ${data_folder}/software:/software
       - ${data_folder}/games:/games
