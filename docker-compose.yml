@@ -5,14 +5,17 @@
 #   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
 version: "3.4"
+
 # basic common configuration for most containers
 x-conf: &conf
   TZ: ${TZ}
   PGID: ${GID}
   PUID: ${UID}
+
 # container restart policy
 x-restart: &restart
   restart: always
+
 # traefik security headers
 x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
   traefik.frontend.headers.SSLRedirect: "true"
@@ -29,9 +32,16 @@ x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
   traefik.frontend.passHostHeader: "true"
   #traefik.frontend.headers.contentSecurityPolicy: "default-src data: https:; script-src data: 'unsafe-inline' https://*.${root_domain}; style-src data: 'unsafe-inline' https:; frame-src https://*.${root_domain}"
   traefik.frontend.headers.customResponseHeaders: "Feature-Policy:camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';||server:''||X-Powered-By:''"
-# oauth configuration
+
+# oauth forward-auth SSO configuration
 x-oauthLabels: &oauthLabels
   traefik.frontend.auth.forward.address: "http://traefik-forward-auth:4181"
+  traefik.frontend.auth.forward.authResponseHeaders: "X-Forwarded-User"
+  traefik.frontend.auth.forward.trustForwardHeader: "true"
+
+# keycloak SSO
+x-keycloakLabels: &keycloakLabels
+  traefik.frontend.auth.forward.address: "http://traefik-forward-auth-keycloak:4181"
   traefik.frontend.auth.forward.authResponseHeaders: "X-Forwarded-User"
   traefik.frontend.auth.forward.trustForwardHeader: "true"
 
@@ -64,26 +74,7 @@ services:
       - target: 443
         published: 443
         mode: host
-  # OIDC forward authentication for traefik
-  traefik-forward-auth:
-    hostname: oauth.${root_domain}
-    image: thomseddon/traefik-forward-auth:latest
-    <<: *restart
-    environment:
-      CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
-      CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
-      SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
-      #OIDC_ISSUER: https://accounts.google.com
-      WHITELIST: "${allowed_emails}"
-      AUTH_HOST: "oauth.${root_domain}"
-      COOKIE_DOMAIN: "${root_domain}"
-    networks:
-      - traefik
-    labels:
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:oauth.${root_domain}"
-      traefik.port: "4181"
+
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
   # NOTE watchtower also updates itself
@@ -126,7 +117,7 @@ services:
       - 1.0.0.1
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
       traefik.port: "8080"
@@ -166,7 +157,7 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:hydra.${root_domain}"
       traefik.port: "5076"
@@ -189,7 +180,7 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
       traefik.port: "7878"
@@ -212,7 +203,7 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
       traefik.port: "8989"
@@ -235,7 +226,7 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
       traefik.port: "8686"
@@ -251,7 +242,7 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
       traefik.port: "6767"
@@ -283,7 +274,7 @@ services:
       DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
       traefik.port: "5299"
@@ -308,7 +299,7 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
       traefik.port: "8090"
@@ -398,6 +389,173 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:ombi.${root_domain},requests.${root_domain}"
       traefik.port: "3579"
+
+  # Alternative to Calibre content server for storing books
+  cops:
+    hostname: cops.${root_domain}
+    image: linuxserver/cops:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/cops:/config
+      - ${data_folder}/books:/books
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:cops.${root_domain}"
+      traefik.port: "80"
+
+  # calibre-web, for reading ebooks
+  calibre-web:
+    hostname: read.${root_domain}
+    image: linuxserver/calibre-web:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/calibre-web:/config
+      - ${data_folder}/books:/books
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+      DOCKER_MODS: linuxserver/calibre-web:calibre
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
+      traefik.port: "8083"
+
+  # gollum for hosting documentation
+  gollum:
+    hostname: doc.${root_domain}
+    image: cuotos/gollum-alpine:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/gollum:/wiki
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+      GOLLUMARGS: "--live-preview --allow-uploads dir"
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
+      traefik.port: "4567"
+
+  # unmanic, transcode video files in the background
+  unmanic:
+    hostname: transcode.${root_domain}
+    image: josh5/unmanic:latest
+    <<: *restart
+    networks:
+      - traefik
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/unmanic:/config
+      - ${data_folder}/documentaries:/library/
+      - /tmp/unmanic:/tmp/unmanic
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:transcode.${root_domain},unmanic.${root_domain}"
+      traefik.port: "8888"
+
+  # pyload for downloading files
+  pyload:
+    image: linuxserver/pyload
+    <<: *restart
+    container_name: pyload
+    hostname: download.${root_domain}
+    environment:
+      <<: *conf
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/pyload:/config
+      - ${data_folder}/download/other:/downloads
+      - ${data_folder}/documentaries:/documentaries
+      - ${data_folder}/software:/software
+      - ${data_folder}/games:/games
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
+      traefik.port: "8000"
+    networks:
+      - traefik
+
+  # youtube-dl for downloading videos
+  youtube-dl:
+    image: kmb32123/youtube-dl-server:latest
+    <<: *restart
+    hostname: youtube-dl.${root_domain}
+    environment:
+      <<: *conf
+    networks:
+      - traefik
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${data_folder}/documentaries:/youtube-dl
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
+      traefik.port: "8080"
+
+  # vsode server, online ide
+  vscode:
+    hostname: vscode.${root_domain}
+    image: linuxserver/code-server:latest
+    <<: *restart
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/vscode:/config
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+      SUDO_PASSWORD: ${VSCODE_SUDO_PASSWORD}
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:vscode.${root_domain}"
+      traefik.port: "8443"
+
+  # JS CMS
+  ghost_margot:
+    environment:
+      <<: *conf
+      url: "https://margot.${tld}"
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:margot.${tld}"
+      traefik.port: "2368"
+    volumes:
+      - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    <<: *restart
+    image: ghost:alpine
+
+  ##################################################################
+  # Monitoring
+
   # tautulli, plex media server monitoring
   tautulli:
     hostname: tautulli.${root_domain}
@@ -416,10 +574,11 @@ services:
       <<: *conf
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
       traefik.port: "8181"
+
   # netdata, server monitoring
   netdata:
     hostname: netdata.${root_domain}
@@ -437,7 +596,7 @@ services:
       PGID: ${docker_group_id}
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
+      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:status.${root_domain},netdata.${root_domain}"
       traefik.port: "19999"
@@ -445,160 +604,158 @@ services:
       - SYS_PTRACE
     security_opt:
       - apparmor:unconfined
-  # Alternative to Calibre content server for storing books
-  cops:
-    hostname: cops.${root_domain}
-    image: linuxserver/cops:latest
-    <<: *restart
+
+  ##################################################################
+  # Authentication
+
+  # LDAP server
+  openldap:
+    hostname: ldap.${root_domain}
+    image: osixia/openldap:release-1.4.0-dev
+    environment:
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: cert.pem
+      LDAP_TLS_KEY_FILENAME: privkey.pem
+      LDAP_TLS_CA_CRT_FILENAME: chain.pem
+    command: "--copy-service"
+    networks:
+      traefik:
+        aliases:
+          - ldap.${root_domain}
+          - openldap
+    ports:
+      - target: 389
+        published: 389
+        mode: host
+      - target: 636
+        published: 636
+        mode: host
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/cops:/config
-      - ${data_folder}/books:/books
+      - ${docker_data_folder}/openldap/ldap:/var/lib/ldap
+      - ${docker_data_folder}/openldap/slapd.d:/etc/ldap/slapd.d
+      # ubuntu path for Samba LDIF, this might be different with other distributions
+      - ${SAMBA_LDIF_PATH}:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba.ldif
+      # gotten from https://ubuntu.com/server/docs/samba-openldap-backend
+      - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif
+      - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif
+      # certificates
+      - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs
+
+  # OpenLDAP certificate handler
+  traefik-certificate-extractor:
+    entrypoint: >
+      /bin/sh -c "while true
+                    do python3 -u extractor.py
+                    sleep 1h
+                  done"
+    volumes:
+      - ${docker_data_folder}/traefik/acme.json:/app/data/acme.json:ro
+      - ${docker_data_folder}/openldap/certs:/app/certs
+    image: danielhuisman/traefik-certificate-extractor
+
+  # LDAP Server management web GUI
+  lam:
+    image: ldapaccountmanager/lam:stable
+    volumes:
+      - ${docker_data_folder}/lam/config.cfg:/etc/ldap-account-manager/config.cfg
+      - ${docker_data_folder}/lam/olloix.conf:/var/lib/ldap-account-manager/config/olloix.conf
+    environment:
+      LAM_SKIP_PRECONFIGURE: "true"
     networks:
       - traefik
-    environment:
-      <<: *conf
     labels:
       <<: *securityHeaders
       <<: *oauthLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:cops.${root_domain}"
+      traefik.frontend.rule: "Host:lam.${root_domain}"
       traefik.port: "80"
-  # calibre-web, for reading ebooks
-  calibre-web:
-    hostname: read.${root_domain}
-    image: linuxserver/calibre-web:latest
-    <<: *restart
+
+  # SSO
+  keycloak:
+    image: jboss/keycloak:latest
+    environment:
+      # Technically, this could be auto-detected, but we prefer to be prescriptive
+      DB_VENDOR: postgres
+      DB_DATABASE: keycloak
+      DB_ADDR: keycloak-db
+      DB_USER: keycloak
+      DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
+      # This is required to run keycloak behind traefik
+      PROXY_ADDRESS_FORWARDING: "true"
+      KEYCLOAK_HOSTNAME: keycloak.${root_domain}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/calibre-web:/config
-      - ${data_folder}/books:/books
     networks:
       - traefik
-    environment:
-      <<: *conf
-      DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
       <<: *securityHeaders
-      <<: *oauthLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
-      traefik.port: "8083"
-  # gollum for hosting documentation
-  gollum:
-    hostname: doc.${root_domain}
-    image: cuotos/gollum-alpine:latest
-    <<: *restart
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/gollum:/wiki
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-      GOLLUMARGS: "--live-preview --allow-uploads dir"
-    labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
-      traefik.port: "4567"
-  # unmanic, transcode video files in the background
-  unmanic:
-    hostname: transcode.${root_domain}
-    image: josh5/unmanic:latest
-    <<: *restart
-    networks:
-      - traefik
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/unmanic:/config
-      - ${data_folder}/documentaries:/library/
-      - /tmp/unmanic:/tmp/unmanic
-    environment:
-      <<: *conf
-    labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:transcode.${root_domain},unmanic.${root_domain}"
-      traefik.port: "8888"
-  pyload:
-    image: linuxserver/pyload
-    <<: *restart
-    container_name: pyload
-    hostname: download.${root_domain}
-    environment:
-      <<: *conf
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/pyload:/config
-      - ${data_folder}/download/other:/downloads/
-      - ${data_folder}/documentaries:/documentaries
-      - ${data_folder}/software:/software
-      - ${data_folder}/games:/games
-    labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
-      traefik.port: "8000"
-    networks:
-      - traefik
-  # youtube-dl
-  youtube-dl:
-    image: kmb32123/youtube-dl-server:latest
-    <<: *restart
-    hostname: youtube-dl.${root_domain}
-    environment:
-      <<: *conf
-    networks:
-      - traefik
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${data_folder}/documentaries:/youtube-dl
-    labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
+      traefik.frontend.rule: "Host:keycloak.${root_domain}"
       traefik.port: "8080"
-  # vsode server, online ide
-  vscode:
-    hostname: vscode.${root_domain}
-    image: linuxserver/code-server:latest
-    <<: *restart
+
+  # DB for keycloak
+  keycloak-db:
+    environment:
+      # Tell Postgress what user/password to create
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    image: postgres:12-alpine
     volumes:
+      - ${docker_data_folder}/keycloak-db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/vscode:/config
     networks:
       - traefik
+
+  # OIDC forward authentication for traefik
+  traefik-forward-auth:
+    hostname: oauth.${root_domain}
+    image: thomseddon/traefik-forward-auth:latest
+    <<: *restart
     environment:
-      <<: *conf
-      SUDO_PASSWORD: ${VSCODE_SUDO_PASSWORD}
+      CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+      CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+      SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+      #OIDC_ISSUER: https://accounts.google.com
+      WHITELIST: "${allowed_emails}"
+      AUTH_HOST: "oauth.${root_domain}"
+      COOKIE_DOMAIN: "${root_domain}"
+      COOKIE_NAME: _google_forward_auth
+      CSRF_COOKIE_NAME: _google_forward_auth_csrf
+    networks:
+      - traefik
     labels:
-      <<: *securityHeaders
       <<: *oauthLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:vscode.${root_domain}"
-      traefik.port: "8443"
-  # JS CMS
-  ghost_margot:
+      traefik.frontend.rule: "Host:oauth.${root_domain}"
+      traefik.port: "4181"
+
+  # OIDC forward authentication for traefik
+  traefik-forward-auth-keycloak:
+    hostname: keycloakauth.${root_domain}
+    image: thomseddon/traefik-forward-auth:latest
+    <<: *restart
     environment:
-      <<: *conf
-      url: "https://margot.${tld}"
-    labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:margot.${tld}"
-      traefik.port: "2368"
-    volumes:
-      - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
-      - /etc/localtime:/etc/localtime:ro
+      PROVIDERS_OIDC_CLIENT_ID: ${KEYCLOAK_OIDC_CLIENT_ID}
+      PROVIDERS_OIDC_CLIENT_SECRET: ${KEYCLOAK_OIDC_CLIENT_SECRET}
+      SECRET: ${KEYCLOAK_OIDC_COOKIE_SECRET}
+      PROVIDERS_OIDC_ISSUER_URL: https://keycloak.${root_domain}/auth/realms/${KEYCLOAK_REALM}
+      AUTH_HOST: auth.${root_domain}
+      COOKIE_DOMAIN: ${root_domain}
+      DEFAULT_PROVIDER: oidc
+      COOKIE_NAME: _keycloak_forward_auth
+      CSRF_COOKIE_NAME: _keycloak_forward_auth_csrf
     networks:
       - traefik
-    <<: *restart
-    image: ghost:alpine
+    labels:
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:auth.${root_domain}"
+      traefik.port: "4181"
 
 networks:
   watchtower:
