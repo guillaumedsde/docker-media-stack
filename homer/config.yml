@@ -7,7 +7,7 @@ subtitle: "hosted on ${root_domain}"
 # logo: "assets/homer.png"
 # Alternatively a fa icon can be provided:
 icon: "fas fa-skull-crossbones"
-# footer: '<p>Created with <span class="has-text-danger">❤️</span> with <a href="https://bulma.io/">bulma</a>, <a href="https://vuejs.org/">vuejs</a> & <a href="https://fontawesome.com/">font awesome</a> // Fork me on <a href="https://github.com/bastienwirtz/homer"><i class="fab fa-github-alt"></i></a></p>'  # set false if you want to hide it.header:
+# footer: '<p>Created with <span class="has-text-danger">❤︝</span> with <a href="https://bulma.io/">bulma</a>, <a href="https://vuejs.org/">vuejs</a> & <a href="https://fontawesome.com/">font awesome</a> // Fork me on <a href="https://github.com/bastienwirtz/homer"><i class="fab fa-github-alt"></i></a></p>'  # set false if you want to hide it.header:
 footer: false
 
 # Optional message
@@ -94,24 +94,6 @@ services:
         subtitle: "Add Subtitles"
         tag: "add"
         url: "https://subtitles.${root_domain}"
-  - name: "Blogs"
-    icon: "fas fa-blog"
-    items:
-      - name: "Etienne"
-        icon: "fas fa-blog"
-        subtitle: "Photo Blog"
-        tag: "blog"
-        url: "http://etienne.desusanne.com"
-      - name: "Margot"
-        icon: "fas fa-blog"
-        subtitle: "Portfolio"
-        tag: "blog"
-        url: "http://margot.desusanne.com"
-      - name: "Guillaume"
-        icon: "fas fa-blog"
-        subtitle: "Blog"
-        tag: "blog"
-        url: "http://blog.guillaume.desusanne.com"
   - name: "Download"
     icon: "fas fa-download"
     items:
