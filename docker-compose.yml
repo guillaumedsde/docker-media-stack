@@ -46,6 +46,7 @@ x-keycloakLabels: &keycloakLabels
   traefik.frontend.auth.forward.trustForwardHeader: "true"
 
 services:
+  # Reverse proxy with automatic SSL certificate generation
   traefik:
     image: traefik:maroilles
     # command: --logLevel=DEBUG
@@ -91,6 +92,8 @@ services:
     networks:
       - watchtower
     command: ["--cleanup", "--schedule", "0 0 5 * * *"]
+
+  # Torrent client
   qbittorrent:
     <<: *restart
     cap_add:
