@@ -481,26 +481,6 @@ services:
       traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
       traefik.port: "8080"
 
-  # vsode server, online ide
-  vscode:
-    hostname: vscode.${root_domain}
-    image: linuxserver/code-server:latest
-    <<: *restart
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/vscode:/config
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-      SUDO_PASSWORD: ${VSCODE_SUDO_PASSWORD}
-    labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:vscode.${root_domain}"
-      traefik.port: "8443"
-
   # JS CMS
   ghost_margot:
     environment:
