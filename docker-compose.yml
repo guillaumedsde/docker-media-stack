@@ -48,7 +48,7 @@ x-keycloakLabels: &keycloakLabels
 services:
   traefik:
     image: traefik:maroilles
-    command: --logLevel=DEBUG
+    # command: --logLevel=DEBUG
     hostname: traefik.${root_domain}
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
@@ -303,23 +303,23 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
       traefik.port: "8090"
-  # heimdall is a homepage
-  heimdall:
-    hostname: home.${root_domain}
-    image: linuxserver/heimdall:latest
+
+  # homer is a homepage container
+  homer:
+    hostname: ${root_domain}
+    image: b4bz/homer:latest
     <<: *restart
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/heimdall:/config
     networks:
       - traefik
-    environment:
-      <<: *conf
+    volumes:
+      - ${docker_data_folder}/homer/config.yml:/www/config.yml
+      - ${docker_data_folder}/homer/assets:/www/assets
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:home.${root_domain}, heimdall.${root_domain}"
-      traefik.port: "80"
+      traefik.frontend.rule: "Host:home.${root_domain}, ${root_domain}, homer.${root_domain}"
+      traefik.port: "8080"
+
   # plex media server
   plex:
     hostname: plex.${root_domain}
@@ -448,7 +448,7 @@ services:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:doc.${root_domain},gollum.${root_domain}"
+      traefik.frontend.rule: "Host:doc.${root_domain},docs.${root_domain},gollum.${root_domain}"
       traefik.port: "4567"
 
   # unmanic, transcode video files in the background
