@@ -312,8 +312,8 @@ services:
     networks:
       - traefik
     volumes:
-      - ${docker_data_folder}/homer/config.yml:/www/config.yml
-      - ${docker_data_folder}/homer/assets:/www/assets
+      - ${docker_data_folder}/homer/config.yml:/www/config.yml:ro
+      - ${docker_data_folder}/homer/assets:/www/assets:ro
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
