@@ -122,6 +122,7 @@ services:
       traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
       traefik.port: "8080"
     image: guillaumedsde/qbittorrent-openvpn:latest
+
   # jackett tracker site scraper with API
   jackett:
     hostname: jackett.${root_domain}
@@ -140,6 +141,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:jackett.${root_domain}"
       traefik.port: "9117"
+
   # jackett tracker site scraper with API
   hydra:
     image: linuxserver/nzbhydra2:latest
@@ -161,6 +163,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:hydra.${root_domain}"
       traefik.port: "5076"
+
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
@@ -184,6 +187,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
       traefik.port: "7878"
+
   # sonarr, webapp for downloading series through torrent client
   # queries are done with jackett
   sonarr:
@@ -207,6 +211,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
       traefik.port: "8989"
+
   # lidarr, webapp for downloading music through torrent client
   # queries are done with jackett
   lidarr:
@@ -230,6 +235,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
       traefik.port: "8686"
+
   # bazarr, webapp for downloading subtitles
   bazarr:
     hostname: subtitles.${root_domain}
@@ -252,6 +258,7 @@ services:
       - ${data_folder}:/data
     networks:
       - traefik
+
   # lazylibrarian, webapp for downloading books through torrent client
   # queries are done with jackett
   lazylibrarian:
@@ -278,31 +285,6 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
       traefik.port: "5299"
-  # mylar, webapp for downloading comics
-  mylar:
-    container_name: mylar
-    hostname: comics.${root_domain}
-    image: linuxserver/mylar:latest
-    <<: *restart
-    depends_on:
-      - "jackett"
-      - "qbittorrent"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/mylar:/config
-      - ${data_folder}/comics:/comics
-      - ${data_folder}/download/comics:/downloads
-      - ${data_folder}:/data
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
-      traefik.port: "8090"
 
   # homer is a homepage container
   homer:
