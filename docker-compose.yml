@@ -290,6 +290,32 @@ services:
       traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
       traefik.port: "5299"
 
+  # mylar, webapp for downloading comics
+  mylar:
+    container_name: mylar
+    hostname: comics.${root_domain}
+    image: hotio/mylar3:latest
+    <<: *restart
+    depends_on:
+      - "jackett"
+      - "qbittorrent"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/mylar:/config
+      - ${data_folder}/comics:/comics
+      - ${data_folder}/download/comics:/downloads
+      - ${data_folder}:/data
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
+      traefik.port: "8090"
+
   # homer is a homepage container
   homer:
     hostname: ${root_domain}
