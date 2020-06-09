@@ -143,7 +143,7 @@ services:
 
   # jackett tracker site scraper with API
   hydra:
-    image: linuxserver/nzbhydra2:latest
+    image: guillaumedsde/nzbhydra2-distroless:latest
     hostname: hydra.${root_domain}
     <<: *restart
     depends_on:
