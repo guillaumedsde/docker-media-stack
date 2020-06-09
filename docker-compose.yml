@@ -108,24 +108,19 @@ services:
       - traefik
     environment:
       <<: *conf
-      CREATE_TUN_DEVICE: "true"
       OPENVPN_PROVIDER: WINDSCRIBE
       OPENVPN_CONFIG: France-udp
       OPENVPN_USERNAME: ${openvpn_user}
       OPENVPN_PASSWORD: ${openvpn_password}
-      #OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
-      WEBPROXY_ENABLED: "false"
-      LOCAL_NETWORK: 192.168.0.0/24
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
+      LAN: 192.168.0.0/24
+      DNS: "192.168.0.1"
     labels:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
       traefik.port: "8080"
-    image: guillaumedsde/qbittorrent-openvpn:latest
+    image: guillaumedsde/alpine-qbittorrent-openvpn:latest
 
   # jackett tracker site scraper with API
   jackett:
