@@ -238,7 +238,7 @@ services:
   # bazarr, webapp for downloading subtitles
   bazarr:
     hostname: subtitles.${root_domain}
-    image: linuxserver/bazarr:latest
+    image: hotio/bazarr:stable-ffsubsync
     <<: *restart
     depends_on:
       - "radarr"
