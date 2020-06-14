@@ -512,6 +512,7 @@ services:
       <<: *conf
       url: "https://margot.${tld}"
       mail__transport: SMTP
+      mail__from: ghost@${root_domain}
       mail__options__service: SendGrid
       mail__options__host: smtp.sendgrid.net
       mail__options__port: "465"
