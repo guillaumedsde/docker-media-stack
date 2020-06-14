@@ -527,6 +527,7 @@ services:
     volumes:
       - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
       - /etc/localtime:/etc/localtime:ro
+    tmpfs: /tmp
     networks:
       - traefik
     <<: *restart
