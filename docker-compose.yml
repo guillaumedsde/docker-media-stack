@@ -511,6 +511,13 @@ services:
     environment:
       <<: *conf
       url: "https://margot.${tld}"
+      mail__transport: SMTP
+      mail__options__service: SendGrid
+      mail__options__host: smtp.sendgrid.net
+      mail__options__port: "465"
+      mail__options__secureConnection: "true"
+      mail__options__auth__user: apikey
+      mail__options__auth__pass: ${SENDGRID_PASS}
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
