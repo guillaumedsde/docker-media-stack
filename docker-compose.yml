@@ -601,7 +601,7 @@ services:
   # LDAP server
   openldap:
     hostname: ldap.${root_domain}
-    image: osixia/openldap:release-1.4.0-dev
+    image: osixia/openldap:latest
     environment:
       LDAP_DOMAIN: ${LDAP_DOMAIN}
       LDAP_ORGANISATION: ${LDAP_ORGANISATION}
@@ -610,6 +610,8 @@ services:
       LDAP_TLS_CRT_FILENAME: cert.pem
       LDAP_TLS_KEY_FILENAME: privkey.pem
       LDAP_TLS_CA_CRT_FILENAME: chain.pem
+      LDAP_OPENLDAP_UID: ${UID}
+      LDAP_OPENLDAP_GID: ${GID}
     command: "--copy-service"
     <<: *restart
     networks:
@@ -628,12 +630,12 @@ services:
       - ${docker_data_folder}/openldap/ldap:/var/lib/ldap
       - ${docker_data_folder}/openldap/slapd.d:/etc/ldap/slapd.d
       # ubuntu path for Samba LDIF, this might be different with other distributions
-      - ${SAMBA_LDIF_PATH}:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba.ldif
+      - ${SAMBA_LDIF_PATH}:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba.ldif:ro
       # gotten from https://ubuntu.com/server/docs/samba-openldap-backend
-      - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif
-      - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif
+      - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif:ro
+      - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
-      - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs
+      - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
   traefik-certificate-extractor:
