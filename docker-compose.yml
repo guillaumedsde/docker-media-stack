@@ -701,8 +701,8 @@ services:
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
     environment:
-      CLIENT_ID: ${OAUTH2_PROXY_CLIENT_SECRET}
-      CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
+      PROVIDERS_GOOGLE_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_SECRET}
+      PROVIDERS_GOOGLE_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
       SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
       #OIDC_ISSUER: https://accounts.google.com
       WHITELIST: "${allowed_emails}"
