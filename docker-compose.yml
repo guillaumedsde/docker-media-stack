@@ -125,12 +125,12 @@ services:
   # jackett tracker site scraper with API
   jackett:
     hostname: jackett.${root_domain}
-    image: linuxserver/jackett:latest
+    image: guillaumedsde/jackett-distroless:latest
     <<: *restart
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
-      - ${torrent_blackhole}:/downloads
+      - ${torrent_blackhole}:/blackhole
     networks:
       - traefik
     environment:
@@ -692,7 +692,7 @@ services:
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
     environment:
-      CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
+      CLIENT_ID: ${OAUTH2_PROXY_CLIENT_SECRET}
       CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
       SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
       #OIDC_ISSUER: https://accounts.google.com
