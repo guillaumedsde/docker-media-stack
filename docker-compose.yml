@@ -131,10 +131,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
       - ${torrent_blackhole}:/blackhole
+    tmpfs:
+      - "/var:rw,exec"
+      - "/tmp:rw,exec"
+    read_only: true
     networks:
       - traefik
     environment:
       <<: *conf
+      S6_READ_ONLY_ROOT: "1"
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
@@ -152,10 +157,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/hydra:/config
       - ${torrent_blackhole}:/blackhole
+    tmpfs:
+      - "/var:rw,exec"
+      - "/tmp:rw,exec"
+    read_only: true
     networks:
       - traefik
     environment:
       <<: *conf
+      S6_READ_ONLY_ROOT: 1
     labels:
       <<: *securityHeaders
       <<: *keycloakLabels
