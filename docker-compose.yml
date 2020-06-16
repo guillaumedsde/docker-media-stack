@@ -4,7 +4,7 @@
 #   1. configure your desired variables in the .env file
 #   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
-version: "3.4"
+version: "3.5"
 
 # basic common configuration for most containers
 x-conf: &conf
@@ -595,6 +595,71 @@ services:
     security_opt:
       - apparmor:unconfined
 
+  # Diskover web UI for disk usage analysis
+  diskover:
+    hostname: diskover.${root_domain}
+    image: linuxserver/diskover:latest
+    environment:
+      <<: *conf
+      REDIS_HOST: diskover-redis
+      REDIS_PORT: "6379"
+      ES_HOST: diskover-elasticsearch
+      ES_PORT: "9200"
+      ES_USER: elastic
+      # NOTE: default password for ES is "changeme", cannot set it through environement with ES<6.1
+      ES_PASS: ${DISKOVER_ES_PASSWORD}
+      RUN_ON_START: "true"
+      USE_CRON: "true"
+    volumes:
+      - ${docker_data_folder}/diskover/config:/config
+      - ${data_folder}/diskover/data:/data
+    networks:
+      - traefik
+      - diskover
+    # TODO: reverse proxy all ports not just 80
+    # ports:
+    #   - 80:80
+    #   - 9181:9181
+    #   - 9999:9999
+    # TODO: probably need to ajust this
+    # mem_limit: 4096m
+    depends_on:
+      - diskover-elasticsearch
+      - diskover-redis
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:diskover.${root_domain},disk.${root_domain}"
+      traefik.port: "80"
+      traefik.docker.network: traefik
+
+  # ElasticSearch Instance for diskover
+  diskover-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.9
+    volumes:
+      - ${docker_data_folder}/diskover-elasticsearch/data:/usr/share/elasticsearch/data
+    # TODO: seperate network
+    networks:
+      - diskover
+    environment:
+      - bootstrap.memory_lock=true
+      # TODO: probably need to ajust this
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  # Redis instance for diskover
+  diskover-redis:
+    image: redis:alpine
+    volumes:
+      - ${docker_data_folder}/diskover-redis:/data
+    # TODO: seperate network
+    networks:
+      - diskover
+
   ##################################################################
   # Authentication
 
@@ -709,7 +774,6 @@ services:
 
   # OIDC forward authentication for traefik
   traefik-forward-auth:
-    hostname: oauth.${root_domain}
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
     environment:
@@ -732,7 +796,6 @@ services:
 
   # OIDC forward authentication for traefik
   traefik-forward-auth-keycloak:
-    hostname: keycloakauth.${root_domain}
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
     environment:
@@ -755,4 +818,11 @@ services:
 
 networks:
   watchtower:
+    driver: bridge
   traefik:
+    driver: bridge
+    name: traefik
+  diskover:
+    driver: bridge
+    internal: true
+    name: diskover
