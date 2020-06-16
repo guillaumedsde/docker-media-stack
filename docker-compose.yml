@@ -680,7 +680,7 @@ services:
     command: "--copy-service"
     <<: *restart
     networks:
-      traefik:
+      ldap:
         aliases:
           - ldap.${root_domain}
           - openldap
@@ -724,6 +724,7 @@ services:
       LAM_SKIP_PRECONFIGURE: "true"
     networks:
       - traefik
+      - ldap
     <<: *restart
     labels:
       <<: *securityHeaders
@@ -731,6 +732,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:lam.${root_domain}"
       traefik.port: "80"
+      traefik.docker.network: traefik
 
   # SSO
   keycloak:
@@ -752,11 +754,14 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - traefik
+      - ldap
+      - keycloak
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
       traefik.frontend.rule: "Host:keycloak.${root_domain}"
       traefik.port: "8080"
+      traefik.docker.network: traefik
 
   # DB for keycloak
   keycloak-db:
@@ -770,7 +775,7 @@ services:
       - ${docker_data_folder}/keycloak-db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - keycloak
 
   # OIDC forward authentication for traefik
   traefik-forward-auth:
@@ -826,3 +831,11 @@ networks:
     driver: bridge
     internal: true
     name: diskover
+  ldap:
+    driver: bridge
+    internal: true
+    name: ldap
+  keycloak:
+    driver: bridge
+    internal: true
+    name: keycloak
