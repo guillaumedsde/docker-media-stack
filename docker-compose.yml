@@ -375,6 +375,7 @@ services:
       - ${data_folder}:/data:ro
     networks:
       - traefik
+      - ldap
     environment:
       <<: *conf
     labels:
