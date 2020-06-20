@@ -578,7 +578,7 @@ services:
       <<: *conf
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
-      MYSQL_PASSWORD: ${nextcloud_db_pass}
+      POSTGRES_PASSWORD: ${nextcloud_db_pass}
       POSTGRES_HOST: nextcloud-mariadb
       NEXTCLOUD_TRUSTED_DOMAINS: cloud.${root_domain} nextcloud.${root_domain}
       SMTP_HOST: smtp.sendgrid.net
