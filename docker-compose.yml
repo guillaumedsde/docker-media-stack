@@ -371,7 +371,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jellyfin:/config
-      - ${data_folder}:/data
+      - ${data_folder}:/data:ro
     environment:
       <<: *conf
     labels:
