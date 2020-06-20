@@ -362,6 +362,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:plex.${root_domain}"
       traefik.port: "32400"
+
   # jellyfin media server
   jellyfin:
     container_name: jellyfin
@@ -372,6 +373,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jellyfin:/config
       - ${data_folder}:/data:ro
+    networks:
+      - traefik
     environment:
       <<: *conf
     labels:
