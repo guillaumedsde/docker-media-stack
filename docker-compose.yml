@@ -564,7 +564,7 @@ services:
     hostname: cloud.${root_domain}
     depends_on:
       - "traefik"
-      - "nextcloud-mariadb"
+      - "nextcloud-postgres"
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
       - ${data_folder}:/data
