@@ -579,8 +579,7 @@ services:
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
-      POSTGRES_HOST: nextcloud-mariadb
-      NEXTCLOUD_TRUSTED_DOMAINS: cloud.${root_domain} nextcloud.${root_domain}
+      POSTGRES_HOST: nextcloud-postgres
       SMTP_HOST: smtp.sendgrid.net
       SMTP_SECURE: ssl
       SMTP_PORT: "465"
