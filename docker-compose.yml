@@ -383,6 +383,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:jellyfin.${root_domain}"
       traefik.port: "8096"
+      traefik.docker.network: traefik
 
   # ombi, plex media requests
   ombi:
