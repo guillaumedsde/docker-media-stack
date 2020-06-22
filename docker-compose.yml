@@ -654,8 +654,8 @@ services:
       SMTP_SERVER: smtp.sendgrid.net
       SMTP_PORT: "465"
       SMTP_AUTHENTICATION: login
-      SMTP_ENABLE_STARTTLS_AUTO: false
-      SMTP_SSL: true
+      SMTP_ENABLE_STARTTLS_AUTO: "false"
+      SMTP_SSL: "true"
       EMAIL_FROM_ADDRESS: huginn@${root_domain}
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
