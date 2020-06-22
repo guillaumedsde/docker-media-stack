@@ -649,7 +649,11 @@ services:
       - "huginn-mariadb"
     environment:
       <<: *conf
+      HUGINN_DOMAIN: huginn.${root_domain}
+      HUGINN_RAILS_ENV: production
+      HUGINN_INVITATION_CODE: ${HUGINN_INVITATION_CODE}
       HUGINN_DATABASE_NAME: huginn
+      HUGINN_IMPORT_DEFAULT_SCENARIO_FOR_ALL_USERS: "false"
       HUGINN_DATABASE_USERNAME: root
       HUGINN_DATABASE_PASSWORD: ${HUGINN_DB_PASS}
       MYSQL_PORT_3306_TCP_ADDR: huginn-mariadb
@@ -664,7 +668,6 @@ services:
       HUGINN_SMTP_ENABLE_STARTTLS_AUTO: "false"
       HUGINN_SMTP_SSL: "true"
       HUGINN_EMAIL_FROM_ADDRESS: huginn@${root_domain}
-      HUGINN_INVITATION_CODE: ${HUGINN_INVITATION_CODE}
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
