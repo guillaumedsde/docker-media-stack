@@ -642,6 +642,7 @@ services:
     image: gitlab/gitlab-runner:alpine
 
   n8n:
+    hostname: n8n.${root_domain}
     depends_on:
       - "traefik"
     environment:
@@ -654,7 +655,7 @@ services:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
+      traefik.frontend.rule: "Host:n8n.${root_domain}"
       traefik.port: "5678"
     <<: *restart
     image: n8nio/n8n:latest
