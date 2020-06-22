@@ -652,15 +652,16 @@ services:
       HUGINN_DATABASE_NAME: huginn
       HUGINN_DATABASE_USERNAME: root
       HUGINN_DATABASE_PASSWORD: ${HUGINN_DB_PASS}
-      SMTP_DOMAIN: ${root_domain}
-      SMTP_USER_NAME: apikey
-      SMTP_PASSWORD: ${SENDGRID_PASS}
-      SMTP_SERVER: smtp.sendgrid.net
-      SMTP_PORT: "465"
-      SMTP_AUTHENTICATION: login
-      SMTP_ENABLE_STARTTLS_AUTO: "false"
-      SMTP_SSL: "true"
-      EMAIL_FROM_ADDRESS: huginn@${root_domain}
+      HUGINN_DATABASE_HOST: huginn-mariadb
+      HUGINN_SMTP_DOMAIN: ${root_domain}
+      HUGINN_SMTP_USER_NAME: apikey
+      HUGINN_SMTP_PASSWORD: ${SENDGRID_PASS}
+      HUGINN_SMTP_SERVER: smtp.sendgrid.net
+      HUGINN_SMTP_PORT: "465"
+      HUGINN_SMTP_AUTHENTICATION: login
+      HUGINN_SMTP_ENABLE_STARTTLS_AUTO: "false"
+      HUGINN_SMTP_SSL: "true"
+      HUGINN_EMAIL_FROM_ADDRESS: huginn@${root_domain}
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
