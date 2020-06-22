@@ -648,6 +648,9 @@ services:
       - "traefik"
     environment:
       <<: *conf
+      HUGINN_DATABASE_NAME: huginn
+      HUGINN_DATABASE_USERNAME: root
+      HUGINN_DATABASE_PASSWORD: ${HUGINN_DB_PASS}
       SMTP_DOMAIN: ${root_domain}
       SMTP_USER_NAME: apikey
       SMTP_PASSWORD: ${SENDGRID_PASS}
@@ -661,14 +664,26 @@ services:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
       - traefik
+      - huginn
     labels:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:huginn.${root_domain}"
       traefik.port: "3000"
+      traefik.docker.network: traefik
     <<: *restart
     image: huginn/huginn:latest
+
+  huginn-mariadb:
+    image: mariadb
+    volumes:
+      - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
+    networks:
+      - huginn
+    <<: *restart
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HUGINN_DB_PASS}
 
   ##################################################################
   # Monitoring
