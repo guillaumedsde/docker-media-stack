@@ -983,6 +983,10 @@ networks:
     driver: bridge
     internal: true
     name: nextcloud
+  huginn:
+    driver: bridge
+    internal: true
+    name: huginn
   samba:
     driver: bridge
     name: samba
