@@ -641,24 +641,34 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     image: gitlab/gitlab-runner:alpine
 
-  n8n:
-    hostname: n8n.${root_domain}
+  # automation platform
+  huginn:
+    hostname: huginn.${root_domain}
     depends_on:
       - "traefik"
     environment:
       <<: *conf
+      SMTP_DOMAIN: ${root_domain}
+      SMTP_USER_NAME: apikey
+      SMTP_PASSWORD: ${SENDGRID_PASS}
+      SMTP_SERVER: smtp.sendgrid.net
+      SMTP_PORT: "465"
+      SMTP_AUTHENTICATION: login
+      SMTP_ENABLE_STARTTLS_AUTO: false
+      SMTP_SSL: true
+      EMAIL_FROM_ADDRESS: huginn@${root_domain}
     volumes:
-      - ${docker_data_folder}/n8n:/root/.n8n
+      - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
       - traefik
     labels:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:n8n.${root_domain}"
-      traefik.port: "5678"
+      traefik.frontend.rule: "Host:huginn.${root_domain}"
+      traefik.port: "3000"
     <<: *restart
-    image: n8nio/n8n:latest
+    image: huginn/huginn:latest
 
   ##################################################################
   # Monitoring
