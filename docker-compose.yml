@@ -664,6 +664,7 @@ services:
       HUGINN_SMTP_ENABLE_STARTTLS_AUTO: "false"
       HUGINN_SMTP_SSL: "true"
       HUGINN_EMAIL_FROM_ADDRESS: huginn@${root_domain}
+      HUGINN_INVITATION_CODE: ${HUGINN_INVITATION_CODE}
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
