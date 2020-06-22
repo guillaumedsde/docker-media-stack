@@ -641,6 +641,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     image: gitlab/gitlab-runner:alpine
 
+  n8n:
+    depends_on:
+      - "traefik"
+    environment:
+      <<: *conf
+    volumes:
+      - ${docker_data_folder}/n8n:/root/.n8n
+    networks:
+      - traefik
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
+      traefik.port: "5678"
+    <<: *restart
+    image: n8nio/n8n:latest
+
   ##################################################################
   # Monitoring
 
