@@ -534,6 +534,8 @@ services:
 
   # JS CMS
   ghost_margot:
+    depends_on:
+      - "traefik"
     environment:
       <<: *conf
       url: "https://margot.${tld}"
@@ -563,7 +565,6 @@ services:
   nextcloud:
     hostname: cloud.${root_domain}
     depends_on:
-      - "traefik"
       - "nextcloud-postgres"
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
@@ -645,7 +646,7 @@ services:
   huginn:
     hostname: huginn.${root_domain}
     depends_on:
-      - "traefik"
+      - "huginn-mariadb"
     environment:
       <<: *conf
       HUGINN_DATABASE_NAME: huginn
