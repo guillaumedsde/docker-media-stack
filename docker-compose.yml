@@ -674,7 +674,6 @@ services:
       - huginn
     labels:
       <<: *securityHeaders
-      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:huginn.${root_domain}"
       traefik.port: "3000"
