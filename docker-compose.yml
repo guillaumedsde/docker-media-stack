@@ -572,8 +572,6 @@ services:
       - traefik
       - nextcloud
       - ldap
-    extra_hosts:
-      - host.docker.internal:172.17.0.1
     environment:
       <<: *conf
       POSTGRES_DB: nextcloud
@@ -598,7 +596,7 @@ services:
       traefik.frontend.redirect.regex: https://(.*)/.well-known/(card|cal)dav
       traefik.frontend.redirect.replacement: https://$$1/remote.php/dav/
     <<: *restart
-    image: nextcloud:latest
+    image: guillaumedsde/nextcloud-samba:latest
 
   # databse for nextcloud
   nextcloud-postgres:
