@@ -584,7 +584,7 @@ services:
       SMTP_AUTHTYPE: login
       SMTP_NAME: apikey
       SMTP_PASSWORD: ${SENDGRID_PASS}
-      MAIL_FROM_ADDRESS: nextcloud@${root_domain}
+      MAIL_FROM_ADDRESS: nextcloud
       MAIL_DOMAIN: ${root_domain}
     labels:
       <<: *securityHeaders
