@@ -19,7 +19,6 @@ x-restart: &restart
 # container logging policy
 x-logging: &logging
   logging:
-    driver: "json-file"
     options:
       max-file: 5
       max-size: 10m
