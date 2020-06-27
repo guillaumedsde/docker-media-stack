@@ -391,6 +391,8 @@ services:
     image: linuxserver/jellyfin:latest
     <<: *restart
     <<: *logging
+    depends_on:
+      - openldap
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jellyfin:/config
@@ -594,7 +596,9 @@ services:
   nextcloud:
     hostname: cloud.${root_domain}
     depends_on:
-      - "nextcloud-postgres"
+      - nextcloud-postgres
+      - samba
+      - openldap
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
       - ${data_folder}:/data
@@ -655,6 +659,8 @@ services:
       - /etc/samba/smb.conf:/etc/samba/smb.conf:ro
       - /var/lib/samba/private/secrets.tdb:/var/lib/samba/private/secrets.tdb
       - /data:/data
+    depends_on:
+      - openldap
     <<: *restart
     <<: *logging
     networks:
@@ -910,6 +916,8 @@ services:
     networks:
       - traefik
       - ldap
+    depends_on:
+      - openldap
     <<: *restart
     <<: *logging
     labels:
@@ -937,6 +945,9 @@ services:
       KEYCLOAK_HOSTNAME: keycloak.${root_domain}
     <<: *restart
     <<: *logging
+    depends_on:
+      - keycloak-db
+      - openldap
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -1005,6 +1016,8 @@ services:
       CSRF_COOKIE_NAME: _keycloak_forward_auth_csrf
     networks:
       - traefik
+    depends_on:
+      - keycloak
     labels:
       <<: *keycloakLabels
       traefik.enable: "true"
