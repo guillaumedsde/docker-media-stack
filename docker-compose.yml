@@ -432,7 +432,7 @@ services:
       LDAP_SERVER_URI: ldap://openldap:389
       LDAP_BIND_DN: ${LDAP_BIND_DN}
       LDAP_BIND_PASSWORD: ${LDAP_ADMIN_PASSWORD}
-      LDAP_SEARCH_FILTER: (|(uid={0})(cn={0})(mail={0}))
+      LDAP_SEARCH_FILTER: (|(cn={0})(mail={0}))
       LDAP_ROOT_DN: ${LDAP_ROOT_DN}
     labels:
       <<: *securityHeaders
