@@ -16,6 +16,14 @@ x-conf: &conf
 x-restart: &restart
   restart: always
 
+# container logging policy
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-file: 5
+      max-size: 10m
+
 # traefik security headers
 x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
   traefik.frontend.headers.SSLRedirect: "true"
@@ -63,6 +71,7 @@ services:
       traefik.frontend.rule: Host:traefik.${root_domain}
       traefik.port: "8080"
     <<: *restart
+    <<: *logging
     networks:
       - traefik
     volumes:
@@ -79,6 +88,7 @@ services:
   watchtower:
     image: containrrr/watchtower:latest
     <<: *restart
+    <<: *logging
     read_only: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -93,6 +103,7 @@ services:
   # Torrent client
   qbittorrent:
     <<: *restart
+    <<: *logging
     cap_add:
       - NET_ADMIN
     volumes:
@@ -123,6 +134,7 @@ services:
     hostname: jackett.${root_domain}
     image: guillaumedsde/jackett-distroless:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
@@ -147,6 +159,7 @@ services:
     image: guillaumedsde/nzbhydra2-distroless:latest
     hostname: hydra.${root_domain}
     <<: *restart
+    <<: *logging
     depends_on:
       - "jackett"
     volumes:
@@ -175,6 +188,7 @@ services:
     hostname: movies.${root_domain}
     image: linuxserver/radarr:nightly
     <<: *restart
+    <<: *logging
     depends_on:
       - "jackett"
       - "qbittorrent"
@@ -199,6 +213,7 @@ services:
     hostname: series.${root_domain}
     image: linuxserver/sonarr:preview
     <<: *restart
+    <<: *logging
     depends_on:
       - "jackett"
       - "qbittorrent"
@@ -223,6 +238,7 @@ services:
     hostname: music.${root_domain}
     image: linuxserver/lidarr:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "jackett"
       - "qbittorrent"
@@ -246,6 +262,7 @@ services:
     hostname: subtitles.${root_domain}
     image: hotio/bazarr:stable-ffsubsync
     <<: *restart
+    <<: *logging
     depends_on:
       - "radarr"
       - "sonarr"
@@ -270,6 +287,7 @@ services:
     hostname: books.${root_domain}
     image: linuxserver/lazylibrarian:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "jackett"
       - "qbittorrent"
@@ -296,6 +314,7 @@ services:
     hostname: comics.${root_domain}
     image: hotio/mylar3:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "jackett"
       - "qbittorrent"
@@ -321,6 +340,7 @@ services:
     hostname: ${root_domain}
     image: b4bz/homer:latest
     <<: *restart
+    <<: *logging
     networks:
       - traefik
     volumes:
@@ -337,6 +357,7 @@ services:
     hostname: plex.${root_domain}
     image: linuxserver/plex:latest
     <<: *restart
+    <<: *logging
     # note use the host network mode on first startup,
     # then you can use the regular bridge mode
     # network_mode: "host"
@@ -369,6 +390,7 @@ services:
     hostname: jellyfin.${root_domain}
     image: linuxserver/jellyfin:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jellyfin:/config
@@ -390,6 +412,7 @@ services:
     hostname: ombi.${root_domain}
     image: linuxserver/ombi:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "sonarr"
       - "radarr"
@@ -413,6 +436,7 @@ services:
     hostname: cops.${root_domain}
     image: linuxserver/cops:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/cops:/config
@@ -433,6 +457,7 @@ services:
     hostname: read.${root_domain}
     image: linuxserver/calibre-web:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/calibre-web:/config
@@ -454,6 +479,7 @@ services:
     hostname: doc.${root_domain}
     image: cuotos/gollum-alpine:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/gollum:/wiki
@@ -474,6 +500,7 @@ services:
     hostname: transcode.${root_domain}
     image: josh5/unmanic:latest
     <<: *restart
+    <<: *logging
     networks:
       - traefik
     volumes:
@@ -494,6 +521,7 @@ services:
   pyload:
     image: linuxserver/pyload
     <<: *restart
+    <<: *logging
     hostname: download.${root_domain}
     environment:
       <<: *conf
@@ -517,6 +545,7 @@ services:
   youtube-dl:
     image: kmb32123/youtube-dl-server:latest
     <<: *restart
+    <<: *logging
     hostname: youtube-dl.${root_domain}
     environment:
       <<: *conf
@@ -558,6 +587,7 @@ services:
     networks:
       - traefik
     <<: *restart
+    <<: *logging
     image: ghost:alpine
 
   # personal cloud
@@ -596,6 +626,7 @@ services:
       traefik.frontend.redirect.regex: https://(.*)/.well-known/(card|cal)dav
       traefik.frontend.redirect.replacement: https://$$1/remote.php/dav/
     <<: *restart
+    <<: *logging
     image: guillaumedsde/nextcloud-samba:latest
 
   # databse for nextcloud
@@ -608,6 +639,7 @@ services:
     networks:
       - nextcloud
     <<: *restart
+    <<: *logging
     image: postgres:alpine
 
   samba:
@@ -624,6 +656,7 @@ services:
       - /var/lib/samba/private/secrets.tdb:/var/lib/samba/private/secrets.tdb
       - /data:/data
     <<: *restart
+    <<: *logging
     networks:
       - samba
       - ldap
@@ -632,6 +665,7 @@ services:
   # gitlab runner
   gitlab-runner:
     <<: *restart
+    <<: *logging
     networks:
       - gitlab-runner
     volumes:
@@ -677,6 +711,7 @@ services:
       traefik.port: "3000"
       traefik.docker.network: traefik
     <<: *restart
+    <<: *logging
     image: huginn/huginn:latest
 
   huginn-mariadb:
@@ -686,6 +721,7 @@ services:
     networks:
       - huginn
     <<: *restart
+    <<: *logging
     environment:
       MYSQL_ROOT_PASSWORD: ${HUGINN_DB_PASS}
 
@@ -697,6 +733,7 @@ services:
     hostname: tautulli.${root_domain}
     image: linuxserver/tautulli:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "plex"
     volumes:
@@ -720,6 +757,7 @@ services:
     hostname: netdata.${root_domain}
     image: netdata/netdata:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -771,6 +809,7 @@ services:
     # TODO: probably need to ajust this
     mem_limit: 4096m
     <<: *restart
+    <<: *logging
     depends_on:
       - diskover-elasticsearch
       - diskover-redis
@@ -799,6 +838,7 @@ services:
         soft: -1
         hard: -1
     <<: *restart
+    <<: *logging
 
   # Redis instance for diskover
   diskover-redis:
@@ -809,6 +849,7 @@ services:
     networks:
       - diskover
     <<: *restart
+    <<: *logging
 
   ##################################################################
   # Authentication
@@ -829,6 +870,7 @@ services:
       LDAP_OPENLDAP_GID: ${GID}
     command: "--copy-service --loglevel debug"
     <<: *restart
+    <<: *logging
     networks:
       - ldap
     ports:
@@ -869,6 +911,7 @@ services:
       - traefik
       - ldap
     <<: *restart
+    <<: *logging
     labels:
       <<: *securityHeaders
       <<: *oauthLabels
@@ -893,6 +936,7 @@ services:
       PROXY_ADDRESS_FORWARDING: "true"
       KEYCLOAK_HOSTNAME: keycloak.${root_domain}
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -909,6 +953,7 @@ services:
   # DB for keycloak
   keycloak-db:
     <<: *restart
+    <<: *logging
     environment:
       # Tell Postgress what user/password to create
       POSTGRES_USER: keycloak
@@ -924,6 +969,7 @@ services:
   traefik-forward-auth:
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
+    <<: *logging
     environment:
       PROVIDERS_GOOGLE_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
       PROVIDERS_GOOGLE_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
@@ -946,6 +992,7 @@ services:
   traefik-forward-auth-keycloak:
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
+    <<: *logging
     environment:
       PROVIDERS_OIDC_CLIENT_ID: ${KEYCLOAK_OIDC_CLIENT_ID}
       PROVIDERS_OIDC_CLIENT_SECRET: ${KEYCLOAK_OIDC_CLIENT_SECRET}
