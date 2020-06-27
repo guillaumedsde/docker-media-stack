@@ -423,10 +423,17 @@ services:
       - ${data_folder}/music:/music:ro
     networks:
       - traefik
+      - ldap
     environment:
       <<: *conf
       FUNKWHALE_HOSTNAME: funkwhale.${root_domain}
       NESTED_PROXY: "1"
+      LDAP_ENABLED: "True"
+      LDAP_SERVER_URI: ldap://openldap:389
+      LDAP_BIND_DN: ${LDAP_BIND_DN}
+      LDAP_BIND_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_SEARCH_FILTER: (|(uid={0})(cn={0})(mail={0}))
+      LDAP_ROOT_DN: ${LDAP_ROOT_DN}
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
