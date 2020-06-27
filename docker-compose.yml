@@ -409,38 +409,6 @@ services:
       traefik.port: "8096"
       traefik.docker.network: traefik
 
-  # funkwhale, music streaming
-  funkwhale:
-    hostname: funkwhale.${root_domain}
-    image: funkwhale/all-in-one:latest
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - openldap
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/funkwhale:/data
-      - ${data_folder}/music:/music:ro
-    networks:
-      - traefik
-      - ldap
-    environment:
-      <<: *conf
-      FUNKWHALE_HOSTNAME: funkwhale.${root_domain}
-      NESTED_PROXY: "1"
-      LDAP_ENABLED: "True"
-      LDAP_SERVER_URI: ldap://openldap:389
-      LDAP_BIND_DN: ${LDAP_BIND_DN}
-      LDAP_BIND_PASSWORD: ${LDAP_ADMIN_PASSWORD}
-      LDAP_SEARCH_FILTER: (|(cn={0})(mail={0}))
-      LDAP_ROOT_DN: ${LDAP_ROOT_DN}
-    labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:funkwhale.${root_domain}"
-      traefik.port: "80"
-      traefik.docker.network: traefik
-
   # ombi, plex media requests
   ombi:
     hostname: ombi.${root_domain}
