@@ -565,8 +565,6 @@ services:
 
   # JS CMS
   ghost_margot:
-    depends_on:
-      - "traefik"
     environment:
       <<: *conf
       url: "https://margot.${tld}"
@@ -585,6 +583,33 @@ services:
       traefik.port: "2368"
     volumes:
       - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    <<: *restart
+    <<: *logging
+    image: ghost:alpine
+
+  # JS CMS
+  ghost_guillaume:
+    environment:
+      <<: *conf
+      url: "https://blog.guillaume.${tld}"
+      mail__transport: SMTP
+      mail__from: ghost@${root_domain}
+      mail__options__service: SendGrid
+      mail__options__host: smtp.sendgrid.net
+      mail__options__port: "465"
+      mail__options__secureConnection: "true"
+      mail__options__auth__user: apikey
+      mail__options__auth__pass: ${SENDGRID_PASS}
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:guillaume.${tld}"
+      traefik.port: "2368"
+    volumes:
+      - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
       - /etc/localtime:/etc/localtime:ro
     networks:
       - traefik
