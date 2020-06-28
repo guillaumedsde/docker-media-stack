@@ -920,17 +920,17 @@ services:
 
   # OpenLDAP certificate handler
   traefik-certificate-extractor:
-    entrypoint: >
-      /bin/sh -c "while true
-                    do python3 -u extractor.py
-                    chown -R ${UID}:${GID} /app/certs
-                    chmod 600 /app/certs
-                    sleep 1h
-                  done"
+    image: ldez/traefik-certs-dumper:v2.7.0
+    entrypoint: sh -c '
+      apk add jq
+      ; while ! [ -e /data/acme.json ]
+      || ! [ `jq ".Certificates | length" /data/acme.json` != 0 ]; do
+      sleep 1
+      ; done
+      && traefik-certs-dumper file --watch --source /data/acme.json --dest /data/certs' --post-hook "chown -R ${UID}:${GID} /data/certs && chmod -R 600 /data/certs"
     volumes:
-      - ${docker_data_folder}/traefik/acme.json:/app/data/acme.json:ro
-      - ${docker_data_folder}/openldap/certs:/app/certs
-    image: danielhuisman/traefik-certificate-extractor
+      - ${docker_data_folder}/traefik/acme.json:/data/acme.json:ro
+      - ${docker_data_folder}/openldap/certs:/data/certs
 
   # LDAP Server management web GUI
   lam:
