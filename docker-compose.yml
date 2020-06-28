@@ -895,9 +895,9 @@ services:
       LDAP_ORGANISATION: ${LDAP_ORGANISATION}
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
       LDAP_TLS: "true"
-      LDAP_TLS_CRT_FILENAME: certificate.crt
-      LDAP_TLS_KEY_FILENAME: privatekey.key
-      LDAP_TLS_CA_CRT_FILENAME: certificate.crt
+      LDAP_TLS_CRT_FILENAME: ldap.${root_domain}.cer
+      LDAP_TLS_KEY_FILENAME: ldap.${root_domain}.key
+      LDAP_TLS_CA_CRT_FILENAME: ca.cer
       LDAP_OPENLDAP_UID: ${UID}
       LDAP_OPENLDAP_GID: ${GID}
     command: "--copy-service --loglevel debug"
@@ -917,7 +917,7 @@ services:
       - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif:ro
       - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
-      - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs:ro
+      - ${docker_data_folder}/openldap/certs/ldap.olloix.desusanne.com:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
   openldap-acme:
