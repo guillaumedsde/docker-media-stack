@@ -887,9 +887,10 @@ services:
 
   # LDAP server
   openldap:
-    hostname: openldap
+    hostname: ldap.${root_domain}
     image: osixia/openldap:latest
     environment:
+      HOSTNAME: ldap.${root_domain}
       LDAP_DOMAIN: ${root_domain}
       LDAP_ORGANISATION: ${LDAP_ORGANISATION}
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
