@@ -921,8 +921,7 @@ services:
 
   # OpenLDAP certificate handler
   openldap-acme:
-    image: neilpang/acme.sh:latest
-    network_mode: host
+    image: spritsail/acme.sh:latest
     user: ${UID}
     environment:
       OVH_AK: ${OVH_AK}
