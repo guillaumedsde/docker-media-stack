@@ -916,7 +916,7 @@ services:
       - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif:ro
       - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
-      - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs:ro
+      # - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
   traefik-certificate-extractor:
@@ -928,7 +928,7 @@ services:
       apk add jq
       ; while ! [ -e /data/acme.json ] || ! [ `jq ".Certificates | length" /data/acme.json` != 0 ]; do
       sleep 1
-      ; done && traefik-certs-dumper file --watch --source /data/acme.json --dest /data/certs --post-hook "chown -R ${UID}:${GID} /data/certs" '
+      ; done && traefik-certs-dumper file --watch --domain-subdir --source /data/acme.json --dest /data/certs --post-hook "chown -R ${UID}:${GID} /data/certs" '
     volumes:
       - ${docker_data_folder}/traefik/acme.json:/data/acme.json:ro
       - ${docker_data_folder}/openldap/certs:/data/certs
