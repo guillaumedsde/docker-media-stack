@@ -919,19 +919,18 @@ services:
       - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
-  traefik-certificate-extractor:
-    image: ldez/traefik-certs-dumper:v2.7.0
+  openldap-acme:
+    image: neilpang/acme.sh:latest
+    network_mode: host
+    user: ${UID}
     environment:
-      GID: ${GID}
-      UID: ${UID}
-    entrypoint: sh -c '
-      apk add jq
-      ; while ! [ -e /data/acme.json ] || ! [ `jq ".Certificates | length" /data/acme.json` != 0 ]; do
-      sleep 1
-      ; done && traefik-certs-dumper file --watch --domain-subdir --source /data/acme.json --dest /data/certs --post-hook "chown -R ${UID}:${GID} /data/certs" '
+      OVH_AK: ${OVH_AK}
+      OVH_AS: ${OVH_AS}
+      OVH_END_POINT: ovh-eu
+    command:
+      - daemon
     volumes:
-      - ${docker_data_folder}/traefik/acme.json:/data/acme.json:ro
-      - ${docker_data_folder}/openldap/certs:/data/certs
+      - ${docker_data_folder}/openldap/certs:/acme.sh
 
   # LDAP Server management web GUI
   lam:
