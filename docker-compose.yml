@@ -922,12 +922,13 @@ services:
   traefik-certificate-extractor:
     image: ldez/traefik-certs-dumper:v2.7.0
     environment:
-      <<: *conf
+      GID: ${GID}
+      UID: ${UID}
     entrypoint: sh -c '
       apk add jq
       ; while ! [ -e /data/acme.json ] || ! [ `jq ".Certificates | length" /data/acme.json` != 0 ]; do
       sleep 1
-      ; done && traefik-certs-dumper file --watch --source /data/acme.json --dest /data/certs' --post-hook "chown -R ${PUID}:${PGID} /data/certs && chmod -R 600 /data/certs"
+      ; done && traefik-certs-dumper file --watch --source /data/acme.json --dest /data/certs' --post-hook "chown -R ${UID}:${GID} /data/certs && chmod -R 600 /data/certs"
     volumes:
       - ${docker_data_folder}/traefik/acme.json:/data/acme.json:ro
       - ${docker_data_folder}/openldap/certs:/data/certs
