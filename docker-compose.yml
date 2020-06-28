@@ -924,10 +924,10 @@ services:
     image: spritsail/acme.sh:latest
     user: ${UID}
     environment:
-      OVH_AK: ${OVH_AK}
-      OVH_AS: ${OVH_AS}
-      OVH_CK: ${OVH_CK}
-      OVH_END_POINT: ovh-eu
+      OVH_AK: ${OVH_APPLICATION_KEY}
+      OVH_AS: ${OVH_APPLICATION_SECRET}
+      OVH_CK: ${OVH_CONSUMER_KEY}
+      OVH_END_POINT: ${OVH_ENDPOINT}
     command:
       - daemon
     volumes:
