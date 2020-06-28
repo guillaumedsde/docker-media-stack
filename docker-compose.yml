@@ -923,6 +923,8 @@ services:
     entrypoint: >
       /bin/sh -c "while true
                     do python3 -u extractor.py
+                    chown -R ${UID}:${GID} /app/certs
+                    chmod 600 /app/certs
                     sleep 1h
                   done"
     volumes:
