@@ -926,6 +926,7 @@ services:
     environment:
       OVH_AK: ${OVH_AK}
       OVH_AS: ${OVH_AS}
+      OVH_CK: ${OVH_CK}
       OVH_END_POINT: ovh-eu
     command:
       - daemon
