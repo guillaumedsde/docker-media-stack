@@ -606,7 +606,7 @@ services:
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:guillaume.${tld}"
+      traefik.frontend.rule: "Host:blog.guillaume.${tld}"
       traefik.port: "2368"
     volumes:
       - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
