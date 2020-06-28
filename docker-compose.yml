@@ -921,7 +921,7 @@ services:
 
   # OpenLDAP certificate handler
   openldap-acme:
-    image: spritsail/acme.sh:latest
+    image: guillaumedsde/acme.sh:latest
     user: ${UID}
     environment:
       OVH_AK: ${OVH_APPLICATION_KEY}
