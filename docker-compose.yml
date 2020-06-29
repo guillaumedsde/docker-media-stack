@@ -135,6 +135,9 @@ services:
     image: guillaumedsde/jackett-distroless:latest
     <<: *restart
     <<: *logging
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
@@ -161,7 +164,8 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - "jackett"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/hydra:/config
@@ -190,8 +194,8 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/radarr:/config
@@ -215,8 +219,8 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/sonarr:/config
@@ -240,8 +244,8 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lidarr:/config
@@ -289,8 +293,8 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lazylibrarian:/config
@@ -316,8 +320,8 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/mylar:/config
@@ -419,7 +423,6 @@ services:
       - "sonarr"
       - "radarr"
       - "lidarr"
-      - "plex"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/ombi:/config
