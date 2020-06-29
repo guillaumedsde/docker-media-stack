@@ -345,6 +345,9 @@ services:
     image: b4bz/homer:latest
     <<: *restart
     <<: *logging
+    environment:
+      UID: ${UID}
+      GID: ${GID}
     networks:
       - traefik
     volumes:
