@@ -1,19 +1,18 @@
 stages:
-  - documentation
+  - build
   - deploy
 
 render-compose-graph:
-  stage: documentation
+  stage: build
   image:
     name: pmsipilot/docker-compose-viz
     entrypoint: [""]
   script:
     - mkdir public
     - /dcv/bin/entrypoint.sh render -m image docker-compose.yml --horizontal  --no-volumes  --force
-    - cp docker-compose.png public/
   artifacts:
     paths:
-      - public
+      - docker-compose.png
     expire_in: 1 week
 
 # the 'pages' job will deploy and build your site to the 'public' path
@@ -31,6 +30,7 @@ pages:
     - gitbook install # add any requested plugins in book.json
   script:
     - gitbook build . public # build to public path
+    - cp docker-compose.png public/
   artifacts:
     paths:
       - public
