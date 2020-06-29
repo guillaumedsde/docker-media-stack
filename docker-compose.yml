@@ -831,7 +831,7 @@ services:
       ES_PASS: ${DISKOVER_ES_PASSWORD}
       RUN_ON_START: "true"
       USE_CRON: "true"
-      DISKOVER_OPTS: "--finddupes"
+      DISKOVER_OPTS: "--finddupes --optimizeindex"
     volumes:
       - ${docker_data_folder}/diskover/config:/config
       - ${data_folder}:/data
@@ -879,7 +879,7 @@ services:
 
   # Redis instance for diskover
   diskover-redis:
-    image: redis:4-alpine
+    image: redis:alpine
     volumes:
       - ${docker_data_folder}/diskover-redis:/data
     # TODO: seperate network
