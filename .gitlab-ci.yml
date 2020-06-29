@@ -3,6 +3,7 @@ stages:
   - deploy
 
 render-compose-graph:
+  stage: documentation
   image:
     name: pmsipilot/docker-compose-viz
     entrypoint: [""]
