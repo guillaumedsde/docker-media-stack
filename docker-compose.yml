@@ -706,7 +706,7 @@ services:
     read_only: true
     <<: *restart
     <<: *logging
-    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE} --user ${UID}:${GID}
+    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
     image: guillaumedsde/wsdd:latest
 
   # gitlab runner
