@@ -706,7 +706,7 @@ services:
     network_mode: "host"
     <<: *restart
     <<: *logging
-    command: --ipv4only --verbose --hostname LICORNE --workgroup WORKGROUP --discovery
+    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --discovery -i ${WSDD_INTERFACE}
     image: guillaumedsde/wsdd:latest
 
   # gitlab runner
