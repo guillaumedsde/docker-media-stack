@@ -702,11 +702,11 @@ services:
   # Web Service Discovery host daemon
   # see https://github.com/christgau/wsdd
   wsdd:
-    user: ${UID}:${GID}
     network_mode: "host"
+    read_only: true
     <<: *restart
     <<: *logging
-    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --discovery -i ${WSDD_INTERFACE}
+    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE} --user ${UID}:${GID}
     image: guillaumedsde/wsdd:latest
 
   # gitlab runner
