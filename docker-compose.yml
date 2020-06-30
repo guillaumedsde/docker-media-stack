@@ -703,7 +703,7 @@ services:
   # see https://github.com/christgau/wsdd
   wsdd:
     user: ${UID}:${GID}
-    net: "host"
+    network_mode: "host"
     <<: *restart
     <<: *logging
     command: --ipv4only --verbose --hostname LICORNE --workgroup WORKGROUP --discovery
