@@ -704,6 +704,8 @@ services:
   wsdd:
     user: ${UID}:${GID}
     net: "host"
+    <<: *restart
+    <<: *logging
     command: --ipv4only --verbose --hostname LICORNE --workgroup WORKGROUP --discovery
     image: guillaumedsde/wsdd:latest
 
