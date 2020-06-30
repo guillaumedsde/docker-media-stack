@@ -699,6 +699,14 @@ services:
       - ldap
     image: guillaumedsde/samba-ldap
 
+  # Web Service Discovery host daemon
+  # see https://github.com/christgau/wsdd
+  wsdd:
+    user: ${UID}:${GID}
+    net: "host"
+    command: --ipv4only --verbose --hostname LICORNE --workgroup WORKGROUP --discovery
+    image: guillaumedsde/wsdd:latest
+
   # gitlab runner
   gitlab-runner:
     <<: *restart
@@ -928,7 +936,7 @@ services:
   # OpenLDAP certificate handler
   openldap-acme:
     image: guillaumedsde/acme.sh:latest
-    user: ${UID}
+    user: ${UID}:${GID}
     environment:
       OVH_AK: ${LDAP_OVH_APPLICATION_KEY}
       OVH_AS: ${LDAP_OVH_APPLICATION_SECRET}
