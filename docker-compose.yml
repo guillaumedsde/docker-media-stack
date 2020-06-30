@@ -703,6 +703,7 @@ services:
   # see https://github.com/christgau/wsdd
   wsdd:
     network_mode: "host"
+    user: ${UID}:${GID}
     read_only: true
     <<: *restart
     <<: *logging
