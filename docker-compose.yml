@@ -315,7 +315,7 @@ services:
 
   # mylar, webapp for downloading comics
   mylar:
-    hostname: comics.${root_domain}
+    hostname: mylar.${root_domain}
     image: hotio/mylar3:latest
     <<: *restart
     <<: *logging
@@ -336,7 +336,7 @@ services:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
+      traefik.frontend.rule: "Host:mylar.${root_domain}"
       traefik.port: "8090"
 
   # homer is a homepage container
