@@ -791,6 +791,57 @@ services:
       - traefik
     image: gotify/server:latest
 
+  # bookmarking read it later application
+  wallabag:
+    depends_on:
+      - "wallabag-mariadb"
+      - "wallabag-redis"
+    volumes:
+      - ${docker_data_folder}/wallabag/data:/var/www/wallabag/data
+      - ${docker_data_folder}/wallabag/images:/var/www/wallabag/web/assets/images
+    networks:
+      - traefik
+      - wallabag
+    environment:
+      SYMFONY__ENV__DOMAIN_NAME: https://wallabag.${tld}
+      SYMFONY__ENV__MAILER_HOST: smtp.sendgrid.net
+      SYMFONY__ENV__MAILER_USER: apikey
+      SYMFONY__ENV__MAILER_PASSWORD: ${SENDGRID_PASS}
+      SYMFONY__ENV__FROM_EMAIL: wallabag@${root_domain}
+      SYMFONY__ENV__REDIS_HOST: wallabag-redis
+      SYMFONY__ENV__DATABASE_HOST: wallabag-mariadb
+      SYMFONY__ENV__DATABASE_PORT: "3306"
+      MYSQL_ROOT_PASSWORD: ${WALLABAG_DB_PASS}
+      SYMFONY__ENV__DATABASE_DRIVER: pdo_mysql
+      SYMFONY__ENV__DATABASE_NAME: wallabag
+      SYMFONY__ENV__DATABASE_CHARSET: utf8mb4
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:wallabag.${root_domain}"
+      traefik.port: "80"
+      traefik.docker.network: traefik
+    <<: *restart
+    image: wallabag/wallabag:latest
+
+  wallabag-mariadb:
+    image: mariadb
+    networks:
+      - wallabag
+    <<: *restart
+    <<: *logging
+    environment:
+      MYSQL_ROOT_PASSWORD: ${WALLABAG_DB_PASS}
+    volumes:
+      - ${docker_data_folder}/wallabag-mariadb:/var/lib/mysql
+
+  wallabag-redis:
+    image: redis:alpine
+    networks:
+      - wallabag
+    <<: *restart
+    <<: *logging
+
   ##################################################################
   # Monitoring
 
@@ -1114,6 +1165,10 @@ networks:
     driver: bridge
     internal: true
     name: huginn
+  wallabag:
+    driver: bridge
+    internal: true
+    name: wallabag
   samba:
     driver: bridge
     name: samba
