@@ -775,6 +775,7 @@ services:
 
   # Push notification service
   gotify:
+    hostname: gotify.${tld}
     environment:
       <<: *conf
     <<: *restart
@@ -793,12 +794,14 @@ services:
 
   # bookmarking read it later application
   wallabag:
+    hostname: wallabag.${tld}
     depends_on:
       - "wallabag-mariadb"
       - "wallabag-redis"
     volumes:
       - ${docker_data_folder}/wallabag/data:/var/www/wallabag/data
       - ${docker_data_folder}/wallabag/images:/var/www/wallabag/web/assets/images
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - traefik
       - wallabag
@@ -822,6 +825,7 @@ services:
       traefik.port: "80"
       traefik.docker.network: traefik
     <<: *restart
+    <<: *logging
     image: wallabag/wallabag:latest
 
   wallabag-mariadb:
