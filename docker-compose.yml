@@ -482,6 +482,28 @@ services:
       traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
       traefik.port: "8083"
 
+  # komga, for reading comics
+  komga:
+    hostname: comics.${root_domain}
+    image: gotson/komga:latest
+    user: "${UID}:${GID}"
+    <<: *restart
+    <<: *logging
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - ${docker_data_folder}/komga:/config
+      - ${data_folder}/comics:/books
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:comics.${root_domain},komga.${root_domain}"
+      traefik.port: "8080"
+
   # gollum for hosting documentation
   gollum:
     hostname: doc.${root_domain}
