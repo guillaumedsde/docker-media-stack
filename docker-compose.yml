@@ -773,6 +773,24 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${HUGINN_DB_PASS}
 
+  # Push notification service
+  gotify:
+    environment:
+      <<: *conf
+    <<: *restart
+    <<: *logging
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:gotify.${tld}"
+      traefik.port: "80"
+    volumes:
+      - ${docker_data_folder}/gotify:/app/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    image: gotify/server:latest
+
   ##################################################################
   # Monitoring
 
