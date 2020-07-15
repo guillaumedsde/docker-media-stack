@@ -16,6 +16,14 @@ x-conf: &conf
 x-restart: &restart
   restart: always
 
+# container logging policy
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-file: "5"
+      max-size: "10m"
+
 # traefik security headers
 x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
   traefik.frontend.headers.SSLRedirect: "true"
@@ -63,6 +71,7 @@ services:
       traefik.frontend.rule: Host:traefik.${root_domain}
       traefik.port: "8080"
     <<: *restart
+    <<: *logging
     networks:
       - traefik
     volumes:
@@ -79,6 +88,7 @@ services:
   watchtower:
     image: containrrr/watchtower:latest
     <<: *restart
+    <<: *logging
     read_only: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -93,6 +103,7 @@ services:
   # Torrent client
   qbittorrent:
     <<: *restart
+    <<: *logging
     cap_add:
       - NET_ADMIN
     volumes:
@@ -123,6 +134,10 @@ services:
     hostname: jackett.${root_domain}
     image: guillaumedsde/jackett-distroless:latest
     <<: *restart
+    <<: *logging
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
@@ -147,8 +162,10 @@ services:
     image: guillaumedsde/nzbhydra2-distroless:latest
     hostname: hydra.${root_domain}
     <<: *restart
+    <<: *logging
     depends_on:
-      - "jackett"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/hydra:/config
@@ -175,9 +192,10 @@ services:
     hostname: movies.${root_domain}
     image: linuxserver/radarr:nightly
     <<: *restart
+    <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/radarr:/config
@@ -199,9 +217,10 @@ services:
     hostname: series.${root_domain}
     image: linuxserver/sonarr:preview
     <<: *restart
+    <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/sonarr:/config
@@ -223,9 +242,10 @@ services:
     hostname: music.${root_domain}
     image: linuxserver/lidarr:latest
     <<: *restart
+    <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lidarr:/config
@@ -246,6 +266,7 @@ services:
     hostname: subtitles.${root_domain}
     image: hotio/bazarr:stable-ffsubsync
     <<: *restart
+    <<: *logging
     depends_on:
       - "radarr"
       - "sonarr"
@@ -270,9 +291,10 @@ services:
     hostname: books.${root_domain}
     image: linuxserver/lazylibrarian:latest
     <<: *restart
+    <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lazylibrarian:/config
@@ -293,12 +315,13 @@ services:
 
   # mylar, webapp for downloading comics
   mylar:
-    hostname: comics.${root_domain}
+    hostname: mylar.${root_domain}
     image: hotio/mylar3:latest
     <<: *restart
+    <<: *logging
     depends_on:
-      - "jackett"
-      - "qbittorrent"
+      jackett:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/mylar:/config
@@ -313,7 +336,7 @@ services:
       <<: *securityHeaders
       <<: *keycloakLabels
       traefik.enable: "true"
-      traefik.frontend.rule: "Host:comics.${root_domain},mylar.${root_domain}"
+      traefik.frontend.rule: "Host:mylar.${root_domain}"
       traefik.port: "8090"
 
   # homer is a homepage container
@@ -321,11 +344,15 @@ services:
     hostname: ${root_domain}
     image: b4bz/homer:latest
     <<: *restart
+    <<: *logging
+    environment:
+      UID: ${UID}
+      GID: ${GID}
     networks:
       - traefik
     volumes:
       - ${docker_data_folder}/homer/config.yml:/www/config.yml:ro
-      - ${docker_data_folder}/homer/assets:/www/assets:ro
+      - ${docker_data_folder}/homer/assets:/www/assets
     labels:
       <<: *securityHeaders
       traefik.enable: "true"
@@ -337,6 +364,7 @@ services:
     hostname: plex.${root_domain}
     image: linuxserver/plex:latest
     <<: *restart
+    <<: *logging
     # note use the host network mode on first startup,
     # then you can use the regular bridge mode
     # network_mode: "host"
@@ -369,6 +397,9 @@ services:
     hostname: jellyfin.${root_domain}
     image: linuxserver/jellyfin:latest
     <<: *restart
+    <<: *logging
+    depends_on:
+      - openldap
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jellyfin:/config
@@ -390,11 +421,11 @@ services:
     hostname: ombi.${root_domain}
     image: linuxserver/ombi:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "sonarr"
       - "radarr"
       - "lidarr"
-      - "plex"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/ombi:/config
@@ -413,6 +444,7 @@ services:
     hostname: cops.${root_domain}
     image: linuxserver/cops:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/cops:/config
@@ -433,6 +465,7 @@ services:
     hostname: read.${root_domain}
     image: linuxserver/calibre-web:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/calibre-web:/config
@@ -450,11 +483,34 @@ services:
       traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
       traefik.port: "8083"
 
+  # komga, for reading comics
+  komga:
+    hostname: comics.${root_domain}
+    image: gotson/komga:latest
+    user: "${UID}:${GID}"
+    <<: *restart
+    <<: *logging
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - ${docker_data_folder}/komga:/config
+      - ${data_folder}/comics:/books
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:comics.${root_domain},komga.${root_domain}"
+      traefik.port: "8080"
+
   # gollum for hosting documentation
   gollum:
     hostname: doc.${root_domain}
     image: cuotos/gollum-alpine:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/gollum:/wiki
@@ -475,6 +531,7 @@ services:
     hostname: transcode.${root_domain}
     image: josh5/unmanic:latest
     <<: *restart
+    <<: *logging
     networks:
       - traefik
     volumes:
@@ -495,6 +552,7 @@ services:
   pyload:
     image: linuxserver/pyload
     <<: *restart
+    <<: *logging
     hostname: download.${root_domain}
     environment:
       <<: *conf
@@ -518,6 +576,7 @@ services:
   youtube-dl:
     image: kmb32123/youtube-dl-server:latest
     <<: *restart
+    <<: *logging
     hostname: youtube-dl.${root_domain}
     environment:
       <<: *conf
@@ -535,8 +594,6 @@ services:
 
   # JS CMS
   ghost_margot:
-    depends_on:
-      - "traefik"
     environment:
       <<: *conf
       url: "https://margot.${tld}"
@@ -559,13 +616,43 @@ services:
     networks:
       - traefik
     <<: *restart
+    <<: *logging
+    image: ghost:alpine
+
+  # JS CMS
+  ghost_guillaume:
+    environment:
+      <<: *conf
+      url: "https://blog.guillaume.${tld}"
+      mail__transport: SMTP
+      mail__from: ghost@${root_domain}
+      mail__options__service: SendGrid
+      mail__options__host: smtp.sendgrid.net
+      mail__options__port: "465"
+      mail__options__secureConnection: "true"
+      mail__options__auth__user: apikey
+      mail__options__auth__pass: ${SENDGRID_PASS}
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:blog.guillaume.${tld}"
+      traefik.port: "2368"
+    volumes:
+      - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    <<: *restart
+    <<: *logging
     image: ghost:alpine
 
   # personal cloud
   nextcloud:
     hostname: cloud.${root_domain}
     depends_on:
-      - "nextcloud-postgres"
+      - nextcloud-postgres
+      - samba
+      - openldap
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
       - ${data_folder}:/data
@@ -573,8 +660,6 @@ services:
       - traefik
       - nextcloud
       - ldap
-    extra_hosts:
-      - host.docker.internal:172.17.0.1
     environment:
       <<: *conf
       POSTGRES_DB: nextcloud
@@ -587,7 +672,7 @@ services:
       SMTP_AUTHTYPE: login
       SMTP_NAME: apikey
       SMTP_PASSWORD: ${SENDGRID_PASS}
-      MAIL_FROM_ADDRESS: nextcloud@${root_domain}
+      MAIL_FROM_ADDRESS: nextcloud
       MAIL_DOMAIN: ${root_domain}
     labels:
       <<: *securityHeaders
@@ -599,7 +684,8 @@ services:
       traefik.frontend.redirect.regex: https://(.*)/.well-known/(card|cal)dav
       traefik.frontend.redirect.replacement: https://$$1/remote.php/dav/
     <<: *restart
-    image: nextcloud:latest
+    <<: *logging
+    image: guillaumedsde/nextcloud-samba:latest
 
   # databse for nextcloud
   nextcloud-postgres:
@@ -611,6 +697,7 @@ services:
     networks:
       - nextcloud
     <<: *restart
+    <<: *logging
     image: postgres:alpine
 
   samba:
@@ -622,19 +709,34 @@ services:
       - "445:445"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /etc/nslcd.conf:/etc/nslcd.conf:ro
-      - /etc/samba/smb.conf:/etc/samba/smb.conf:ro
-      - /var/lib/samba/private/secrets.tdb:/var/lib/samba/private/secrets.tdb
+      - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
+      - ${docker_data_folder}/samba/smb.conf:/etc/samba/smb.conf:ro
+      - ${docker_data_folder}/samba/secrets.tdb:/var/lib/samba/private/secrets.tdb
       - /data:/data
+    depends_on:
+      - openldap
     <<: *restart
+    <<: *logging
     networks:
       - samba
       - ldap
     image: guillaumedsde/samba-ldap
 
+  # Web Service Discovery host daemon
+  # see https://github.com/christgau/wsdd
+  wsdd:
+    network_mode: "host"
+    user: ${UID}:${GID}
+    read_only: true
+    <<: *restart
+    <<: *logging
+    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
+    image: guillaumedsde/wsdd:latest
+
   # gitlab runner
   gitlab-runner:
     <<: *restart
+    <<: *logging
     networks:
       - gitlab-runner
     volumes:
@@ -680,6 +782,7 @@ services:
       traefik.port: "3000"
       traefik.docker.network: traefik
     <<: *restart
+    <<: *logging
     image: huginn/huginn:latest
 
   huginn-mariadb:
@@ -689,8 +792,84 @@ services:
     networks:
       - huginn
     <<: *restart
+    <<: *logging
     environment:
       MYSQL_ROOT_PASSWORD: ${HUGINN_DB_PASS}
+
+  # Push notification service
+  gotify:
+    hostname: gotify.${tld}
+    environment:
+      <<: *conf
+    <<: *restart
+    <<: *logging
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:gotify.${tld}"
+      traefik.port: "80"
+    volumes:
+      - ${docker_data_folder}/gotify:/app/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    image: gotify/server:latest
+
+  # bookmarking read it later application
+  wallabag:
+    hostname: wallabag.${tld}
+    depends_on:
+      - "wallabag-mariadb"
+      - "wallabag-redis"
+    volumes:
+      - ${docker_data_folder}/wallabag/data:/var/www/wallabag/data
+      - ${docker_data_folder}/wallabag/images:/var/www/wallabag/web/assets/images
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+      - wallabag
+    environment:
+      SYMFONY__ENV__DOMAIN_NAME: https://wallabag.${tld}
+      SYMFONY__ENV__MAILER_HOST: smtp.sendgrid.net
+      SYMFONY__ENV__MAILER_USER: apikey
+      SYMFONY__ENV__MAILER_PASSWORD: ${SENDGRID_PASS}
+      SYMFONY__ENV__FROM_EMAIL: wallabag@${root_domain}
+      SYMFONY__ENV__REDIS_HOST: wallabag-redis
+      SYMFONY__ENV__DATABASE_HOST: wallabag-mariadb
+      SYMFONY__ENV__DATABASE_PORT: "3306"
+      SYMFONY__ENV__DATABASE_USER: wallabag
+      SYMFONY__ENV__DATABASE_PASSWORD: ${WALLABAG_DB_PASS}
+      SYMFONY__ENV__DATABASE_DRIVER: pdo_mysql
+      SYMFONY__ENV__DATABASE_NAME: wallabag
+      SYMFONY__ENV__DATABASE_CHARSET: utf8mb4
+      MYSQL_ROOT_PASSWORD: ${WALLABAG_DB_ROOT_PASS}
+    labels:
+      <<: *securityHeaders
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:wallabag.${root_domain}"
+      traefik.port: "80"
+      traefik.docker.network: traefik
+    <<: *restart
+    <<: *logging
+    image: wallabag/wallabag:latest
+
+  wallabag-mariadb:
+    image: mariadb
+    networks:
+      - wallabag
+    <<: *restart
+    <<: *logging
+    environment:
+      MYSQL_ROOT_PASSWORD: ${WALLABAG_DB_PASS}
+    volumes:
+      - ${docker_data_folder}/wallabag-mariadb:/var/lib/mysql
+
+  wallabag-redis:
+    image: redis:alpine
+    networks:
+      - wallabag
+    <<: *restart
+    <<: *logging
 
   ##################################################################
   # Monitoring
@@ -700,6 +879,7 @@ services:
     hostname: tautulli.${root_domain}
     image: linuxserver/tautulli:latest
     <<: *restart
+    <<: *logging
     depends_on:
       - "plex"
     volumes:
@@ -723,6 +903,7 @@ services:
     hostname: netdata.${root_domain}
     image: netdata/netdata:latest
     <<: *restart
+    <<: *logging
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -759,7 +940,7 @@ services:
       ES_PASS: ${DISKOVER_ES_PASSWORD}
       RUN_ON_START: "true"
       USE_CRON: "true"
-      DISKOVER_OPTS: "--finddupes"
+      DISKOVER_OPTS: "--finddupes --optimizeindex"
     volumes:
       - ${docker_data_folder}/diskover/config:/config
       - ${data_folder}:/data
@@ -774,6 +955,7 @@ services:
     # TODO: probably need to ajust this
     mem_limit: 4096m
     <<: *restart
+    <<: *logging
     depends_on:
       - diskover-elasticsearch
       - diskover-redis
@@ -802,36 +984,40 @@ services:
         soft: -1
         hard: -1
     <<: *restart
+    <<: *logging
 
   # Redis instance for diskover
   diskover-redis:
-    image: redis:4-alpine
+    image: redis:alpine
     volumes:
       - ${docker_data_folder}/diskover-redis:/data
     # TODO: seperate network
     networks:
       - diskover
     <<: *restart
+    <<: *logging
 
   ##################################################################
   # Authentication
 
   # LDAP server
   openldap:
-    hostname: openldap
+    hostname: ldap.${root_domain}
     image: osixia/openldap:latest
     environment:
+      HOSTNAME: ldap.${root_domain}
       LDAP_DOMAIN: ${root_domain}
       LDAP_ORGANISATION: ${LDAP_ORGANISATION}
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
       LDAP_TLS: "true"
-      LDAP_TLS_CRT_FILENAME: cert.pem
-      LDAP_TLS_KEY_FILENAME: privkey.pem
-      LDAP_TLS_CA_CRT_FILENAME: chain.pem
+      LDAP_TLS_CRT_FILENAME: ldap.${root_domain}.cer
+      LDAP_TLS_KEY_FILENAME: ldap.${root_domain}.key
+      LDAP_TLS_CA_CRT_FILENAME: ca.cer
       LDAP_OPENLDAP_UID: ${UID}
       LDAP_OPENLDAP_GID: ${GID}
     command: "--copy-service --loglevel debug"
     <<: *restart
+    <<: *logging
     networks:
       - ldap
     ports:
@@ -841,24 +1027,26 @@ services:
       - ${docker_data_folder}/openldap/ldap:/var/lib/ldap
       - ${docker_data_folder}/openldap/slapd.d:/etc/ldap/slapd.d
       # ubuntu path for Samba LDIF, this might be different with other distributions
-      - ${SAMBA_LDIF_PATH}:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba.ldif:ro
+      - ./ldap_templates/samba/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba.ldif:ro
       # gotten from https://ubuntu.com/server/docs/samba-openldap-backend
       - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif:ro
       - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
-      - ${docker_data_folder}/openldap/certs/*.${root_domain}:/container/service/slapd/assets/certs:ro
+      - ${docker_data_folder}/openldap/certs/ldap.olloix.desusanne.com:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
-  traefik-certificate-extractor:
-    entrypoint: >
-      /bin/sh -c "while true
-                    do python3 -u extractor.py
-                    sleep 1h
-                  done"
+  openldap-acme:
+    image: guillaumedsde/acme.sh:latest
+    user: ${UID}:${GID}
+    environment:
+      OVH_AK: ${LDAP_OVH_APPLICATION_KEY}
+      OVH_AS: ${LDAP_OVH_APPLICATION_SECRET}
+      OVH_CK: ${LDAP_OVH_CONSUMER_KEY}
+      OVH_END_POINT: ovh-eu
+    command:
+      - daemon
     volumes:
-      - ${docker_data_folder}/traefik/acme.json:/app/data/acme.json:ro
-      - ${docker_data_folder}/openldap/certs:/app/certs
-    image: danielhuisman/traefik-certificate-extractor
+      - ${docker_data_folder}/openldap/certs:/acme.sh
 
   # LDAP Server management web GUI
   lam:
@@ -871,7 +1059,10 @@ services:
     networks:
       - traefik
       - ldap
+    depends_on:
+      - openldap
     <<: *restart
+    <<: *logging
     labels:
       <<: *securityHeaders
       <<: *oauthLabels
@@ -896,6 +1087,10 @@ services:
       PROXY_ADDRESS_FORWARDING: "true"
       KEYCLOAK_HOSTNAME: keycloak.${root_domain}
     <<: *restart
+    <<: *logging
+    depends_on:
+      - keycloak-db
+      - openldap
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -912,6 +1107,7 @@ services:
   # DB for keycloak
   keycloak-db:
     <<: *restart
+    <<: *logging
     environment:
       # Tell Postgress what user/password to create
       POSTGRES_USER: keycloak
@@ -927,6 +1123,7 @@ services:
   traefik-forward-auth:
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
+    <<: *logging
     environment:
       PROVIDERS_GOOGLE_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
       PROVIDERS_GOOGLE_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
@@ -949,6 +1146,7 @@ services:
   traefik-forward-auth-keycloak:
     image: thomseddon/traefik-forward-auth:latest
     <<: *restart
+    <<: *logging
     environment:
       PROVIDERS_OIDC_CLIENT_ID: ${KEYCLOAK_OIDC_CLIENT_ID}
       PROVIDERS_OIDC_CLIENT_SECRET: ${KEYCLOAK_OIDC_CLIENT_SECRET}
@@ -961,6 +1159,8 @@ services:
       CSRF_COOKIE_NAME: _keycloak_forward_auth_csrf
     networks:
       - traefik
+    depends_on:
+      - keycloak
     labels:
       <<: *keycloakLabels
       traefik.enable: "true"
@@ -994,6 +1194,10 @@ networks:
     driver: bridge
     internal: true
     name: huginn
+  wallabag:
+    driver: bridge
+    internal: true
+    name: wallabag
   samba:
     driver: bridge
     name: samba
