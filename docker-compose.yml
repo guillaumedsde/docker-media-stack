@@ -651,6 +651,7 @@ services:
     hostname: cloud.${root_domain}
     depends_on:
       - nextcloud-postgres
+      - nextcloud-redis
       - samba
       - openldap
     volumes:
