@@ -708,6 +708,7 @@ services:
       - nextcloud
     <<: *restart
     <<: *logging
+    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
     image: redis:alpine
 
   samba:
