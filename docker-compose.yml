@@ -668,6 +668,7 @@ services:
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
       POSTGRES_HOST: nextcloud-postgres
       REDIS_HOST: nextcloud-redis
+      REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
       SMTP_HOST: smtp.sendgrid.net
       SMTP_SECURE: ssl
       SMTP_PORT: "465"
