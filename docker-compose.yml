@@ -898,7 +898,7 @@ services:
     volumes:
       - ${docker_data_folder}/duplicati:/config
       #- ${docker_data_folder}:/backups
-      - /data:/data:ro
+      - /data/users:/data/users:ro
     labels:
       <<: *securityHeaders
       <<: *keycloakLabels
