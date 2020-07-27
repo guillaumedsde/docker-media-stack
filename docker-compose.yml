@@ -889,6 +889,8 @@ services:
     image: linuxserver/duplicati
     environment:
       <<: *conf
+      PUID: "0"
+      PGID: "0"
     <<: *restart
     <<: *logging
     networks:
