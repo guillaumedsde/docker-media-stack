@@ -890,6 +890,8 @@ services:
       <<: *conf
     <<: *restart
     <<: *logging
+    networks:
+      - traefik
     volumes:
       - ${docker_data_folder}/duplicati:/config
       #- ${docker_data_folder}:/backups
