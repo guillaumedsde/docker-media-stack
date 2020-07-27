@@ -883,6 +883,25 @@ services:
     <<: *restart
     <<: *logging
 
+  # Data backup utility
+  duplicati:
+    image: linuxserver/duplicati
+    environment:
+      <<: *conf
+    <<: *restart
+    <<: *logging
+    volumes:
+      - ${docker_data_folder}/duplicati:/config
+      #- ${docker_data_folder}:/backups
+      - ${data_folder}:/source:ro
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:duplicati.${root_domain}"
+      traefik.port: "8200"
+      traefik.docker.network: traefik
+
   ##################################################################
   # Monitoring
 
