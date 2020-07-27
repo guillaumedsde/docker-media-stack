@@ -724,7 +724,7 @@ services:
       - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
       - ${docker_data_folder}/samba/smb.conf:/etc/samba/smb.conf:ro
       - ${docker_data_folder}/samba/secrets.tdb:/var/lib/samba/private/secrets.tdb
-      - /data:/data
+      - /data/users:/data/users
     depends_on:
       - openldap
     <<: *restart
