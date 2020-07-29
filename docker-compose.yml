@@ -240,7 +240,7 @@ services:
   # queries are done with jackett
   lidarr:
     hostname: music.${root_domain}
-    image: linuxserver/lidarr:latest
+    image: linuxserver/lidarr:preview
     <<: *restart
     <<: *logging
     depends_on:
