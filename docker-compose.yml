@@ -351,7 +351,7 @@ services:
     networks:
       - traefik
     volumes:
-      - ${docker_data_folder}/homer/config.yml:/www/config.yml:ro
+      - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
       - ${docker_data_folder}/homer/assets:/www/assets
     labels:
       <<: *securityHeaders
@@ -472,6 +472,7 @@ services:
       - ${data_folder}/books:/books
     networks:
       - traefik
+      - ldap
     environment:
       <<: *conf
       DOCKER_MODS: linuxserver/calibre-web:calibre
@@ -650,6 +651,7 @@ services:
     hostname: cloud.${root_domain}
     depends_on:
       - nextcloud-postgres
+      - nextcloud-redis
       - samba
       - openldap
     volumes:
@@ -665,6 +667,8 @@ services:
       POSTGRES_USER: nextcloud
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
       POSTGRES_HOST: nextcloud-postgres
+      REDIS_HOST: nextcloud-redis
+      REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
       SMTP_HOST: smtp.sendgrid.net
       SMTP_SECURE: ssl
       SMTP_PORT: "465"
@@ -699,6 +703,15 @@ services:
     <<: *logging
     image: postgres:alpine
 
+  # cache for nextcloud
+  nextcloud-redis:
+    networks:
+      - nextcloud
+    <<: *restart
+    <<: *logging
+    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
+    image: redis:alpine
+
   samba:
     environment:
       SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
@@ -711,7 +724,7 @@ services:
       - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
       - ${docker_data_folder}/samba/smb.conf:/etc/samba/smb.conf:ro
       - ${docker_data_folder}/samba/secrets.tdb:/var/lib/samba/private/secrets.tdb
-      - /data:/data
+      - /data/users:/data/users
     depends_on:
       - openldap
     <<: *restart
@@ -869,6 +882,29 @@ services:
       - wallabag
     <<: *restart
     <<: *logging
+
+  # Data backup utility
+  duplicati:
+    hostname: duplicati.${root_domain}
+    image: linuxserver/duplicati
+    environment:
+      <<: *conf
+      PUID: "0"
+      PGID: "0"
+    <<: *restart
+    <<: *logging
+    networks:
+      - traefik
+    volumes:
+      - ${docker_data_folder}/duplicati:/config
+      #- ${docker_data_folder}:/backups
+      - /data/users:/data/users:ro
+    labels:
+      <<: *securityHeaders
+      <<: *keycloakLabels
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host:duplicati.${root_domain},backups.${root_domain}"
+      traefik.port: "8200"
 
   ##################################################################
   # Monitoring
@@ -1038,10 +1074,10 @@ services:
     image: guillaumedsde/acme.sh:latest
     user: ${UID}:${GID}
     environment:
-      OVH_AK: ${LDAP_OVH_APPLICATION_KEY}
-      OVH_AS: ${LDAP_OVH_APPLICATION_SECRET}
-      OVH_CK: ${LDAP_OVH_CONSUMER_KEY}
-      OVH_END_POINT: ovh-eu
+      OVH_AK: ${OVH_APPLICATION_KEY}
+      OVH_AS: ${OVH_APPLICATION_SECRET}
+      OVH_CK: ${OVH_CONSUMER_KEY}
+      OVH_END_POINT: ${OVH_ENDPOINT}
     command:
       - daemon
     volumes:
