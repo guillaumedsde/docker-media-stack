@@ -127,7 +127,7 @@ services:
       traefik.enable: "true"
       traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
       traefik.port: "8080"
-    image: guillaumedsde/alpine-qbittorrent-openvpn:latest
+    image: guillaumedsde/alpine-qbittorrent-openvpn:development
 
   # jackett tracker site scraper with API
   jackett:
