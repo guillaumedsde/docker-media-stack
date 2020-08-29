@@ -264,7 +264,7 @@ services:
   # bazarr, webapp for downloading subtitles
   bazarr:
     hostname: subtitles.${root_domain}
-    image: hotio/bazarr:stable-ffsubsync
+    image: hotio/bazarr:stable
     <<: *restart
     <<: *logging
     depends_on:
