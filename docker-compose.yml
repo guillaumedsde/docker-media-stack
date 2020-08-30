@@ -977,6 +977,7 @@ services:
       RUN_ON_START: "true"
       USE_CRON: "true"
       DISKOVER_OPTS: "--finddupes --optimizeindex"
+      xpack.security.enabled: "false"
     volumes:
       - ${docker_data_folder}/diskover/config:/config
       - ${data_folder}:/data
