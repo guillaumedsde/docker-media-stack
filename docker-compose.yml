@@ -990,7 +990,7 @@ services:
     #   - 9181:9181
     #   - 9999:9999
     # TODO: probably need to ajust this
-    mem_limit: 4096m
+    mem_limit: 2048m
     <<: *restart
     <<: *logging
     depends_on:
@@ -1013,9 +1013,9 @@ services:
     networks:
       - diskover
     environment:
-      - bootstrap.memory_lock=true
+      bootstrap.memory_lock: "true"
       # TODO: probably need to ajust this
-      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      ES_JAVA_OPTS: -Xms1024m -Xmx1024m"
     ulimits:
       memlock:
         soft: -1
