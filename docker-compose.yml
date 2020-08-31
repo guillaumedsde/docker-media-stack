@@ -977,7 +977,6 @@ services:
       RUN_ON_START: "true"
       USE_CRON: "true"
       DISKOVER_OPTS: "--finddupes --optimizeindex"
-      xpack.security.enabled: "false"
     volumes:
       - ${docker_data_folder}/diskover/config:/config
       - ${data_folder}:/data
@@ -1016,6 +1015,7 @@ services:
       bootstrap.memory_lock: "true"
       # TODO: probably need to ajust this
       ES_JAVA_OPTS: -Xms1G -Xmx1G
+      xpack.security.enabled: "false"
     ulimits:
       memlock:
         soft: -1
