@@ -1015,7 +1015,7 @@ services:
     environment:
       bootstrap.memory_lock: "true"
       # TODO: probably need to ajust this
-      ES_JAVA_OPTS: -Xms512M -Xmx1G
+      ES_JAVA_OPTS: -Xms1G -Xmx1G
     ulimits:
       memlock:
         soft: -1
