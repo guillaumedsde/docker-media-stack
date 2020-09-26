@@ -477,7 +477,6 @@ services:
       DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
       <<: *securityHeaders
-      <<: *keycloakLabels
       traefik.enable: "true"
       traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
       traefik.port: "8083"
