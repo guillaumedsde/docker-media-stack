@@ -701,7 +701,7 @@ services:
       - nextcloud
     <<: *restart
     <<: *logging
-    image: postgres:alpine
+    image: postgres:12-alpine
 
   # cache for nextcloud
   nextcloud-redis:
