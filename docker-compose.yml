@@ -24,60 +24,50 @@ x-logging: &logging
       max-file: "5"
       max-size: "10m"
 
-# traefik security headers
-x-securityHeaders: &securityHeaders # redirect non SSL requests to SSL
-  traefik.frontend.headers.SSLRedirect: "true"
-  # default is same host as request, which is what we want
-  #traefik.frontend.headers.SSLHost: "${tld}"
-  traefik.frontend.headers.STSSeconds: "315360000"
-  traefik.frontend.headers.STSIncludeSubdomains: "true"
-  #traefik.frontend.headers.STSPreload: "true"
-  # forbid iframes
-  traefik.frontend.headers.frameDeny: "true"
-  traefik.frontend.headers.browserXSSFilter: "true"
-  traefik.frontend.headers.contentTypeNosniff: "true"
-  traefik.frontend.headers.customFrameOptionsValue: "SAMEORIGIN"
-  traefik.frontend.passHostHeader: "true"
-  #traefik.frontend.headers.contentSecurityPolicy: "default-src data: https:; script-src data: 'unsafe-inline' https://*.${root_domain}; style-src data: 'unsafe-inline' https:; frame-src https://*.${root_domain}"
-  traefik.frontend.headers.customResponseHeaders: "Feature-Policy:camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';||server:''||X-Powered-By:''"
-
-# oauth forward-auth SSO configuration
-x-oauthLabels: &oauthLabels
-  traefik.frontend.auth.forward.address: "http://traefik-forward-auth:4181"
-  traefik.frontend.auth.forward.authResponseHeaders: "X-Forwarded-User"
-  traefik.frontend.auth.forward.trustForwardHeader: "true"
-
-# keycloak SSO
-x-keycloakLabels: &keycloakLabels
-  traefik.frontend.auth.forward.address: "http://traefik-forward-auth-keycloak:4181"
-  traefik.frontend.auth.forward.authResponseHeaders: "X-Forwarded-User"
-  traefik.frontend.auth.forward.trustForwardHeader: "true"
+# Traefik
+x-traefik: &traefik
+  traefik.enable: "true"
 
 services:
-  # Reverse proxy with automatic SSL certificate generation
+  # reverse proxy
   traefik:
-    image: traefik:maroilles
-    # command: --logLevel=DEBUG
-    hostname: traefik.${root_domain}
+    image: traefik:2.3
+    command:
+      - "--log.level=DEBUG"
+      # docker configuration
+      - "--providers.docker=true"
+      - "--providers.docker.network=traefik"
+      - "--providers.docker.exposedbydefault=false"
+      # entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls.certResolver=le"
+      - "--entrypoints.websecure.http.tls.options"
+      # DNS challenge
+      - "--certificatesresolvers.le=true"
+      - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
+      - "--certificatesresolvers.le.acme.dnschallenge=true"
+      - "--certificatesresolvers.le.acme.dnschallenge.delayBeforeCheck=240"
+      - "--certificatesresolvers.le.acme.dnschallenge.provider=ovh"
+      - "--certificatesresolvers.le.acme.email=${letsencrypt_email}"
+      - "--certificatesresolvers.le.acme.keytype=EC384"
+      - "--certificatesresolvers.le.acme.dnsChallenge.resolvers=1.1.1.1:53"
+      # configs
+      - "--providers.file.directory=/config/"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
-    labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: Host:traefik.${root_domain}
-      traefik.port: "8080"
-    <<: *restart
-    <<: *logging
-    networks:
-      - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${docker_data_folder}/traefik/traefik.toml:/traefik.toml
-      - ${docker_data_folder}/traefik/acme.json:/acme.json
+      - ${docker_data_folder}/traefik:/traefik
+      - ./config/traefik:/config:ro
+    networks:
+      - traefik
+    <<: *restart
+    <<: *logging
     ports:
       - 80:80
       - 443:443
@@ -122,11 +112,13 @@ services:
       LAN: 192.168.0.0/24
       DNS: "192.168.0.1"
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:torrent.${root_domain},qbittorrent.${root_domain}"
-      traefik.port: "8080"
+      <<: *traefik
+      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
+      # service
+      traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
+
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
 
   # jackett tracker site scraper with API
@@ -152,10 +144,12 @@ services:
       <<: *conf
       S6_READ_ONLY_ROOT: "1"
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:jackett.${root_domain}"
-      traefik.port: "9117"
+      <<: *traefik
+      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
+      # service
+      traefik.http.services.jackett.loadbalancer.server.port: "9117"
+      # Forward auth
+      traefik.http.routers.jackett.middlewares: keycloak-forward-auth
 
   # jackett tracker site scraper with API
   hydra:
@@ -180,11 +174,12 @@ services:
       <<: *conf
       S6_READ_ONLY_ROOT: 1
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:hydra.${root_domain}"
-      traefik.port: "5076"
+      <<: *traefik
+      traefik.http.routers.nzbhydra.rule: Host(`hydra.${root_domain}`)
+      # service
+      traefik.http.services.nzbhydra.loadbalancer.server.port: "5076"
+      # Forward auth
+      traefik.http.routers.nzbhydra.middlewares: keycloak-forward-auth
 
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
@@ -205,11 +200,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:movies.${root_domain},radarr.${root_domain}"
-      traefik.port: "7878"
+      <<: *traefik
+      traefik.http.routers.radarr.rule: Host(`movies.${root_domain}`)
+      # service
+      traefik.http.services.radarr.loadbalancer.server.port: "7878"
+      # Forward auth
+      traefik.http.routers.radarr.middlewares: keycloak-forward-auth
 
   # sonarr, webapp for downloading series through torrent client
   # queries are done with jackett
@@ -230,11 +226,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:series.${root_domain},sonarr.${root_domain}"
-      traefik.port: "8989"
+      <<: *traefik
+      traefik.http.routers.sonarr.rule: Host(`series.${root_domain}`)
+      # service
+      traefik.http.services.sonarr.loadbalancer.server.port: "8989"
+      # Forward auth
+      traefik.http.routers.sonarr.middlewares: keycloak-forward-auth
 
   # lidarr, webapp for downloading music through torrent client
   # queries are done with jackett
@@ -255,11 +252,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:music.${root_domain},lidarr.${root_domain}"
-      traefik.port: "8686"
+      <<: *traefik
+      traefik.http.routers.lidarr.rule: Host(`music.${root_domain}`)
+      # service
+      traefik.http.services.lidarr.loadbalancer.server.port: "8686"
+      # Forward auth
+      traefik.http.routers.lidarr.middlewares: keycloak-forward-auth
 
   # bazarr, webapp for downloading subtitles
   bazarr:
@@ -273,11 +271,13 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:subtitles.${root_domain},bazarr.${root_domain}"
-      traefik.port: "6767"
+      <<: *traefik
+      traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
+      # service
+      traefik.http.services.bazarr.loadbalancer.server.port: "6767"
+      # Forward auth
+      traefik.http.routers.bazarr.middlewares: keycloak-forward-auth
+
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/bazarr:/config
@@ -307,11 +307,12 @@ services:
       <<: *conf
       DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:books.${root_domain},lazylibrarian.${root_domain}"
-      traefik.port: "5299"
+      <<: *traefik
+      traefik.http.routers.lazylibrarian.rule: Host(`books.${root_domain}`)
+      # service
+      traefik.http.services.lazylibrarian.loadbalancer.server.port: "5299"
+      # Forward auth
+      traefik.http.routers.lazylibrarian.middlewares: keycloak-forward-auth
 
   # mylar, webapp for downloading comics
   mylar:
@@ -333,11 +334,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:mylar.${root_domain}"
-      traefik.port: "8090"
+      <<: *traefik
+      traefik.http.routers.mylar.rule: Host(`mylar.${root_domain}`)
+      # service
+      traefik.http.services.mylar.loadbalancer.server.port: "8090"
+      # Forward auth
+      traefik.http.routers.mylar.middlewares: keycloak-forward-auth
 
   # homer is a homepage container
   homer:
@@ -354,10 +356,10 @@ services:
       - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
       - ${docker_data_folder}/homer/assets:/www/assets
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:home.${root_domain}, ${root_domain}, homer.${root_domain}"
-      traefik.port: "8080"
+      <<: *traefik
+      traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
+      # service
+      traefik.http.services.homer.loadbalancer.server.port: "8080"
 
   # plex media server
   plex:
@@ -386,10 +388,10 @@ services:
       PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
       <<: *conf
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:plex.${root_domain}"
-      traefik.port: "32400"
+      <<: *traefik
+      traefik.http.routers.plex.rule: Host(`plex.${root_domain}`)
+      # service
+      traefik.http.services.plex.loadbalancer.server.port: "32400"
 
   # jellyfin media server
   jellyfin:
@@ -409,11 +411,10 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:jellyfin.${root_domain}"
-      traefik.port: "8096"
-      traefik.docker.network: traefik
+      <<: *traefik
+      traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
+      # service
+      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
   # ombi, plex media requests
   ombi:
@@ -433,10 +434,10 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:ombi.${root_domain},requests.${root_domain}"
-      traefik.port: "3579"
+      <<: *traefik
+      traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
+      # service
+      traefik.http.services.ombi.loadbalancer.server.port: "3579"
 
   # Alternative to Calibre content server for storing books
   cops:
@@ -453,11 +454,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:cops.${root_domain}"
-      traefik.port: "80"
+      <<: *traefik
+      traefik.http.routers.cops.rule: Host(`cops.${root_domain}`)
+      # service
+      traefik.http.services.cops.loadbalancer.server.port: "80"
+      # Forward auth
+      traefik.http.routers.cops.middlewares: keycloak-forward-auth
 
   # calibre-web, for reading ebooks
   calibre-web:
@@ -476,11 +478,10 @@ services:
       <<: *conf
       DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:read.${root_domain},calibre-web.${root_domain}"
-      traefik.port: "8083"
-      traefik.docker.network: traefik
+      <<: *traefik
+      traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
+      # service
+      traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
 
   # komga, for reading comics
   komga:
@@ -498,11 +499,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:comics.${root_domain},komga.${root_domain}"
-      traefik.port: "8080"
+      <<: *traefik
+      traefik.http.routers.komga.rule: Host(`comics.${root_domain}`)
+      # service
+      traefik.http.services.komga.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.komga.middlewares: keycloak-forward-auth
 
   # gollum for hosting documentation
   gollum:
@@ -519,11 +521,12 @@ services:
       <<: *conf
       GOLLUMARGS: "--live-preview --allow-uploads dir"
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:doc.${root_domain},docs.${root_domain},gollum.${root_domain}"
-      traefik.port: "4567"
+      <<: *traefik
+      traefik.http.routers.gollum.rule: Host(`docs.${root_domain}`)
+      # service
+      traefik.http.services.gollum.loadbalancer.server.port: "4567"
+      # Forward auth
+      traefik.http.routers.gollum.middlewares: keycloak-forward-auth
 
   # unmanic, transcode video files in the background
   unmanic:
@@ -541,35 +544,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:transcode.${root_domain},unmanic.${root_domain}"
-      traefik.port: "8888"
-
-  # pyload for downloading files
-  pyload:
-    image: linuxserver/pyload
-    <<: *restart
-    <<: *logging
-    hostname: download.${root_domain}
-    environment:
-      <<: *conf
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/pyload:/config
-      - ${data_folder}/download/other:/downloads
-      - ${data_folder}/documentaries:/documentaries
-      - ${data_folder}/software:/software
-      - ${data_folder}/games:/games
-    labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:download.${root_domain},pyload.${root_domain}"
-      traefik.port: "8000"
-    networks:
-      - traefik
+      <<: *traefik
+      traefik.http.routers.unmanic.rule: Host(`transcode.${root_domain}`)
+      # service
+      traefik.http.services.unmanic.loadbalancer.server.port: "8888"
+      # Forward auth
+      traefik.http.routers.unmanic.middlewares: keycloak-forward-auth
 
   # youtube-dl for downloading videos
   youtube-dl:
@@ -585,11 +565,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${data_folder}/documentaries:/youtube-dl
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:youtube-dl.${root_domain},yt-dl.${root_domain}"
-      traefik.port: "8080"
+      <<: *traefik
+      traefik.http.routers.yt-dl.rule: Host(`yt-dl.${root_domain}`)
+      # service
+      traefik.http.services.yt-dl.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.yt-dl.middlewares: keycloak-forward-auth
 
   # JS CMS
   ghost_margot:
@@ -605,10 +586,10 @@ services:
       mail__options__auth__user: apikey
       mail__options__auth__pass: ${SENDGRID_PASS}
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:margot.${tld}"
-      traefik.port: "2368"
+      <<: *traefik
+      traefik.http.routers.blog-margot.rule: Host(`margot.${tld}`)
+      # service
+      traefik.http.services.blog-margot.loadbalancer.server.port: "2368"
     volumes:
       - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
       - /etc/localtime:/etc/localtime:ro
@@ -632,10 +613,10 @@ services:
       mail__options__auth__user: apikey
       mail__options__auth__pass: ${SENDGRID_PASS}
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:blog.guillaume.${tld}"
-      traefik.port: "2368"
+      <<: *traefik
+      traefik.http.routers.blog-guillaume.rule: Host(`blog.guillaume.${tld}`)
+      # service
+      traefik.http.services.blog-guillaume.loadbalancer.server.port: "2368"
     volumes:
       - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
       - /etc/localtime:/etc/localtime:ro
@@ -677,14 +658,13 @@ services:
       MAIL_FROM_ADDRESS: nextcloud
       MAIL_DOMAIN: ${root_domain}
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:cloud.${root_domain},nextcloud.${root_domain}"
-      traefik.port: "80"
-      traefik.docker.network: traefik
-      traefik.frontend.redirect.permanent: "true"
-      traefik.frontend.redirect.regex: https://(.*)/.well-known/(card|cal)dav
-      traefik.frontend.redirect.replacement: https://$$1/remote.php/dav/
+      <<: *traefik
+      traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
+      # service
+      traefik.http.services.nextcloud.loadbalancer.server.port: "80"
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: https://(.*)/.well-known/(card|cal)dav
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://$${1}/remote.php/dav/
     <<: *restart
     <<: *logging
     image: guillaumedsde/nextcloud-samba:latest
@@ -787,11 +767,10 @@ services:
       - traefik
       - huginn
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:huginn.${root_domain}"
-      traefik.port: "3000"
-      traefik.docker.network: traefik
+      <<: *traefik
+      traefik.http.routers.huginn.rule: Host(`huginn.${root_domain}`)
+      # service
+      traefik.http.services.huginn.loadbalancer.server.port: "3000"
     <<: *restart
     <<: *logging
     image: huginn/huginn:latest
@@ -815,95 +794,16 @@ services:
     <<: *restart
     <<: *logging
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:gotify.${tld}"
-      traefik.port: "80"
+      <<: *traefik
+      traefik.http.routers.gotify.rule: Host(`gotify.${tld}`)
+      # service
+      traefik.http.services.gotify.loadbalancer.server.port: "80"
     volumes:
       - ${docker_data_folder}/gotify:/app/data
       - /etc/localtime:/etc/localtime:ro
     networks:
       - traefik
     image: gotify/server:latest
-
-  # bookmarking read it later application
-  wallabag:
-    hostname: wallabag.${tld}
-    depends_on:
-      - "wallabag-mariadb"
-      - "wallabag-redis"
-    volumes:
-      - ${docker_data_folder}/wallabag/data:/var/www/wallabag/data
-      - ${docker_data_folder}/wallabag/images:/var/www/wallabag/web/assets/images
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - traefik
-      - wallabag
-    environment:
-      SYMFONY__ENV__DOMAIN_NAME: https://wallabag.${tld}
-      SYMFONY__ENV__MAILER_HOST: smtp.sendgrid.net
-      SYMFONY__ENV__MAILER_USER: apikey
-      SYMFONY__ENV__MAILER_PASSWORD: ${SENDGRID_PASS}
-      SYMFONY__ENV__FROM_EMAIL: wallabag@${root_domain}
-      SYMFONY__ENV__REDIS_HOST: wallabag-redis
-      SYMFONY__ENV__DATABASE_HOST: wallabag-mariadb
-      SYMFONY__ENV__DATABASE_PORT: "3306"
-      SYMFONY__ENV__DATABASE_USER: wallabag
-      SYMFONY__ENV__DATABASE_PASSWORD: ${WALLABAG_DB_PASS}
-      SYMFONY__ENV__DATABASE_DRIVER: pdo_mysql
-      SYMFONY__ENV__DATABASE_NAME: wallabag
-      SYMFONY__ENV__DATABASE_CHARSET: utf8mb4
-      MYSQL_ROOT_PASSWORD: ${WALLABAG_DB_ROOT_PASS}
-    labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:wallabag.${root_domain}"
-      traefik.port: "80"
-      traefik.docker.network: traefik
-    <<: *restart
-    <<: *logging
-    image: wallabag/wallabag:latest
-
-  wallabag-mariadb:
-    image: mariadb
-    networks:
-      - wallabag
-    <<: *restart
-    <<: *logging
-    environment:
-      MYSQL_ROOT_PASSWORD: ${WALLABAG_DB_PASS}
-    volumes:
-      - ${docker_data_folder}/wallabag-mariadb:/var/lib/mysql
-
-  wallabag-redis:
-    image: redis:alpine
-    networks:
-      - wallabag
-    <<: *restart
-    <<: *logging
-
-  # Data backup utility
-  duplicati:
-    hostname: duplicati.${root_domain}
-    image: linuxserver/duplicati
-    environment:
-      <<: *conf
-      PUID: "0"
-      PGID: "0"
-    <<: *restart
-    <<: *logging
-    networks:
-      - traefik
-    volumes:
-      - ${docker_data_folder}/duplicati:/config
-      #- ${docker_data_folder}:/backups
-      - /data/users:/data/users:ro
-    labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:duplicati.${root_domain},backups.${root_domain}"
-      traefik.port: "8200"
 
   ##################################################################
   # Monitoring
@@ -926,11 +826,12 @@ services:
     environment:
       <<: *conf
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:tautulli.${root_domain},stats.${root_domain}"
-      traefik.port: "8181"
+      <<: *traefik
+      traefik.http.routers.tautulli.rule: Host(`tautulli.${root_domain}`)
+      # service
+      traefik.http.services.tautulli.loadbalancer.server.port: "8181"
+      # Forward auth
+      traefik.http.routers.tautulli.middlewares: keycloak-forward-auth
 
   # netdata, server monitoring
   netdata:
@@ -949,11 +850,12 @@ services:
       <<: *conf
       PGID: ${docker_group_id}
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:status.${root_domain},netdata.${root_domain}"
-      traefik.port: "19999"
+      <<: *traefik
+      traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
+      # service
+      traefik.http.services.netdata.loadbalancer.server.port: "19999"
+      # Forward auth
+      traefik.http.routers.netdata.middlewares: keycloak-forward-auth
     cap_add:
       - SYS_PTRACE
     security_opt:
@@ -981,11 +883,6 @@ services:
     networks:
       - traefik
       - diskover
-    # TODO: reverse proxy all ports not just 80
-    # ports:
-    #   - 80:80
-    #   - 9181:9181
-    #   - 9999:9999
     mem_limit: 2048m
     <<: *restart
     <<: *logging
@@ -993,12 +890,12 @@ services:
       - diskover-elasticsearch
       - diskover-redis
     labels:
-      <<: *securityHeaders
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:diskover.${root_domain},disk.${root_domain}"
-      traefik.port: "80"
-      traefik.docker.network: traefik
+      <<: *traefik
+      traefik.http.routers.diskover.rule: Host(`diskover.${root_domain}`)
+      # service
+      traefik.http.services.diskover.loadbalancer.server.port: "80"
+      # Forward auth
+      traefik.http.routers.diskover.middlewares: keycloak-forward-auth
 
   # ElasticSearch Instance for diskover
   diskover-elasticsearch:
@@ -1064,7 +961,7 @@ services:
       - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif:ro
       - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
-      - ${docker_data_folder}/openldap/certs/ldap.olloix.desusanne.com:/container/service/slapd/assets/certs:ro
+      - ${docker_data_folder}/openldap/certs/ldap.${root_domain}:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
   openldap-acme:
@@ -1096,12 +993,12 @@ services:
     <<: *restart
     <<: *logging
     labels:
-      <<: *securityHeaders
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:lam.${root_domain}"
-      traefik.port: "80"
-      traefik.docker.network: traefik
+      <<: *traefik
+      traefik.http.routers.lam.rule: Host(`lam.${root_domain}`)
+      # service
+      traefik.http.services.lam.loadbalancer.server.port: "80"
+      # Forward auth
+      traefik.http.routers.lam.middlewares: traefik-forward-auth
 
   # SSO
   keycloak:
@@ -1130,11 +1027,10 @@ services:
       - ldap
       - keycloak
     labels:
-      <<: *securityHeaders
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:keycloak.${root_domain}"
-      traefik.port: "8080"
-      traefik.docker.network: traefik
+      <<: *traefik
+      traefik.http.routers.keycloak.rule: Host(`keycloak.${root_domain}`)
+      # service
+      traefik.http.services.keycloak.loadbalancer.server.port: "8080"
 
   # DB for keycloak
   keycloak-db:
@@ -1153,7 +1049,7 @@ services:
 
   # OIDC forward authentication for traefik
   traefik-forward-auth:
-    image: thomseddon/traefik-forward-auth:latest
+    image: thomseddon/traefik-forward-auth:2
     <<: *restart
     <<: *logging
     environment:
@@ -1169,14 +1065,19 @@ services:
     networks:
       - traefik
     labels:
-      <<: *oauthLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:oauth.${root_domain}"
-      traefik.port: "4181"
+      <<: *traefik
+      # HTTP entrypoint
+      traefik.http.routers.traefik-forward-auth.rule: Host(`oauth.${root_domain}`)
+      # service
+      traefik.http.services.traefik-forward-auth.loadbalancer.server.port: "4181"
+      # Forward auth
+      traefik.http.middlewares.traefik-forward-auth.forwardauth.address: http://traefik-forward-auth:4181
+      traefik.http.routers.traefik-forward-auth.middlewares: traefik-forward-auth
+      traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
 
   # OIDC forward authentication for traefik
-  traefik-forward-auth-keycloak:
-    image: thomseddon/traefik-forward-auth:latest
+  keycloak-forward-auth:
+    image: thomseddon/traefik-forward-auth:2
     <<: *restart
     <<: *logging
     environment:
@@ -1189,15 +1090,25 @@ services:
       DEFAULT_PROVIDER: oidc
       COOKIE_NAME: _keycloak_forward_auth
       CSRF_COOKIE_NAME: _keycloak_forward_auth_csrf
+    command:
+      - "--rule.jackett-api.action=allow"
+      - "--rule.jackett-api.rule=Host(`jackett.${root_domain}`) && PathPrefix(`/api/{.*}`)"
+      - "--rule.jackett-dl.action=allow"
+      - "--rule.jackett-dl.rule=Host(`jackett.${root_domain}`) && PathPrefix(`/dl/{.*}`)"
     networks:
       - traefik
     depends_on:
       - keycloak
     labels:
-      <<: *keycloakLabels
-      traefik.enable: "true"
-      traefik.frontend.rule: "Host:auth.${root_domain}"
-      traefik.port: "4181"
+      <<: *traefik
+      # HTTP entrypoint
+      traefik.http.routers.keycloak-forward-auth.rule: Host(`auth.${root_domain}`)
+      # service
+      traefik.http.services.keycloak-forward-auth.loadbalancer.server.port: "4181"
+      # Forward auth
+      traefik.http.middlewares.keycloak-forward-auth.forwardauth.address: http://keycloak-forward-auth:4181
+      traefik.http.routers.keycloak-forward-auth.middlewares: keycloak-forward-auth
+      traefik.http.middlewares.keycloak-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
 
 networks:
   watchtower:
@@ -1226,10 +1137,6 @@ networks:
     driver: bridge
     internal: true
     name: huginn
-  wallabag:
-    driver: bridge
-    internal: true
-    name: wallabag
   samba:
     driver: bridge
     name: samba
