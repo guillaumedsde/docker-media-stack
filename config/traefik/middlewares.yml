@@ -2,7 +2,7 @@ http:
   middlewares:
     securityHeaders:
       headers:
-        frameDeny: true
+        customFrameOptionsValue: SAMEORIGIN
         contentTypeNosniff: true
         browserXssFilter: true
         forceSTSHeader: true
