@@ -664,8 +664,8 @@ services:
       # service
       traefik.http.services.nextcloud.loadbalancer.server.port: "80"
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: "https://(.*)/.well-known/(card|cal)dav"
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: "https://$${1}/remote.php/dav/"
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: https://cloud.${root_domain}/.well-known/(card|cal)dav
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
     <<: *restart
     <<: *logging
     image: guillaumedsde/nextcloud-samba:latest
