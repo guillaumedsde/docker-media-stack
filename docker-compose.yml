@@ -56,7 +56,8 @@ services:
       - "--certificatesresolvers.le.acme.dnsChallenge.resolvers=1.1.1.1:53"
       # configs
       - "--providers.file.directory=/config/"
-      # traefik dashboard
+      # traefik API and dashboard
+      - "--api=true"
       - "--api.dashboard=true"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
