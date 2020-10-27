@@ -42,7 +42,6 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
-      - "--entrypoints.websecure.http.tls.options=default@file"
       - "--entrypoints.websecure.http.middlewares=securityHeaders@file"
       # DNS challenge
       - "--certificatesresolvers.le=true"
