@@ -57,6 +57,8 @@ services:
       # traefik API and dashboard
       - "--api=true"
       - "--api.dashboard=true"
+      # traefik healthcheck
+      - "--ping=true"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
