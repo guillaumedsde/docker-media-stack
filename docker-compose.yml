@@ -56,11 +56,17 @@ services:
       - "--certificatesresolvers.le.acme.dnsChallenge.resolvers=1.1.1.1:53"
       # configs
       - "--providers.file.directory=/config/"
+      # traefik dashboard
+      - "--api.dashboard=true"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
+    labels:
+      traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      traefik.http.routers.dashboard.service: api@internal
+      traefik.http.routers.dashboard.middlewares: traefik-forward-auth
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${docker_data_folder}/traefik:/traefik
