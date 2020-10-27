@@ -37,7 +37,6 @@ services:
       # docker configuration
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.defaultRule=Host(`{{ .Name }}.${root_domain}`)"
       # entrypoints
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -66,6 +65,7 @@ services:
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
     labels:
       <<: *traefik
+      traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`)
       traefik.http.routers.dashboard.service: api@internal
       traefik.http.routers.dashboard.middlewares: traefik-forward-auth
     volumes:
