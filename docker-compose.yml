@@ -59,6 +59,7 @@ services:
       - "--api.dashboard=true"
       # traefik healthcheck
       - "--ping=true"
+      - "--ping.manualrouting=true"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
@@ -69,6 +70,8 @@ services:
       traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`)
       traefik.http.routers.dashboard.service: api@internal
       traefik.http.routers.dashboard.middlewares: traefik-forward-auth
+      traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
+      traefik.http.routers.ping.service: ping@internal
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${docker_data_folder}/traefik:/traefik
