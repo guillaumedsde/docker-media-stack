@@ -934,6 +934,7 @@ services:
     volumes:
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
       - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
+    entrypoint: filebeat
     command:
       - -e -M "traefik.access.var.paths=[/var/log/traefik/access.log*]"
     environment:
