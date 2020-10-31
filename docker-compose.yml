@@ -1182,3 +1182,7 @@ networks:
   gitlab-runner:
     driver: bridge
     name: gitlab-runner
+  elastic:
+    driver: bridge
+    internal: true
+    name: elastic
