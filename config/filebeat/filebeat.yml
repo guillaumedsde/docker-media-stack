@@ -1,7 +1,4 @@
-filebeat.registry_file: /usr/share/filebeat/data/registry
-
 filebeat.modules:
-
   - module: traefik
     access:
       enabled: true
