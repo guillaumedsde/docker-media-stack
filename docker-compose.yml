@@ -60,6 +60,8 @@ services:
       # traefik healthcheck
       - "--ping=true"
       - "--ping.manualrouting=true"
+      # traefik logs
+      - "--log.filePath=/var/log/traefik/traefik.log"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
