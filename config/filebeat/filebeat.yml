@@ -75,44 +75,44 @@ filebeat.modules:
   #input:
 
   #---------------------------- Elasticsearch Module ----------------------------
-  - module: elasticsearch
+  # - module: elasticsearch
     # Server log
-    server:
-      enabled: true
+    # server:
+      # enabled: true
 
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       #var.paths:
 
-    gc:
-      enabled: true
+    # gc:
+      # enabled: true
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       #var.paths:
 
-    audit:
-      enabled: true
+    # audit:
+      # enabled: true
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       #var.paths:
 
-    slowlog:
-      enabled: true
+    # slowlog:
+      # enabled: true
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       #var.paths:
 
-    deprecation:
-      enabled: true
+    # deprecation:
+      # enabled: true
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       #var.paths:
 
   #-------------------------------- Kibana Module --------------------------------
-  - module: kibana
+  # - module: kibana
     # All logs
-    log:
-      enabled: true
+    # log:
+      # enabled: true
 
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
@@ -211,9 +211,9 @@ filebeat.modules:
   #  #var.paths:
 
   #------------------------------- Osquery Module -------------------------------
-  - module: osquery
-    result:
-      enabled: true
+  # - module: osquery
+  #   result:
+  #     enabled: true
 
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
@@ -267,7 +267,7 @@ filebeat.modules:
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       var.paths:
-        - '/var/log/traefik/access.log*'
+        - "/var/log/traefik/access.log"
 
       # Input configuration (advanced). Any input configuration option
       # can be added under this section.
@@ -276,7 +276,7 @@ filebeat.modules:
 #=========================== Filebeat inputs =============================
 
 # List of inputs to fetch data.
-filebeat.inputs:
+# filebeat.inputs:
   # Each - is an input. Most options can be set at the input level, so
   # you can use different inputs for various configurations.
   # Below are the input specific configurations.
@@ -289,18 +289,18 @@ filebeat.inputs:
   # * stdin: Reads the standard in
 
   #------------------------------ Log input --------------------------------
-  - type: log
+  # - type: log
 
     # Change to true to enable this input configuration.
-    enabled: false
+    # enabled: false
 
     # Paths that should be crawled and fetched. Glob based paths.
     # To fetch all ".log" files from a specific level of subdirectories
     # /var/log/*/*.log can be used.
     # For each file found under this path, a harvester is started.
     # Make sure not file is defined twice as this can lead to unexpected behaviour.
-    paths:
-      - /var/log/*.log
+    # paths:
+      # - /var/log/*.log
       #- c:\programdata\elasticsearch\logs\*
 
     # Configure the file encoding for reading files with international characters
@@ -1742,7 +1742,7 @@ output.elasticsearch:
 #setup.template.overwrite: false
 
 # Elasticsearch template settings
-setup.template.settings:
+# setup.template.settings:
 
   # A dictionary of settings to place into the settings.index dictionary
   # of the Elasticsearch template. For more details, please check
@@ -1883,8 +1883,8 @@ setup.kibana:
 
 # Logging to rotating files. Set logging.to_files to false to disable logging to
 # files.
-logging.to_files: true
-logging.files:
+# logging.to_files: true
+# logging.files:
   # Configure the path where the logs are written. The default is the logs directory
   # under the home path (the binary location).
   #path: /var/log/filebeat
