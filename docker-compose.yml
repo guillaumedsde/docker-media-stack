@@ -936,6 +936,7 @@ services:
   filebeat:
     image: docker.elastic.co/beats/filebeat-oss:7.9.3
     user: root
+    command: --strict.perms=false
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
