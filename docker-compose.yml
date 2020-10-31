@@ -74,6 +74,7 @@ services:
       traefik.http.routers.ping.service: ping@internal
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${docker_data_folder}/traefik/logs:/var/log/traefik/
       - ${docker_data_folder}/traefik:/traefik
       - ./config/traefik:/config:ro
     networks:
@@ -910,6 +911,53 @@ services:
       - diskover
     <<: *restart
     <<: *logging
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    container_name: es01
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ${docker_data_folder}/elasticsearch/data:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    <<: *restart
+    <<: *logging
+  
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.9.3
+    volumes:
+      - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
+      - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
+    command:
+      - setup -E setup.kibana.host=kibana:5601
+      - -E output.elasticsearch.hosts=["elasticsearch:9200"]
+      - -M "traefik.access.var.paths=[/var/log/traefik/access.log*]"
+    networks:
+      - elastic
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.3
+    networks:
+      - elastic
+      - traefik
+    environment:
+      SERVER_NAME: kibana.${root_domain}
+    labels:
+      <<: *traefik
+      traefik.http.routers.kibana.rule: Host(`kibana.${root_domain}`)
+      # service
+      traefik.http.services.kibana.loadbalancer.server.port: "5601"
+      # Forward auth
+      traefik.http.routers.kibana.middlewares: keycloak-forward-auth
+
+
 
   ##################################################################
   # Authentication
