@@ -932,7 +932,7 @@ services:
   filebeat:
     image: docker.elastic.co/beats/filebeat-oss:7.9.3
     volumes:
-      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
     command:
