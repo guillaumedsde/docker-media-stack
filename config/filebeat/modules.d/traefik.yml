@@ -1,4 +1,0 @@
-- module: traefik
-  access:
-    enabled: true
-    var.paths: ["/usr/local/traefik/access.log*"]
