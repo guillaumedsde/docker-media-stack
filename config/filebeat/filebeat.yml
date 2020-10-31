@@ -1,3 +1,7 @@
+filebeat.config.modules:
+  enabled: true
+  path: ${path.config}/modules.d/*.yml
+
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
 
