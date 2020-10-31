@@ -1,0 +1,17 @@
+filebeat.registry_file: /usr/share/filebeat/data/registry
+
+filebeat.modules:
+
+  - module: traefik
+    access:
+      enabled: true
+      var.paths: ["/var/log/traefik/*"]
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+logging.to_files: false
+
+setup:
+  kibana.host: "kibana:5601"
+  dashboards.enabled: true
