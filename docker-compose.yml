@@ -935,7 +935,9 @@ services:
   
   filebeat:
     image: docker.elastic.co/beats/filebeat-oss:7.9.3
-    user: "1000:4"
+    user: "filebeat:4"
+    entrypoint: 
+      - /usr/share/filebeat/filebeat
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
