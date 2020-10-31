@@ -939,6 +939,7 @@ services:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
+      - /var/log/:/var/log/host/:ro
     networks:
       - elastic
   
