@@ -933,18 +933,8 @@ services:
     image: docker.elastic.co/beats/filebeat-oss:7.9.3
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./config/filebeat/modules.d:/usr/share/filebeat/modules.d:ro
       - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
-    command:
-      - -e
-      - -M
-      - "traefik.access.var.paths=[/var/log/traefik/access.log*]"
-    environment:
-      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
-      KIBANA_HOST: ${KIBANA_HOST:-kibana}
-      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-elastic}
-      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-changeme}
     networks:
       - elastic
   
