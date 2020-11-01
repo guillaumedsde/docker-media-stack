@@ -988,7 +988,7 @@ services:
       - traefik
       - elastic
     environment:
-      PORT: 9707
+      PORT: "9707"
       URL: "http://sonarr:8989"
       APIKEY: "${SONARR_API_KEY}"
       ENABLE_EPISODE_QUALITY_METRICS: "true"
@@ -1001,7 +1001,7 @@ services:
       - traefik
       - elastic
     environment:
-      PORT: 9708
+      PORT: "9707"
       URL: "http://radarr:7878"
       APIKEY: "${RADARR_API_KEY}"
 
