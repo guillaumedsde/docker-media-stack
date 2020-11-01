@@ -1,6 +1,15 @@
 stages:
+  - test
   - build
   - deploy
+
+validate-compose-file:
+  stage: test
+  image:
+    name: docker/compose
+    entrypoint: [""]
+  script:
+    - docker-compose -f docker-compose.yml config
 
 render-compose-graph:
   stage: build
