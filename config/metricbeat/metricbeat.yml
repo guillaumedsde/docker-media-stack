@@ -252,6 +252,16 @@ metricbeat.modules:
 #   period: 10s
 #   hosts: ["tcp://127.0.0.1:9191"]
 
+#------------------------------ Prometheus Module ------------------------------
+# Metrics collected from a Prometheus endpoint
+- module: prometheus
+  period: 10s
+  metricsets: ["collector"]
+  hosts: ["radarr-exporter:9708", sonarr-exporter:9707]
+  metrics_path: /metrics
+  #metrics_filters:
+  #  include: []
+  #  exclude: []
 
 # ================================== General ===================================
 
