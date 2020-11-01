@@ -916,7 +916,7 @@ services:
       - diskover
     <<: *restart
     <<: *logging
-  
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.9.3
     environment:
@@ -933,7 +933,7 @@ services:
       - elastic
     <<: *restart
     <<: *logging
-  
+
   filebeat:
     image: docker.elastic.co/beats/filebeat-oss:7.9.3
     user: root
@@ -979,6 +979,31 @@ services:
       traefik.http.services.kibana.loadbalancer.server.port: "5601"
       # Forward auth
       traefik.http.routers.kibana.middlewares: keycloak-forward-auth
+
+  sonarr-exporter:
+    image: onedr0p/exportarr:latest
+    entrypoint: ["exportarr"]
+    command: ["sonarr"]
+    networks:
+      - traefik
+      - elastic
+    environment:
+      PORT: 9707
+      URL: "http://sonarr:8989"
+      APIKEY: "${SONARR_API_KEY}"
+      ENABLE_EPISODE_QUALITY_METRICS: "true"
+
+  radarr-exporter:
+    image: onedr0p/exportarr:latest
+    entrypoint: ["exportarr"]
+    command: ["radarr"]
+    networks:
+      - traefik
+      - elastic
+    environment:
+      PORT: 9708
+      URL: "http://radarr:7878"
+      APIKEY: "${RADARR_API_KEY}"
 
   ##################################################################
   # Authentication
