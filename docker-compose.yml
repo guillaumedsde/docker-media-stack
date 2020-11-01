@@ -62,8 +62,7 @@ services:
       - "--ping.manualrouting=true"
       # traefik access logs
       - "--accesslog=true"
-      - "--accesslog.format=json"
-      - "--accesslog.filepath=/var/log/traefik/access.log.json"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
       - "--accesslog.bufferingsize=100"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
