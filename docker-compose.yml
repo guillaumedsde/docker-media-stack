@@ -981,7 +981,7 @@ services:
       traefik.http.routers.kibana.middlewares: keycloak-forward-auth
 
   sonarr-exporter:
-    image: onedr0p/exportarr:latest
+    image: onedr0p/exportarr:master
     entrypoint: ["exportarr"]
     command: ["sonarr"]
     networks:
@@ -994,7 +994,7 @@ services:
       ENABLE_EPISODE_QUALITY_METRICS: "true"
 
   radarr-exporter:
-    image: onedr0p/exportarr:latest
+    image: onedr0p/exportarr:master
     entrypoint: ["exportarr"]
     command: ["radarr"]
     networks:
