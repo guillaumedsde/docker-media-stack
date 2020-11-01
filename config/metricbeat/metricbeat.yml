@@ -256,13 +256,13 @@ metricbeat.modules:
 # Metrics collected from a Prometheus endpoint
 - module: prometheus
   period: 10s
-  # metricsets: ["collector"]
+  metricsets: ["collector"]
   hosts: ["radarr-exporter:9707", sonarr-exporter:9707]
   metrics_path: /metrics
-  # metrics_filters:
-  #  include:
-  #   - sonarr_*
-  #   - radarr_*
+  metrics_filters:
+   include:
+    - sonarr_*
+    - radarr_*
   #  exclude: []
 
 # ================================== General ===================================
