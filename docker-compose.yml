@@ -903,7 +903,7 @@ services:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 2.5g
+    mem_limit: 2500m
     <<: *restart
     <<: *logging
 
@@ -931,7 +931,7 @@ services:
       - ${docker_data_folder}/elasticsearch/data:/usr/share/elasticsearch/data
     networks:
       - elastic
-    mem_limit: 2.5G
+    mem_limit: 2500m
     <<: *restart
     <<: *logging
 
