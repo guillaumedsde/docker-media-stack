@@ -256,7 +256,31 @@ metricbeat.modules:
 # Metrics collected from a Prometheus endpoint
 - module: prometheus
   period: 10s
-  metricsets: ["collector"]
+  metricsets: 
+    # radarr
+    - radarr_history_total
+    - radarr_movie_downloaded_total
+    - radarr_movie_filesize_total
+    - radarr_movie_missing_total
+    - radarr_movie_monitored_total
+    - radarr_movie_quality_total
+    - radarr_movie_total
+    - radarr_movie_wanted_total
+    - radarr_queue_total
+    - radarr_system_status
+    # sonarr
+    - sonarr_episode_downloaded_total
+    - sonarr_episode_missing_total
+    - sonarr_episode_quality_total
+    - sonarr_episode_total
+    - sonarr_history_total
+    - sonarr_queue_total
+    - sonarr_season_monitored_total
+    - sonarr_season_total
+    - sonarr_series_filesize_bytes
+    - sonarr_series_monitored_total
+    - sonarr_series_total
+    - sonarr_system_status
   hosts: ["radarr-exporter:9708", sonarr-exporter:9707]
   metrics_path: /metrics
   #metrics_filters:
