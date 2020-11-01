@@ -945,7 +945,25 @@ services:
       - /var/log/:/var/log/host/:ro
     networks:
       - elastic
-  
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat-oss:7.9.3
+    user: root
+    networks:
+      - elastic
+    volumes:
+      - ./config/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - metricbeat:/usr/share/metricbeat/data
+    environment:
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST:-elasticsearch}
+      - KIBANA_HOST=${KIBANA_HOST:-kibana}
+    # disable strict permission checks
+    command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:7.9.3
     networks:
@@ -961,8 +979,6 @@ services:
       traefik.http.services.kibana.loadbalancer.server.port: "5601"
       # Forward auth
       traefik.http.routers.kibana.middlewares: keycloak-forward-auth
-
-
 
   ##################################################################
   # Authentication
