@@ -74,7 +74,7 @@ metricbeat.modules:
     - fsstat         # File system summary metrics
     #- raid           # Raid
     - socket         # Sockets and connection info (linux only)
-    - service        # systemd service information
+    # - service        # systemd service information
   enabled: true
   period: 10s
   processes: ['.*']
