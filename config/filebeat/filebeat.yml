@@ -19,6 +19,7 @@ filebeat.modules:
       # Filebeat will choose the paths depending on your OS.
       var.paths:
         - "/var/log/host/syslog*"
+        - "/var/log/host/messages*"
 
       # Input configuration (advanced). Any input configuration option
       # can be added under this section.
@@ -269,7 +270,7 @@ filebeat.modules:
       # Set custom paths for the log files. If left empty,
       # Filebeat will choose the paths depending on your OS.
       var.paths:
-        - "/var/log/traefik/access.log"
+        - "/var/log/traefik/access.log.json*"
 
       # Input configuration (advanced). Any input configuration option
       # can be added under this section.
