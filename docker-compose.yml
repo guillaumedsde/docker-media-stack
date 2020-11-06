@@ -794,8 +794,7 @@ services:
     image: gotify/server:latest
 
   robots:
-    image: nginx:latest
-    user: ${UID}:${GID}
+    image: nginx:alpine
     read_only: true
     volumes:
       - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
