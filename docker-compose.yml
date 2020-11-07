@@ -990,7 +990,7 @@ services:
     <<: *restart
     <<: *logging
     volumes:
-      - ./config/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./config/logstash/config/:/usr/share/logstash/config/        
       - ./config/logstash/conf.d/:/usr/share/logstash/etc/logstash/conf.d/
       - ./config/logstash/conf.d/patterns/:/usr/share/logstash/etc/logstash/conf.d/patterns/
