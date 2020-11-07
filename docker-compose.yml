@@ -1010,7 +1010,7 @@ services:
     ports:
       - "5000:5000"
       - "9600:9600"
-      - "0.0.0.0:5140:5140/udp"
+      - "5140:5140/udp"
     environment:
       LS_JAVA_OPTS: -Xmx1G -Xms1G
     networks:
