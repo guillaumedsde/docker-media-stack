@@ -720,8 +720,8 @@ services:
   gitlab-runner:
     <<: *restart
     <<: *logging
-    mem_limit: 8g
-    cpus: "8"
+    mem_limit: 200m
+    cpus: "2"
     networks:
       - gitlab-runner
     volumes:
