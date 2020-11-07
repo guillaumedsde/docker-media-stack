@@ -83,6 +83,22 @@ services:
       - ./config/traefik:/config:ro
     networks:
       - traefik
+      - kibana
+      - cops
+      - calibre-web
+      - homer
+      - gollum
+      - unmanic
+      - ytdl
+      - ghost
+      - nextcloud-proxy
+      - huginn-proxy
+      - gotify
+      - robots
+      - netdata
+      - diskover-proxy
+      - lam
+      - keycloak-proxy
     <<: *restart
     <<: *logging
     mem_limit: 200m
@@ -380,12 +396,13 @@ services:
       UID: ${UID}
       GID: ${GID}
     networks:
-      - traefik
+      - homer
     volumes:
       - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
       - ${docker_data_folder}/homer/assets:/www/assets
     labels:
       <<: *traefik
+      traefik.docker.network: homer
       traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
       # service
       traefik.http.services.homer.loadbalancer.server.port: "8080"
@@ -483,11 +500,12 @@ services:
       - ${docker_data_folder}/cops:/config
       - ${data_folder}/books:/books
     networks:
-      - traefik
+      - cops
     environment:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.docker.network: cops
       traefik.http.routers.cops.rule: Host(`cops.${root_domain}`)
       # service
       traefik.http.services.cops.loadbalancer.server.port: "80"
@@ -506,13 +524,14 @@ services:
       - ${docker_data_folder}/calibre-web:/config
       - ${data_folder}/books:/books
     networks:
-      - traefik
+      - calibre-web
       - ldap
     environment:
       <<: *conf
       DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
       <<: *traefik
+      traefik.docker.network: calibre-web
       traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
@@ -528,12 +547,13 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/gollum:/wiki
     networks:
-      - traefik
+      - gollum
     environment:
       <<: *conf
       GOLLUMARGS: "--live-preview --allow-uploads dir"
     labels:
       <<: *traefik
+      traefik.docker.network: gollum
       traefik.http.routers.gollum.rule: Host(`docs.${root_domain}`)
       # service
       traefik.http.services.gollum.loadbalancer.server.port: "4567"
@@ -547,7 +567,7 @@ services:
     <<: *restart
     <<: *logging
     networks:
-      - traefik
+      - unmanic
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/unmanic:/config
@@ -557,6 +577,7 @@ services:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.docker.network: unmanic
       traefik.http.routers.unmanic.rule: Host(`transcode.${root_domain}`)
       # service
       traefik.http.services.unmanic.loadbalancer.server.port: "8888"
@@ -573,12 +594,13 @@ services:
     environment:
       <<: *conf
     networks:
-      - traefik
+      - ytdl
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${data_folder}/documentaries:/youtube-dl
     labels:
       <<: *traefik
+      traefik.docker.network: ytdl
       traefik.http.routers.yt-dl.rule: Host(`yt-dl.${root_domain}`)
       # service
       traefik.http.services.yt-dl.loadbalancer.server.port: "8080"
@@ -600,6 +622,7 @@ services:
       mail__options__auth__pass: ${SENDGRID_PASS}
     labels:
       <<: *traefik
+      traefik.docker.network: ghost
       traefik.http.routers.blog-guillaume.rule: Host(`blog.guillaume.${tld}`)
       # service
       traefik.http.services.blog-guillaume.loadbalancer.server.port: "2368"
@@ -607,7 +630,7 @@ services:
       - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - ghost
     <<: *restart
     <<: *logging
     mem_limit: 250m
@@ -627,6 +650,7 @@ services:
     networks:
       - traefik
       - nextcloud
+      - nextcloud-proxy
       - ldap
     environment:
       <<: *conf
@@ -646,6 +670,7 @@ services:
       MAIL_DOMAIN: ${root_domain}
     labels:
       <<: *traefik
+      traefik.docker.network: nextcloud-proxy
       traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
       # service
       traefik.http.services.nextcloud.loadbalancer.server.port: "80"
@@ -707,7 +732,7 @@ services:
   # Web Service Discovery host daemon
   # see https://github.com/christgau/wsdd
   wsdd:
-    network_mode: "host"
+    network_mode: host
     user: ${UID}:${GID}
     read_only: true
     mem_limit: 200m
@@ -759,10 +784,11 @@ services:
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
-      - traefik
       - huginn
+      - huginn-proxy
     labels:
       <<: *traefik
+      traefik.docker.network: huginn-proxy
       traefik.http.routers.huginn.rule: Host(`huginn.${root_domain}`)
       # service
       traefik.http.services.huginn.loadbalancer.server.port: "3000"
@@ -792,6 +818,7 @@ services:
     <<: *logging
     labels:
       <<: *traefik
+      traefik.docker.network: gotify
       traefik.http.routers.gotify.rule: Host(`gotify.${tld}`)
       # service
       traefik.http.services.gotify.loadbalancer.server.port: "80"
@@ -799,7 +826,7 @@ services:
       - ${docker_data_folder}/gotify:/app/data
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - gotify
     image: gotify/server:latest
 
   robots:
@@ -811,8 +838,11 @@ services:
       - ./config/nginx/robots.txt:/usr/share/nginx/html/robots.txt:ro
       - robots-nginx-cache:/var/cache/nginx
       - robots-nginx-pid:/var/run
+    networks:
+      - robots
     labels:
       <<: *traefik
+      traefik.docker.network: robots
       traefik.http.routers.robots.rule: Host(`.*`) && Path(`/robots.txt`)
       # service
       traefik.http.services.robots.loadbalancer.server.port: "8080"
@@ -858,12 +888,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
     networks:
-      - traefik
+      - netdata
     environment:
       <<: *conf
       PGID: ${docker_group_id}
     labels:
       <<: *traefik
+      traefik.docker.network: netdata
       traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
@@ -898,6 +929,7 @@ services:
     networks:
       - traefik
       - diskover
+      - diskover-proxy
     <<: *restart
     <<: *logging
     depends_on:
@@ -905,6 +937,7 @@ services:
       - diskover-redis
     labels:
       <<: *traefik
+      traefik.docker.network: diskover-proxy
       traefik.http.routers.diskover.rule: Host(`diskover.${root_domain}`)
       # service
       traefik.http.services.diskover.loadbalancer.server.port: "80"
@@ -1023,7 +1056,7 @@ services:
     image: docker.elastic.co/kibana/kibana-oss:7.9.3
     networks:
       - elastic
-      - traefik
+      - kibana
     environment:
       SERVER_NAME: kibana.${root_domain}
       ELASTICSEARCH_URL: http://elasticsearch:9200
@@ -1031,6 +1064,7 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.kibana.rule: Host(`kibana.${root_domain}`)
+      traefik.docker.network: kibana
       # service
       traefik.http.services.kibana.loadbalancer.server.port: "5601"
       # Forward auth
@@ -1125,7 +1159,7 @@ services:
     environment:
       LAM_SKIP_PRECONFIGURE: "true"
     networks:
-      - traefik
+      - lam
       - ldap
     depends_on:
       - openldap
@@ -1134,6 +1168,7 @@ services:
     mem_limit: 100m
     labels:
       <<: *traefik
+      traefik.docker.network: lam
       traefik.http.routers.lam.rule: Host(`lam.${root_domain}`)
       # service
       traefik.http.services.lam.loadbalancer.server.port: "80"
@@ -1164,11 +1199,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - keycloak-proxy
       - ldap
       - keycloak
     labels:
       <<: *traefik
+      traefik.docker.network: keycloak-proxy
       traefik.http.routers.keycloak.rule: Host(`keycloak.${root_domain}`)
       # service
       traefik.http.services.keycloak.loadbalancer.server.port: "8080"
@@ -1300,6 +1336,66 @@ networks:
   logstash:
     driver: bridge
     name: logstash
+  kibana:
+    driver: bridge
+    internal: true
+    name: kibana
+  cops:
+    driver: bridge
+    internal: true
+    name: cops
+  calibre-web:
+    driver: bridge
+    name: calibre-web
+  homer:
+    driver: bridge
+    internal: true
+    name: homer
+  gollum:
+    driver: bridge
+    internal: true
+    name: gollum
+  unmanic:
+    driver: bridge
+    internal: true
+    name: unmanic
+  ytdl:
+    driver: bridge
+    internal: true
+    name: ytdl
+  ghost:
+    driver: bridge
+    name: ghost
+  nextcloud-proxy:
+    driver: bridge
+    name: nextcloud-proxy
+  huginn-proxy:
+    driver: bridge
+    name: huginn-proxy
+  gotify:
+    driver: bridge
+    internal: true
+    name: gotify
+  robots:
+    driver: bridge
+    internal: true
+    name: robots
+  netdata:
+    driver: bridge
+    internal: true
+    name: netdata
+  diskover-proxy:
+    driver: bridge
+    internal: true
+    name: diskover-proxy
+  lam:
+    driver: bridge
+    internal: true
+    name: lam
+  keycloak-proxy:
+    driver: bridge
+    name: keycloak-proxy
+
 
 volumes: 
   robots-nginx-cache:
