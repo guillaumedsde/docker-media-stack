@@ -961,6 +961,8 @@ services:
       - /var/log/:/var/log/host/:ro
     networks:
       - elastic
+    <<: *restart
+    <<: *logging
 
   metricbeat:
     image: docker.elastic.co/beats/metricbeat-oss:7.9.3
@@ -978,8 +980,32 @@ services:
     environment:
       - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST:-elasticsearch}
       - KIBANA_HOST=${KIBANA_HOST:-kibana}
+    <<: *restart
+    <<: *logging
     # disable strict permission checks
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+  
+  logstash:
+    image: docker.elastic.co/logstash/logstash-oss:7.9.3
+    <<: *restart
+    <<: *logging
+    volumes:
+      - ./config/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./config/logstash/config/:/usr/share/logstash/config/        
+      - ./config/logstash/conf.d/:/usr/share/logstash/etc/logstash/conf.d/
+      - ./config/logstash/conf.d/patterns/:/usr/share/logstash/etc/logstash/conf.d/patterns/
+      - ./config/logstash/conf.d/databases/:/usr/share/logstash/etc/logstash/conf.d/databases/
+      - /usr/share/GeoIP/:/usr/share/logstash/GeoIP/
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+      - "5140:5140/udp"
+    environment:
+      LS_JAVA_OPTS: -Xmx1G -Xms1G
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
 
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:7.9.3
