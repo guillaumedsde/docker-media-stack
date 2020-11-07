@@ -1015,6 +1015,7 @@ services:
       LS_JAVA_OPTS: -Xmx1G -Xms1G
     networks:
       - elastic
+      - logstash
     depends_on:
       - elasticsearch
 
@@ -1296,6 +1297,9 @@ networks:
     driver: bridge
     internal: true
     name: elastic
+  logstash:
+    driver: bridge
+    name: logstash
 
 volumes: 
   robots-nginx-cache:
