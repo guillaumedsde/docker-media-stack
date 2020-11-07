@@ -1053,7 +1053,7 @@ services:
       - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:7.9.3
+    image: docker.elastic.co/kibana/kibana:7.9.3
     networks:
       - elastic
       - kibana
