@@ -1,4 +1,5 @@
 http.host: "0.0.0.0"
+network.host: "0.0.0.0"
 #path.config: pipelines.yml
 #xpack.monitoring.elasticsearch.hosts: [ "http://elasticsearch:9200" ]
 
