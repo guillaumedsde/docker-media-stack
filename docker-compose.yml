@@ -1401,3 +1401,4 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   torrent-blackhole:
+    driver: aufs
