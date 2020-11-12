@@ -391,6 +391,8 @@ services:
     user: ${UID}:${GID}
     read_only: true
     mem_limit: 200m
+    networks:
+      - traefik
     volumes:
       - ${data_folder}:/data
     environment:
