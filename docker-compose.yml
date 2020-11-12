@@ -390,7 +390,9 @@ services:
     image: golift/unpackerr
     user: ${UID}:${GID}
     read_only: true
-    mem_limit: 200m
+    mem_limit: 100m
+    <<: *restart
+    <<: *logging
     networks:
       - traefik
     volumes:
@@ -409,7 +411,8 @@ services:
   homer:
     hostname: ${root_domain}
     image: b4bz/homer:latest
-    mem_limit: 150m
+    mem_limit: 100m
+    read_only: true
     <<: *restart
     <<: *logging
     environment:
@@ -1095,6 +1098,8 @@ services:
     entrypoint: ["exportarr"]
     command: ["sonarr"]
     mem_limit: 100m
+    <<: *restart
+    <<: *logging
     networks:
       - traefik
       - elastic
@@ -1109,6 +1114,8 @@ services:
     entrypoint: ["exportarr"]
     command: ["radarr"]
     mem_limit: 100m
+    <<: *restart
+    <<: *logging
     networks:
       - traefik
       - elastic
