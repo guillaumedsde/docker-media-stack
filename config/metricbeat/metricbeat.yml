@@ -162,7 +162,7 @@ metricbeat.modules:
     - "event"
     - "healthcheck"
     - "info"
-    #- "image"
+    - "image"
     - "memory"
     - "network"
   hosts: ["unix:///var/run/docker.sock"]
@@ -256,7 +256,7 @@ metricbeat.modules:
 # Metrics collected from a Prometheus endpoint
 - module: prometheus
   period: 10s
-  hosts: ["radarr-exporter:9707", sonarr-exporter:9707]
+  hosts: ["radarr-exporter:9707", "sonarr-exporter:9707"]
   metrics_path: /metrics
   metrics_filters:
    include:
