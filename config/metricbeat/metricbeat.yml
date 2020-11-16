@@ -234,10 +234,10 @@ metricbeat.modules:
   period: 10s
   metricsets:
     - "pageinfo"
-    # - ksm
-    # - conntrack
+    - "ksm"
+    - "conntrack"
   enabled: true
-  #hostfs: /hostfs
+  hostfs: /hostfs
 
 #------------------------------- Traefik Module -------------------------------
 # - module: traefik
