@@ -1028,7 +1028,7 @@ output.elasticsearch:
   # Scheme and port can be left out and will be set to the default (http and 9200)
   # In case you specify and additional path, the scheme is required: http://localhost:9200/path
   # IPv6 addresses should always be defined as: https://[2001:db8::1]:9200
-  hosts: ["elasticsearch:9200"]
+  hosts: ["${ELASTICSEARCH_HOST}:9200"]
 
   # Set gzip compression level.
   #compression_level: 0
@@ -1665,7 +1665,7 @@ output.elasticsearch:
 # These settings control loading the sample dashboards to the Kibana index. Loading
 # the dashboards are disabled by default and can be enabled either by setting the
 # options here, or by using the `-setup` CLI flag or the `setup` command.
-#setup.dashboards.enabled: false
+setup.dashboards.enabled: false
 
 # The directory from where to read the dashboards. The default is the `kibana`
 # folder in the home path.
@@ -1803,7 +1803,7 @@ setup.kibana:
   # Scheme and port can be left out and will be set to the default (http and 5601)
   # In case you specify and additional path, the scheme is required: http://localhost:5601/path
   # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
-  host: "kibana:5601"
+  host: "${KIBANA_HOST}:5601"
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -1885,7 +1885,7 @@ setup.kibana:
 
 # Logging to rotating files. Set logging.to_files to false to disable logging to
 # files.
-# logging.to_files: true
+logging.to_files: true
 # logging.files:
 # Configure the path where the logs are written. The default is the logs directory
 # under the home path (the binary location).
