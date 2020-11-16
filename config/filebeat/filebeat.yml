@@ -719,17 +719,17 @@ filebeat.modules:
 #filebeat.shutdown_timeout: 0
 
 # Enable filebeat config reloading
-#filebeat.config:
+filebeat.config:
 #inputs:
 #enabled: false
 #path: inputs.d/*.yml
 #reload.enabled: true
 #reload.period: 10s
-#modules:
-#enabled: false
-#path: modules.d/*.yml
-#reload.enabled: true
-#reload.period: 10s
+  modules:
+    enabled: false
+    path: modules.d/*.yml
+    reload.enabled: true
+    reload.period: 10s
 
 # ================================== General ===================================
 
