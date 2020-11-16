@@ -1026,6 +1026,9 @@ services:
       - ${docker_data_folder}/filebeat:/usr/share/filebeat/data
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
       - /var/log/:/var/log/host/:ro
+      environment:
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST:-elasticsearch}
+      - KIBANA_HOST=${KIBANA_HOST:-kibana}
     networks:
       - elastic
     <<: *restart
