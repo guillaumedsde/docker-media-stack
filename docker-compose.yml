@@ -573,7 +573,7 @@ services:
       - gollum
     environment:
       <<: *conf
-      GOLLUMARGS: "--live-preview --allow-uploads dir"
+      GOLLUMARGS: "--allow-uploads dir"
     labels:
       <<: *traefik
       traefik.docker.network: gollum
