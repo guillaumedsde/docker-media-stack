@@ -33,7 +33,7 @@ services:
   traefik:
     image: traefik:2.3
     command:
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       # docker configuration
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
@@ -1023,7 +1023,7 @@ services:
     command: --strict.perms=false
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ${docker_data_folder}/filebeat/data:/usr/share/filebeat/data
+      - ${docker_data_folder}/filebeat:/usr/share/filebeat/data
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
       - /var/log/:/var/log/host/:ro
     networks:
