@@ -1278,7 +1278,7 @@ setup.dashboards.enabled: true
 #setup.template.overwrite: false
 
 # Elasticsearch template settings
-setup.template.settings:
+# setup.template.settings:
 
   # A dictionary of settings to place into the settings.index dictionary
   # of the Elasticsearch template. For more details, please check

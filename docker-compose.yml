@@ -1018,9 +1018,7 @@ services:
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.9.3
-    user: root
     mem_limit: 200m
-    command: --strict.perms=false
     volumes:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${docker_data_folder}/filebeat:/usr/share/filebeat/data
