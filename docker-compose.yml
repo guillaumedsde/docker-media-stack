@@ -748,13 +748,6 @@ services:
     <<: *logging
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
     image: redis:alpine
-  
-  # Wallabag bookmarking application
-  wallabag:
-    image: gilir/wallabag:2.3.8.ldap.1
-    networks:
-      - wallabag
-      - wallabag-internal
 
   samba:
     environment:
