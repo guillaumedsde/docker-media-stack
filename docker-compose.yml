@@ -532,6 +532,9 @@ services:
       traefik.http.routers.cops.rule: Host(`cops.${root_domain}`)
       # service
       traefik.http.services.cops.loadbalancer.server.port: "80"
+      # auth
+      traefik.http.middlewares.cops-auth.basicauth.users: "${COPS_CREDENTIALS}"
+      traefik.http.routers.cops.middlewares: cops-auth
 
   # calibre-web, for reading ebooks
   calibre-web:
@@ -556,28 +559,6 @@ services:
       traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
-  
-  # Alternative to Calibre content server for storing books
-  cops:
-    hostname: cops.${root_domain}
-    image: linuxserver/cops:latest
-    <<: *restart
-    <<: *logging
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/cops:/config
-      - ${data_folder}/books:/books
-    networks:
-      - cops
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.docker.network: cops
-      traefik.http.routers.cops.rule: Host(`cops.${root_domain}`)
-      # service
-      traefik.http.services.cops.loadbalancer.server.port: "80"
-
 
   # gollum for hosting documentation
   gollum:
