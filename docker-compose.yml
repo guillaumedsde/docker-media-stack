@@ -84,7 +84,6 @@ services:
     networks:
       - traefik
       - kibana
-      - cops
       - calibre-web
       - homer
       - gollum
@@ -510,31 +509,6 @@ services:
       traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
       # service
       traefik.http.services.ombi.loadbalancer.server.port: "3579"
-
-  # Alternative to Calibre content server for storing books
-  cops:
-    hostname: cops.${root_domain}
-    image: linuxserver/cops:latest
-    <<: *restart
-    <<: *logging
-    mem_limit: 100m
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/cops:/config
-      - ${data_folder}/books:/books
-    networks:
-      - cops
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.docker.network: cops
-      traefik.http.routers.cops.rule: Host(`cops.${root_domain}`)
-      # service
-      traefik.http.services.cops.loadbalancer.server.port: "80"
-      # auth
-      traefik.http.middlewares.cops-auth.basicauth.users: "${COPS_CREDENTIALS}"
-      traefik.http.routers.cops.middlewares: cops-auth
 
   # calibre-web, for reading ebooks
   calibre-web:
@@ -1373,10 +1347,6 @@ networks:
     driver: bridge
     internal: true
     name: kibana
-  cops:
-    driver: bridge
-    internal: true
-    name: cops
   calibre-web:
     driver: bridge
     name: calibre-web
