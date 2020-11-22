@@ -550,11 +550,11 @@ services:
     labels:
       <<: *traefik
       traefik.docker.network: calibre
-      traefik.http.routers.calibre-web.rule: Host(`calibre.${root_domain}`)
+      traefik.http.routers.calibre.rule: Host(`calibre.${root_domain}`)
       # service
-      traefik.http.services.calibre-web.loadbalancer.server.port: "8080"
+      traefik.http.services.calibre.loadbalancer.server.port: "8080"
       # Forward auth
-      traefik.http.routers.gollum.middlewares: keycloak-forward-auth
+      traefik.http.routers.calibre.middlewares: keycloak-forward-auth
     networks:
       - calibre
 
