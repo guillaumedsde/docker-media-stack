@@ -98,6 +98,7 @@ services:
       - diskover-proxy
       - lam
       - keycloak-proxy
+      - calibre
     <<: *restart
     <<: *logging
     mem_limit: 200m
@@ -533,6 +534,29 @@ services:
       traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
+
+  # calibre for managing book library
+  calibre:
+    hostname: calibre.${root_domain}
+    image: linuxserver/calibre:latest
+    mem_limit: 300m
+    <<: *restart
+    <<: *logging
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${data_folder}/books:/config:ro
+    environment:
+      <<: *conf
+    labels:
+      <<: *traefik
+      traefik.docker.network: calibre
+      traefik.http.routers.calibre-web.rule: Host(`calibre.${root_domain}`)
+      # service
+      traefik.http.services.calibre-web.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.gollum.middlewares: keycloak-forward-auth
+    networks:
+      - calibre
 
   # gollum for hosting documentation
   gollum:
@@ -1350,6 +1374,9 @@ networks:
   calibre-web:
     driver: bridge
     name: calibre-web
+  calibre:
+    driver: bridge
+    name: calibre
   homer:
     driver: bridge
     internal: true
