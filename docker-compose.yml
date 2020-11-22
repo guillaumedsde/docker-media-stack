@@ -544,7 +544,7 @@ services:
     <<: *logging
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${data_folder}/books:/config:ro
+      - ${data_folder}/books:/config
     environment:
       <<: *conf
     labels:
