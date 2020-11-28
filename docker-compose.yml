@@ -165,6 +165,7 @@ services:
     cpus: 2.0
     mem_limit: 100m
     read_only: true
+    user: ${UID}:${GID}
     volumes:
       - ${docker_data_folder}/flood:/data
       - /etc/localtime:/etc/localtime:ro
