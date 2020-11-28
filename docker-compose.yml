@@ -156,6 +156,33 @@ services:
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
 
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
+  
+  flood:
+    <<: *restart
+    <<: *logging
+    image: guillaumedsde/flood-distroless:latest
+    hostname: flood.${root_domain}
+    cpus: 2.0
+    mem_limit: 100m
+    read_only: true
+    volumes:
+      - ${docker_data_folder}/flood:/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    command:
+      - --auth=none
+      - --qburl=http://qbittorrent:8080
+      - --qbuser=${QBT_USER}
+      - --qbpass=${QBT_PASS}
+    labels:
+      <<: *traefik
+      traefik.http.routers.flood.rule: Host(`flood.${root_domain}`)
+      # service
+      traefik.http.services.flood.loadbalancer.server.port: "3000"
+      # Forward auth
+      traefik.http.routers.flood.middlewares: keycloak-forward-auth
+
 
   # jackett tracker site scraper with API
   jackett:
