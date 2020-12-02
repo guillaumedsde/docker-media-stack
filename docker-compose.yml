@@ -168,6 +168,7 @@ services:
     user: ${UID}:${GID}
     volumes:
       - ${docker_data_folder}/flood:/data
+      - ${data_folder}:/data:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
       - traefik
