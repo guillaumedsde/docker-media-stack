@@ -167,7 +167,7 @@ services:
     read_only: true
     user: ${UID}:${GID}
     volumes:
-      - ${docker_data_folder}/flood:/data
+      - ${docker_data_folder}/flood:/config
       - ${data_folder}:/data:ro
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -177,7 +177,7 @@ services:
       - --qburl=http://qbittorrent:8080
       - --qbuser=${QBT_USER}
       - --qbpass=${QBT_PASS}
-      - --rundir=/data
+      - --rundir=/config
     healthcheck:
       test: [ "CMD", "/wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
