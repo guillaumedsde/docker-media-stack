@@ -160,7 +160,7 @@ services:
   flood:
     <<: *restart
     <<: *logging
-    image: guillaumedsde/flood-distroless:latest
+    image: jesec/flood:latest
     hostname: flood.${root_domain}
     cpus: 2.0
     mem_limit: 100m
@@ -176,6 +176,13 @@ services:
       - --qburl=http://qbittorrent:8080
       - --qbuser=${QBT_USER}
       - --qbpass=${QBT_PASS}
+      - --rundir=/data
+    healthcheck:
+      test: [ "/wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     labels:
       <<: *traefik
       traefik.http.routers.flood.rule: Host(`flood.${root_domain}`)
