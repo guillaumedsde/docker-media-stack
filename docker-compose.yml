@@ -180,10 +180,10 @@ services:
       - --rundir=/config
     healthcheck:
       test: [ "CMD", "/wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
     labels:
       <<: *traefik
       traefik.http.routers.flood.rule: Host(`flood.${root_domain}`)
