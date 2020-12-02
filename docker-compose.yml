@@ -179,7 +179,7 @@ services:
       - --qbpass=${QBT_PASS}
       - --rundir=/config
     healthcheck:
-      test: [ "CMD", "/wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 5s
       timeout: 2s
       retries: 10
