@@ -210,7 +210,8 @@ services:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
     read_only: true
-    mem_limit: 750m
+    cpus: "4"
+    mem_limit: 1g
     networks:
       - traefik
     environment:
@@ -262,6 +263,7 @@ services:
     image: linuxserver/radarr:nightly
     <<: *restart
     <<: *logging
+    cpus: "4"
     mem_limit: 500m
     depends_on:
       jackett:
@@ -289,7 +291,8 @@ services:
     image: linuxserver/sonarr:preview
     <<: *restart
     <<: *logging
-    mem_limit: 500m
+    cpus: "4"
+    mem_limit: 750m
     depends_on:
       jackett:
         condition: service_healthy
@@ -316,7 +319,8 @@ services:
     image: linuxserver/lidarr:preview
     <<: *restart
     <<: *logging
-    mem_limit: 500m
+    cpus: "4"
+    mem_limit: 750m
     depends_on:
       jackett:
         condition: service_healthy
@@ -550,6 +554,7 @@ services:
   calibre-web:
     hostname: read.${root_domain}
     image: linuxserver/calibre-web:latest
+    cpus: "4"
     mem_limit: 500m
     <<: *restart
     <<: *logging
@@ -598,6 +603,7 @@ services:
   unmanic:
     hostname: transcode.${root_domain}
     image: josh5/unmanic:latest
+    mem_limit: 1g
     <<: *restart
     <<: *logging
     networks:
@@ -718,7 +724,8 @@ services:
 
   # databse for nextcloud
   nextcloud-postgres:
-    mem_limit: 500m
+    cpus: "2"
+    mem_limit: 250m
     environment:
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
       POSTGRES_USER: nextcloud
@@ -732,7 +739,8 @@ services:
 
   # cache for nextcloud
   nextcloud-redis:
-    mem_limit: 250m
+    cpus: "2"
+    mem_limit: 200m
     networks:
       - nextcloud
     <<: *restart
@@ -994,7 +1002,7 @@ services:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 2000m
+    mem_limit: 3g
     <<: *restart
     <<: *logging
 
@@ -1023,7 +1031,7 @@ services:
       - ${docker_data_folder}/elasticsearch/data:/usr/share/elasticsearch/data
     networks:
       - elastic
-    mem_limit: 3500m
+    mem_limit: 4g
     <<: *restart
     <<: *logging
 
@@ -1048,6 +1056,7 @@ services:
   metricbeat:
     image: docker.elastic.co/beats/metricbeat:7.9.3
     user: root
+    cpus: "2"
     mem_limit: 250m
     networks:
       - elastic
@@ -1072,6 +1081,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.9.3
     <<: *restart
     <<: *logging
+    mem_limit: 2500m
     volumes:
       - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./config/logstash/config/:/usr/share/logstash/config/        
