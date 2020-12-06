@@ -156,7 +156,7 @@ services:
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
 
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
-  
+
   flood:
     <<: *restart
     <<: *logging
@@ -179,7 +179,13 @@ services:
       - --qbpass=${QBT_PASS}
       - --rundir=/config
     healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      test:
+        - "CMD"
+        - "wget"
+        - "--quiet"
+        - "--tries=1"
+        - "--spider"
+        - "http://localhost:3000/"
       interval: 5s
       timeout: 2s
       retries: 10
@@ -191,7 +197,6 @@ services:
       traefik.http.services.flood.loadbalancer.server.port: "3000"
       # Forward auth
       traefik.http.routers.flood.middlewares: keycloak-forward-auth
-
 
   # jackett tracker site scraper with API
   jackett:
@@ -771,6 +776,24 @@ services:
       - ldap
     image: guillaumedsde/samba-ldap
 
+  ssh:
+    ports:
+      - "22:2222"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
+      - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
+      - /data/users:/data/users
+    depends_on:
+      - openldap
+    <<: *restart
+    <<: *logging
+    mem_limit: 250m
+    networks:
+      - ssh
+      - ldap
+    image: guillaumedsde/ssh-ldap
+
   # Web Service Discovery host daemon
   # see https://github.com/christgau/wsdd
   wsdd:
@@ -1076,7 +1099,7 @@ services:
     command:
       - "--strict.perms=false"
       - "-system.hostfs=/hostfs"
-  
+
   logstash:
     image: docker.elastic.co/logstash/logstash:7.9.3
     <<: *restart
@@ -1084,7 +1107,7 @@ services:
     mem_limit: 2500m
     volumes:
       - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./config/logstash/config/:/usr/share/logstash/config/        
+      - ./config/logstash/config/:/usr/share/logstash/config/
       - ./config/logstash/conf.d/:/usr/share/logstash/etc/logstash/conf.d/
       - ./config/logstash/conf.d/patterns/:/usr/share/logstash/etc/logstash/conf.d/patterns/
       - ./config/logstash/conf.d/databases/:/usr/share/logstash/etc/logstash/conf.d/databases/
@@ -1379,6 +1402,9 @@ networks:
   samba:
     driver: bridge
     name: samba
+  ssh:
+    driver: bridge
+    name: ssh
   gitlab-runner:
     driver: bridge
     name: gitlab-runner
@@ -1445,7 +1471,6 @@ networks:
     driver: bridge
     name: keycloak-proxy
 
-
-volumes: 
+volumes:
   robots-nginx-cache:
   robots-nginx-pid:
