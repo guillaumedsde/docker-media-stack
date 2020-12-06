@@ -778,7 +778,7 @@ services:
 
   ssh:
     ports:
-      - "22:2222"
+      - "2222:2222"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
