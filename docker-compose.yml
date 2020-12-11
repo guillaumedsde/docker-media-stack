@@ -269,7 +269,7 @@ services:
     <<: *restart
     <<: *logging
     cpus: "4"
-    mem_limit: 500m
+    mem_limit: 1g
     depends_on:
       jackett:
         condition: service_healthy
@@ -297,7 +297,7 @@ services:
     <<: *restart
     <<: *logging
     cpus: "4"
-    mem_limit: 750m
+    mem_limit: 1g
     depends_on:
       jackett:
         condition: service_healthy
