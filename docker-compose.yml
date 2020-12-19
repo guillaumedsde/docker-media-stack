@@ -33,7 +33,7 @@ services:
   traefik:
     image: traefik:2.3
     command:
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       # docker configuration
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
@@ -60,6 +60,10 @@ services:
       # traefik healthcheck
       - "--ping=true"
       - "--ping.manualrouting=true"
+      # traefik access logs
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+      - "--accesslog.bufferingsize=100"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
@@ -74,12 +78,29 @@ services:
       traefik.http.routers.ping.service: ping@internal
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${docker_data_folder}/traefik/logs:/var/log/traefik/
       - ${docker_data_folder}/traefik:/traefik
       - ./config/traefik:/config:ro
     networks:
       - traefik
+      - kibana
+      - calibre-web
+      - homer
+      - gollum
+      - unmanic
+      - ytdl
+      - ghost
+      - nextcloud-proxy
+      - huginn-proxy
+      - gotify
+      - robots
+      - netdata
+      - diskover-proxy
+      - lam
+      - keycloak-proxy
     <<: *restart
     <<: *logging
+    mem_limit: 200m
     ports:
       - 80:80
       - 443:443
@@ -91,6 +112,7 @@ services:
     image: containrrr/watchtower:latest
     <<: *restart
     <<: *logging
+    mem_limit: 100m
     read_only: true
     user: ${UID}:${docker_group_id}
     volumes:
@@ -112,8 +134,10 @@ services:
     volumes:
       - ${docker_data_folder}/qbittorrent-openvpn:/config
       - ${data_folder}:/data
-      - ${torrent_blackhole}:/blackhole
+      - ${docker_data_folder}/torrent_blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
+    cpus: 2.0
+    mem_limit: 2g
     networks:
       - traefik
     environment:
@@ -134,6 +158,47 @@ services:
 
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
 
+  flood:
+    <<: *restart
+    <<: *logging
+    image: jesec/flood:latest
+    hostname: flood.${root_domain}
+    cpus: 2.0
+    mem_limit: 100m
+    read_only: true
+    user: ${UID}:${GID}
+    volumes:
+      - ${docker_data_folder}/flood:/config
+      - ${data_folder}:/data:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    command:
+      - --auth=none
+      - --qburl=http://qbittorrent:8080
+      - --qbuser=${QBT_USER}
+      - --qbpass=${QBT_PASS}
+      - --rundir=/config
+    healthcheck:
+      test:
+        - "CMD"
+        - "wget"
+        - "--quiet"
+        - "--tries=1"
+        - "--spider"
+        - "http://localhost:3000/"
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
+    labels:
+      <<: *traefik
+      traefik.http.routers.flood.rule: Host(`flood.${root_domain}`)
+      # service
+      traefik.http.services.flood.loadbalancer.server.port: "3000"
+      # Forward auth
+      traefik.http.routers.flood.middlewares: keycloak-forward-auth
+
   # jackett tracker site scraper with API
   jackett:
     hostname: jackett.${root_domain}
@@ -146,11 +211,13 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
-      - ${torrent_blackhole}:/blackhole
+      - ${docker_data_folder}/torrent_blackhole:/blackhole
     tmpfs:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
     read_only: true
+    cpus: "4"
+    mem_limit: 1g
     networks:
       - traefik
     environment:
@@ -176,11 +243,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/hydra:/config
-      - ${torrent_blackhole}:/blackhole
+      - ${docker_data_folder}/torrent_blackhole:/blackhole
     tmpfs:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
     read_only: true
+    mem_limit: 750m
     networks:
       - traefik
     environment:
@@ -201,6 +269,8 @@ services:
     image: linuxserver/radarr:nightly
     <<: *restart
     <<: *logging
+    cpus: "4"
+    mem_limit: 1g
     depends_on:
       jackett:
         condition: service_healthy
@@ -227,6 +297,8 @@ services:
     image: linuxserver/sonarr:preview
     <<: *restart
     <<: *logging
+    cpus: "4"
+    mem_limit: 1g
     depends_on:
       jackett:
         condition: service_healthy
@@ -253,6 +325,8 @@ services:
     image: linuxserver/lidarr:preview
     <<: *restart
     <<: *logging
+    cpus: "4"
+    mem_limit: 750m
     depends_on:
       jackett:
         condition: service_healthy
@@ -290,7 +364,7 @@ services:
       traefik.http.services.bazarr.loadbalancer.server.port: "6767"
       # Forward auth
       traefik.http.routers.bazarr.middlewares: keycloak-forward-auth
-
+    mem_limit: 500m
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/bazarr:/config
@@ -305,6 +379,7 @@ services:
     image: linuxserver/lazylibrarian:latest
     <<: *restart
     <<: *logging
+    mem_limit: 750m
     depends_on:
       jackett:
         condition: service_healthy
@@ -333,6 +408,7 @@ services:
     image: hotio/mylar3:latest
     <<: *restart
     <<: *logging
+    mem_limit: 200m
     depends_on:
       jackett:
         condition: service_healthy
@@ -354,22 +430,47 @@ services:
       # Forward auth
       traefik.http.routers.mylar.middlewares: keycloak-forward-auth
 
+  # automatically extract torrented archives
+  unpackerr:
+    image: golift/unpackerr
+    user: ${UID}:${GID}
+    read_only: true
+    mem_limit: 100m
+    <<: *restart
+    <<: *logging
+    networks:
+      - traefik
+    volumes:
+      - ${data_folder}:/data
+    environment:
+      UN_SONARR_0_URL: http://sonarr:8989
+      UN_SONARR_0_API_KEY: ${SONARR_API_KEY}
+      UN_SONARR_0_PATH: /data/download/series
+      UN_RADARR_0_URL: http://radarr:7878
+      UN_RADARR_0_API_KEY: ${RADARR_API_KEY}
+      UN_RADARR_0_PATH: /data/download/series
+      UN_LIDARR_0_URL: http://lidarr:8686
+      UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
+      UN_LIDARR_0_PATH: /data/download/music
   # homer is a homepage container
   homer:
     hostname: ${root_domain}
     image: b4bz/homer:latest
+    mem_limit: 100m
+    read_only: true
     <<: *restart
     <<: *logging
     environment:
       UID: ${UID}
       GID: ${GID}
     networks:
-      - traefik
+      - homer
     volumes:
       - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
       - ${docker_data_folder}/homer/assets:/www/assets
     labels:
       <<: *traefik
+      traefik.docker.network: homer
       traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
       # service
       traefik.http.services.homer.loadbalancer.server.port: "8080"
@@ -378,6 +479,7 @@ services:
   plex:
     hostname: plex.${root_domain}
     image: linuxserver/plex:latest
+    mem_limit: 4g
     <<: *restart
     <<: *logging
     # note use the host network mode on first startup,
@@ -410,6 +512,7 @@ services:
   jellyfin:
     hostname: jellyfin.${root_domain}
     image: linuxserver/jellyfin:latest
+    mem_limit: 4g
     <<: *restart
     <<: *logging
     depends_on:
@@ -435,6 +538,7 @@ services:
     image: linuxserver/ombi:latest
     <<: *restart
     <<: *logging
+    mem_limit: 500m
     depends_on:
       - "sonarr"
       - "radarr"
@@ -452,32 +556,12 @@ services:
       # service
       traefik.http.services.ombi.loadbalancer.server.port: "3579"
 
-  # Alternative to Calibre content server for storing books
-  cops:
-    hostname: cops.${root_domain}
-    image: linuxserver/cops:latest
-    <<: *restart
-    <<: *logging
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/cops:/config
-      - ${data_folder}/books:/books
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.cops.rule: Host(`cops.${root_domain}`)
-      # service
-      traefik.http.services.cops.loadbalancer.server.port: "80"
-      # Forward auth
-      traefik.http.routers.cops.middlewares: keycloak-forward-auth
-
   # calibre-web, for reading ebooks
   calibre-web:
     hostname: read.${root_domain}
     image: linuxserver/calibre-web:latest
+    cpus: "4"
+    mem_limit: 500m
     <<: *restart
     <<: *logging
     volumes:
@@ -485,39 +569,17 @@ services:
       - ${docker_data_folder}/calibre-web:/config
       - ${data_folder}/books:/books
     networks:
-      - traefik
+      - calibre-web
       - ldap
     environment:
       <<: *conf
       DOCKER_MODS: linuxserver/calibre-web:calibre
     labels:
       <<: *traefik
+      traefik.docker.network: calibre-web
       traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
-
-  # komga, for reading comics
-  komga:
-    hostname: comics.${root_domain}
-    image: gotson/komga:latest
-    user: "${UID}:${GID}"
-    <<: *restart
-    <<: *logging
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - ${docker_data_folder}/komga:/config
-      - ${data_folder}/comics:/books
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.komga.rule: Host(`comics.${root_domain}`)
-      # service
-      traefik.http.services.komga.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.komga.middlewares: keycloak-forward-auth
 
   # gollum for hosting documentation
   gollum:
@@ -525,16 +587,18 @@ services:
     image: cuotos/gollum-alpine:latest
     <<: *restart
     <<: *logging
+    mem_limit: 250m
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/gollum:/wiki
     networks:
-      - traefik
+      - gollum
     environment:
       <<: *conf
-      GOLLUMARGS: "--live-preview --allow-uploads dir"
+      GOLLUMARGS: "--allow-uploads dir"
     labels:
       <<: *traefik
+      traefik.docker.network: gollum
       traefik.http.routers.gollum.rule: Host(`docs.${root_domain}`)
       # service
       traefik.http.services.gollum.loadbalancer.server.port: "4567"
@@ -545,10 +609,11 @@ services:
   unmanic:
     hostname: transcode.${root_domain}
     image: josh5/unmanic:latest
+    mem_limit: 1g
     <<: *restart
     <<: *logging
     networks:
-      - traefik
+      - unmanic
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/unmanic:/config
@@ -558,6 +623,7 @@ services:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.docker.network: unmanic
       traefik.http.routers.unmanic.rule: Host(`transcode.${root_domain}`)
       # service
       traefik.http.services.unmanic.loadbalancer.server.port: "8888"
@@ -569,48 +635,23 @@ services:
     image: kmb32123/youtube-dl-server:latest
     <<: *restart
     <<: *logging
+    mem_limit: 250m
     hostname: youtube-dl.${root_domain}
     environment:
       <<: *conf
     networks:
-      - traefik
+      - ytdl
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${data_folder}/documentaries:/youtube-dl
     labels:
       <<: *traefik
+      traefik.docker.network: ytdl
       traefik.http.routers.yt-dl.rule: Host(`yt-dl.${root_domain}`)
       # service
       traefik.http.services.yt-dl.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.yt-dl.middlewares: keycloak-forward-auth
-
-  # JS CMS
-  ghost_margot:
-    environment:
-      <<: *conf
-      url: "https://margot.${tld}"
-      mail__transport: SMTP
-      mail__from: ghost@${root_domain}
-      mail__options__service: SendGrid
-      mail__options__host: smtp.sendgrid.net
-      mail__options__port: "465"
-      mail__options__secureConnection: "true"
-      mail__options__auth__user: apikey
-      mail__options__auth__pass: ${SENDGRID_PASS}
-    labels:
-      <<: *traefik
-      traefik.http.routers.blog-margot.rule: Host(`margot.${tld}`)
-      # service
-      traefik.http.services.blog-margot.loadbalancer.server.port: "2368"
-    volumes:
-      - ${docker_data_folder}/ghost_margot:/var/lib/ghost/content
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - traefik
-    <<: *restart
-    <<: *logging
-    image: ghost:alpine
 
   # JS CMS
   ghost_guillaume:
@@ -627,6 +668,7 @@ services:
       mail__options__auth__pass: ${SENDGRID_PASS}
     labels:
       <<: *traefik
+      traefik.docker.network: ghost
       traefik.http.routers.blog-guillaume.rule: Host(`blog.guillaume.${tld}`)
       # service
       traefik.http.services.blog-guillaume.loadbalancer.server.port: "2368"
@@ -634,9 +676,10 @@ services:
       - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - ghost
     <<: *restart
     <<: *logging
+    mem_limit: 250m
     image: ghost:alpine
 
   # personal cloud
@@ -653,6 +696,7 @@ services:
     networks:
       - traefik
       - nextcloud
+      - nextcloud-proxy
       - ldap
     environment:
       <<: *conf
@@ -672,6 +716,7 @@ services:
       MAIL_DOMAIN: ${root_domain}
     labels:
       <<: *traefik
+      traefik.docker.network: nextcloud-proxy
       traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
       # service
       traefik.http.services.nextcloud.loadbalancer.server.port: "80"
@@ -680,10 +725,13 @@ services:
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
     <<: *restart
     <<: *logging
+    mem_limit: 1g
     image: guillaumedsde/nextcloud-samba:latest
 
   # databse for nextcloud
   nextcloud-postgres:
+    cpus: "2"
+    mem_limit: 250m
     environment:
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
       POSTGRES_USER: nextcloud
@@ -697,6 +745,8 @@ services:
 
   # cache for nextcloud
   nextcloud-redis:
+    cpus: "2"
+    mem_limit: 200m
     networks:
       - nextcloud
     <<: *restart
@@ -721,17 +771,37 @@ services:
       - openldap
     <<: *restart
     <<: *logging
+    mem_limit: 250m
     networks:
       - samba
       - ldap
     image: guillaumedsde/samba-ldap
 
+  ssh:
+    ports:
+      - "2222:2222"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
+      - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
+      - /data/users:/data/users
+    depends_on:
+      - openldap
+    <<: *restart
+    <<: *logging
+    mem_limit: 250m
+    networks:
+      - ssh
+      - ldap
+    image: guillaumedsde/ssh-ldap
+
   # Web Service Discovery host daemon
   # see https://github.com/christgau/wsdd
   wsdd:
-    network_mode: "host"
+    network_mode: host
     user: ${UID}:${GID}
     read_only: true
+    mem_limit: 200m
     <<: *restart
     <<: *logging
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
@@ -741,6 +811,8 @@ services:
   gitlab-runner:
     <<: *restart
     <<: *logging
+    mem_limit: 200m
+    cpus: "2"
     networks:
       - gitlab-runner
     volumes:
@@ -753,6 +825,7 @@ services:
     hostname: huginn.${root_domain}
     depends_on:
       - "huginn-mariadb"
+    mem_limit: 750m
     environment:
       <<: *conf
       HUGINN_DOMAIN: huginn.${root_domain}
@@ -777,10 +850,11 @@ services:
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
-      - traefik
       - huginn
+      - huginn-proxy
     labels:
       <<: *traefik
+      traefik.docker.network: huginn-proxy
       traefik.http.routers.huginn.rule: Host(`huginn.${root_domain}`)
       # service
       traefik.http.services.huginn.loadbalancer.server.port: "3000"
@@ -790,6 +864,7 @@ services:
 
   huginn-mariadb:
     image: mariadb
+    mem_limit: 250m
     volumes:
       - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
@@ -802,12 +877,14 @@ services:
   # Push notification service
   gotify:
     hostname: gotify.${tld}
+    mem_limit: 200m
     environment:
       <<: *conf
     <<: *restart
     <<: *logging
     labels:
       <<: *traefik
+      traefik.docker.network: gotify
       traefik.http.routers.gotify.rule: Host(`gotify.${tld}`)
       # service
       traefik.http.services.gotify.loadbalancer.server.port: "80"
@@ -815,8 +892,26 @@ services:
       - ${docker_data_folder}/gotify:/app/data
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - gotify
     image: gotify/server:latest
+
+  robots:
+    image: nginx:alpine
+    read_only: true
+    mem_limit: 100m
+    volumes:
+      - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./config/nginx/robots.txt:/usr/share/nginx/html/robots.txt:ro
+      - robots-nginx-cache:/var/cache/nginx
+      - robots-nginx-pid:/var/run
+    networks:
+      - robots
+    labels:
+      <<: *traefik
+      traefik.docker.network: robots
+      traefik.http.routers.robots.rule: Host(`.*`) && Path(`/robots.txt`)
+      # service
+      traefik.http.services.robots.loadbalancer.server.port: "8080"
 
   ##################################################################
   # Monitoring
@@ -827,6 +922,7 @@ services:
     image: linuxserver/tautulli:latest
     <<: *restart
     <<: *logging
+    mem_limit: 250m
     depends_on:
       - "plex"
     volumes:
@@ -858,12 +954,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
     networks:
-      - traefik
+      - netdata
     environment:
       <<: *conf
       PGID: ${docker_group_id}
     labels:
       <<: *traefik
+      traefik.docker.network: netdata
       traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
@@ -873,11 +970,13 @@ services:
       - SYS_PTRACE
     security_opt:
       - apparmor:unconfined
+    mem_limit: 500m
 
   # Diskover web UI for disk usage analysis
   diskover:
     hostname: diskover.${root_domain}
     image: linuxserver/diskover:latest
+    mem_limit: 500m
     environment:
       <<: *conf
       REDIS_HOST: diskover-redis
@@ -896,7 +995,7 @@ services:
     networks:
       - traefik
       - diskover
-    mem_limit: 2048m
+      - diskover-proxy
     <<: *restart
     <<: *logging
     depends_on:
@@ -904,6 +1003,7 @@ services:
       - diskover-redis
     labels:
       <<: *traefik
+      traefik.docker.network: diskover-proxy
       traefik.http.routers.diskover.rule: Host(`diskover.${root_domain}`)
       # service
       traefik.http.services.diskover.loadbalancer.server.port: "80"
@@ -926,18 +1026,153 @@ services:
       memlock:
         soft: -1
         hard: -1
+    mem_limit: 3g
     <<: *restart
     <<: *logging
 
   # Redis instance for diskover
   diskover-redis:
     image: redis:alpine
+    mem_limit: 200m
     volumes:
       - ${docker_data_folder}/diskover-redis:/data
     networks:
       - diskover
     <<: *restart
     <<: *logging
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: -Xms1G -Xmx3G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ${docker_data_folder}/elasticsearch/data:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    mem_limit: 4g
+    <<: *restart
+    <<: *logging
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.9.3
+    user: root
+    mem_limit: 200m
+    command: --strict.perms=false
+    volumes:
+      - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ${docker_data_folder}/filebeat:/usr/share/filebeat/data
+      - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
+      - /var/log/:/var/log/host/:ro
+    environment:
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
+      KIBANA_HOST: ${KIBANA_HOST:-kibana}
+    networks:
+      - elastic
+    <<: *restart
+    <<: *logging
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.9.3
+    user: root
+    cpus: "2"
+    mem_limit: 250m
+    networks:
+      - elastic
+    volumes:
+      - ./config/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ${docker_data_folder}/metricbeat/data:/usr/share/metricbeat/data
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
+      KIBANA_HOST: ${KIBANA_HOST:-kibana}
+    <<: *restart
+    <<: *logging
+    # disable strict permission checks
+    command:
+      - "--strict.perms=false"
+      - "-system.hostfs=/hostfs"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.9.3
+    <<: *restart
+    <<: *logging
+    mem_limit: 2500m
+    volumes:
+      - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./config/logstash/config/:/usr/share/logstash/config/
+      - ./config/logstash/conf.d/:/usr/share/logstash/etc/logstash/conf.d/
+      - ./config/logstash/conf.d/patterns/:/usr/share/logstash/etc/logstash/conf.d/patterns/
+      - ./config/logstash/conf.d/databases/:/usr/share/logstash/etc/logstash/conf.d/databases/
+      - /usr/share/GeoIP/:/usr/share/logstash/GeoIP/
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+      - "5140:5140/udp"
+    environment:
+      LS_JAVA_OPTS: -Xmx1G -Xms1G
+    networks:
+      - elastic
+      - logstash
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.3
+    networks:
+      - elastic
+      - kibana
+    environment:
+      SERVER_NAME: kibana.${root_domain}
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    mem_limit: 500m
+    labels:
+      <<: *traefik
+      traefik.http.routers.kibana.rule: Host(`kibana.${root_domain}`)
+      traefik.docker.network: kibana
+      # service
+      traefik.http.services.kibana.loadbalancer.server.port: "5601"
+      # Forward auth
+      traefik.http.routers.kibana.middlewares: keycloak-forward-auth
+
+  sonarr-exporter:
+    image: onedr0p/exportarr:master
+    entrypoint: ["exportarr"]
+    command: ["sonarr"]
+    mem_limit: 100m
+    <<: *restart
+    <<: *logging
+    networks:
+      - traefik
+      - elastic
+    environment:
+      PORT: "9707"
+      URL: "http://sonarr:8989"
+      APIKEY: "${SONARR_API_KEY}"
+      ENABLE_EPISODE_QUALITY_METRICS: "true"
+
+  radarr-exporter:
+    image: onedr0p/exportarr:master
+    entrypoint: ["exportarr"]
+    command: ["radarr"]
+    mem_limit: 100m
+    <<: *restart
+    <<: *logging
+    networks:
+      - traefik
+      - elastic
+    environment:
+      PORT: "9707"
+      URL: "http://radarr:7878"
+      APIKEY: "${RADARR_API_KEY}"
 
   ##################################################################
   # Authentication
@@ -946,6 +1181,7 @@ services:
   openldap:
     hostname: ldap.${root_domain}
     image: osixia/openldap:latest
+    mem_limit: 500m
     environment:
       HOSTNAME: ldap.${root_domain}
       LDAP_DOMAIN: ${root_domain}
@@ -980,6 +1216,7 @@ services:
   openldap-acme:
     image: guillaumedsde/acme.sh:latest
     user: ${UID}:${GID}
+    mem_limit: 100m
     environment:
       OVH_AK: ${OVH_APPLICATION_KEY}
       OVH_AS: ${OVH_APPLICATION_SECRET}
@@ -999,14 +1236,16 @@ services:
     environment:
       LAM_SKIP_PRECONFIGURE: "true"
     networks:
-      - traefik
+      - lam
       - ldap
     depends_on:
       - openldap
     <<: *restart
     <<: *logging
+    mem_limit: 100m
     labels:
       <<: *traefik
+      traefik.docker.network: lam
       traefik.http.routers.lam.rule: Host(`lam.${root_domain}`)
       # service
       traefik.http.services.lam.loadbalancer.server.port: "80"
@@ -1030,17 +1269,19 @@ services:
       KEYCLOAK_HOSTNAME: keycloak.${root_domain}
     <<: *restart
     <<: *logging
+    mem_limit: 750m
     depends_on:
       - keycloak-db
       - openldap
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - traefik
+      - keycloak-proxy
       - ldap
       - keycloak
     labels:
       <<: *traefik
+      traefik.docker.network: keycloak-proxy
       traefik.http.routers.keycloak.rule: Host(`keycloak.${root_domain}`)
       # service
       traefik.http.services.keycloak.loadbalancer.server.port: "8080"
@@ -1049,6 +1290,7 @@ services:
   keycloak-db:
     <<: *restart
     <<: *logging
+    mem_limit: 250m
     environment:
       # Tell Postgress what user/password to create
       POSTGRES_USER: keycloak
@@ -1065,6 +1307,7 @@ services:
     image: thomseddon/traefik-forward-auth:2
     <<: *restart
     <<: *logging
+    mem_limit: 100m
     environment:
       PROVIDERS_GOOGLE_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
       PROVIDERS_GOOGLE_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
@@ -1093,6 +1336,7 @@ services:
     image: thomseddon/traefik-forward-auth:2
     <<: *restart
     <<: *logging
+    mem_limit: 100m
     environment:
       PROVIDERS_OIDC_CLIENT_ID: ${KEYCLOAK_OIDC_CLIENT_ID}
       PROVIDERS_OIDC_CLIENT_SECRET: ${KEYCLOAK_OIDC_CLIENT_SECRET}
@@ -1159,6 +1403,75 @@ networks:
   samba:
     driver: bridge
     name: samba
+  ssh:
+    driver: bridge
+    name: ssh
   gitlab-runner:
     driver: bridge
     name: gitlab-runner
+  elastic:
+    driver: bridge
+    internal: true
+    name: elastic
+  logstash:
+    driver: bridge
+    name: logstash
+  kibana:
+    driver: bridge
+    internal: true
+    name: kibana
+  calibre-web:
+    driver: bridge
+    name: calibre-web
+  homer:
+    driver: bridge
+    internal: true
+    name: homer
+  gollum:
+    driver: bridge
+    internal: true
+    name: gollum
+  unmanic:
+    driver: bridge
+    internal: true
+    name: unmanic
+  ytdl:
+    driver: bridge
+    internal: true
+    name: ytdl
+  ghost:
+    driver: bridge
+    name: ghost
+  nextcloud-proxy:
+    driver: bridge
+    name: nextcloud-proxy
+  huginn-proxy:
+    driver: bridge
+    name: huginn-proxy
+  gotify:
+    driver: bridge
+    internal: true
+    name: gotify
+  robots:
+    driver: bridge
+    internal: true
+    name: robots
+  netdata:
+    driver: bridge
+    internal: true
+    name: netdata
+  diskover-proxy:
+    driver: bridge
+    internal: true
+    name: diskover-proxy
+  lam:
+    driver: bridge
+    internal: true
+    name: lam
+  keycloak-proxy:
+    driver: bridge
+    name: keycloak-proxy
+
+volumes:
+  robots-nginx-cache:
+  robots-nginx-pid:
