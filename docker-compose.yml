@@ -92,6 +92,7 @@ services:
     <<: *restart
     <<: *logging
     read_only: true
+    user: ${UID}:${docker_group_id}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
