@@ -16,3 +16,7 @@ A template for the configuration file is situated in `.env.sample` in this direc
 Here's an overview of the structure of this stack and how the apps interact and depend on each other:
 
 [![service structure](https://guillaumedsde.gitlab.io/docker-media-stack/docker-compose.png)](https://guillaumedsde.gitlab.io/docker-media-stack/docker-compose.png)
+
+## Credits
+
+- Github user [brianspilner01](https://github.com/brianspilner01) for his awesome [subtitle cleanup script](https://raw.githubusercontent.com/brianspilner01/media-server-scripts/master/sub-clean.sh)
