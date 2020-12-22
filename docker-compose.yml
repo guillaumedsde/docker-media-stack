@@ -369,6 +369,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/bazarr:/config
       - ${data_folder}:/data
+      - ./config/bazarr/sub-clean.sh:/usr/bin/sub-clean.sh
+      - ./config/bazarr/chmod-custom-script.sh:/etc/cont-init.d/99-chmod-custom-script
     networks:
       - traefik
 
