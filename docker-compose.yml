@@ -585,7 +585,7 @@ services:
 
   # gollum for hosting documentation
   gollum:
-    hostname: doc.${root_domain}
+    hostname: docs.${root_domain}
     image: cuotos/gollum-alpine:latest
     <<: *restart
     <<: *logging
@@ -946,7 +946,7 @@ services:
 
   # netdata, server monitoring
   netdata:
-    hostname: netdata.${root_domain}
+    hostname: status.${root_domain}
     image: netdata/netdata:latest
     <<: *restart
     <<: *logging
@@ -1181,17 +1181,17 @@ services:
 
   # LDAP server
   openldap:
-    hostname: ldap.${root_domain}
+    hostname: ldap.${old_root_domain}
     image: osixia/openldap:latest
     mem_limit: 500m
     environment:
-      HOSTNAME: ldap.${root_domain}
-      LDAP_DOMAIN: ${root_domain}
+      HOSTNAME: ldap.${old_root_domain}
+      LDAP_DOMAIN: ${old_root_domain}
       LDAP_ORGANISATION: ${LDAP_ORGANISATION}
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
       LDAP_TLS: "true"
-      LDAP_TLS_CRT_FILENAME: ldap.${root_domain}.cer
-      LDAP_TLS_KEY_FILENAME: ldap.${root_domain}.key
+      LDAP_TLS_CRT_FILENAME: ldap.${old_root_domain}.cer
+      LDAP_TLS_KEY_FILENAME: ldap.${old_root_domain}.key
       LDAP_TLS_CA_CRT_FILENAME: ca.cer
       LDAP_OPENLDAP_UID: ${UID}
       LDAP_OPENLDAP_GID: ${GID}
@@ -1212,7 +1212,7 @@ services:
       - ./ldap_templates/samba_indices.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/samba_indices.ldif:ro
       - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
-      - ${docker_data_folder}/openldap/certs/ldap.${root_domain}:/container/service/slapd/assets/certs:ro
+      - ${docker_data_folder}/openldap/certs/ldap.${old_root_domain}:/container/service/slapd/assets/certs:ro
 
   # OpenLDAP certificate handler
   openldap-acme:
