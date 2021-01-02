@@ -911,7 +911,7 @@ services:
     labels:
       <<: *traefik
       traefik.docker.network: robots
-      traefik.http.routers.robots.rule: Host(`.*`) && Path(`/robots.txt`)
+      traefik.http.routers.robots.rule: HostRegexp(`${root_domain}`,`{subhost:[a-z]+}.${root_domain}`) && Path(`/robots.txt`)
       # service
       traefik.http.services.robots.loadbalancer.server.port: "8080"
 
