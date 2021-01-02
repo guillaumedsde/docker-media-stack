@@ -477,39 +477,6 @@ services:
       # service
       traefik.http.services.homer.loadbalancer.server.port: "8080"
 
-  # plex media server
-  plex:
-    hostname: plex.${root_domain}
-    image: linuxserver/plex:latest
-    mem_limit: 4g
-    <<: *restart
-    <<: *logging
-    # note use the host network mode on first startup,
-    # then you can use the regular bridge mode
-    # network_mode: "host"
-    ports:
-      - "32400:32400"
-      - "32400:32400/udp"
-      - "32469:32469"
-      - "32469:32469/udp"
-      - "5353:5353/udp"
-      - "1900:1900/udp"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/plex:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-    environment:
-      VERSION: docker
-      PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.plex.rule: Host(`plex.${root_domain}`)
-      # service
-      traefik.http.services.plex.loadbalancer.server.port: "32400"
-
   # jellyfin media server
   jellyfin:
     hostname: jellyfin.${root_domain}
@@ -917,32 +884,6 @@ services:
 
   ##################################################################
   # Monitoring
-
-  # tautulli, plex media server monitoring
-  tautulli:
-    hostname: tautulli.${root_domain}
-    image: linuxserver/tautulli:latest
-    <<: *restart
-    <<: *logging
-    mem_limit: 250m
-    depends_on:
-      - "plex"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/tautulli:/config
-      - ${data_folder}:/data
-      - "${docker_data_folder}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.tautulli.rule: Host(`tautulli.${root_domain}`)
-      # service
-      traefik.http.services.tautulli.loadbalancer.server.port: "8181"
-      # Forward auth
-      traefik.http.routers.tautulli.middlewares: keycloak-forward-auth
 
   # netdata, server monitoring
   netdata:
