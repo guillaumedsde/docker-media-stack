@@ -480,7 +480,8 @@ services:
   # jellyfin media server
   jellyfin:
     hostname: jellyfin.${root_domain}
-    image: linuxserver/jellyfin:latest
+    image: jellyfin/jellyfin:latest
+    user: ${UID}:${GID}
     mem_limit: 4g
     <<: *restart
     <<: *logging
@@ -496,6 +497,11 @@ services:
     environment:
       <<: *conf
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
+      #Uncomment forofficial Jellyfin image:
+      JELLYFIN_DATA_DIR: /config/data
+      JELLYFIN_CONFIG_DIR: /config
+      JELLYFIN_LOG_DIR: /config/log
+      JELLYFIN_CACHE_DIR: /config/cache
     labels:
       <<: *traefik
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
