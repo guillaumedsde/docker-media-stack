@@ -1097,6 +1097,7 @@ services:
     image: onedr0p/exportarr:master
     entrypoint: ["exportarr"]
     command: ["sonarr"]
+    cpus: 2.0
     mem_limit: 100m
     <<: *restart
     <<: *logging
@@ -1113,6 +1114,7 @@ services:
     image: onedr0p/exportarr:master
     entrypoint: ["exportarr"]
     command: ["radarr"]
+    cpus: 2.0
     mem_limit: 100m
     <<: *restart
     <<: *logging
@@ -1123,6 +1125,24 @@ services:
       PORT: "9707"
       URL: "http://radarr:7878"
       APIKEY: "${RADARR_API_KEY}"
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    cpus: 2.0
+    mem_limit: 250m
+    user: ${UID}:${GID}
+    environment:
+      # Used to change the verbosity of the logging
+      LOG_LEVEL: info
+      # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
+      CAPTCHA_SOLVER: hcaptcha-solver
+      # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
+      # CAPTCHA_SOLVER: harvester
+      #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
+    networks:
+      - traefik
+    <<: *restart
+    <<: *logging
 
   ##################################################################
   # Authentication
