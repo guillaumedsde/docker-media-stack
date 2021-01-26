@@ -15,3 +15,4 @@ http:
         customResponseHeaders:
           Server: ""
           X-Powered-By: ""
+          X-Robots-Tag: "none"
