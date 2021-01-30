@@ -764,6 +764,9 @@ services:
     read_only: true
     tmpfs:
       - /run/sshd
+      - /var:rw,exec
+    environment:
+      S6_READ_ONLY_ROOT: "1"
     depends_on:
       - openldap
     <<: *restart
