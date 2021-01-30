@@ -761,6 +761,9 @@ services:
       - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
       - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
       - /data/users:/data/users
+    read_only: true
+    tmpfs:
+      - /run/sshd
     depends_on:
       - openldap
     <<: *restart
