@@ -760,6 +760,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
       - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
+      - ${docker_data_folder}/ssh/config:/config
       - /data/users:/data/users
     read_only: true
     tmpfs:
@@ -771,7 +772,7 @@ services:
       - openldap
     <<: *restart
     <<: *logging
-    mem_limit: 250m
+    mem_limit: 100m
     networks:
       - ssh
       - ldap
