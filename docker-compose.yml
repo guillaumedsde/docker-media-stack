@@ -349,7 +349,7 @@ services:
   # bazarr, webapp for downloading subtitles
   bazarr:
     hostname: subtitles.${root_domain}
-    image: hotio/bazarr:stable
+    image: hotio/bazarr:release
     <<: *restart
     <<: *logging
     depends_on:
