@@ -254,15 +254,12 @@ services:
     networks:
       - traefik
     environment:
-      LIDARR_URL: http://lidarr:8787
+      LIDARR_URL: http://lidarr:8686
       LIDARR_KEY: ${LIDARR_API_KEY}
-
-      RADARR_URL: http://radarr:8787
+      RADARR_URL: http://radarr:7878
       RADARR_KEY: ${RADARR_API_KEY}
-
-      SONARR_URL: http://sonarr:8787
+      SONARR_URL: http://sonarr:8989
       SONARR_KEY: ${SONARR_API_KEY}
-
       JACKETT_URL: http://jackett:9117
       JACKETT_KEY: ${JACKETT_API_KEY}
 
@@ -489,6 +486,7 @@ services:
       UN_LIDARR_0_URL: http://lidarr:8686
       UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
       UN_LIDARR_0_PATH: /data/download/music
+
   # homer is a homepage container
   homer:
     hostname: ${root_domain}
