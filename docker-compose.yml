@@ -233,6 +233,39 @@ services:
       # Forward auth
       traefik.http.routers.jackett.middlewares: keycloak-forward-auth
 
+  # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
+  jackett-sync-ts:
+    image: allergicduck/jackett-sync
+    <<: *restart
+    <<: *logging
+    depends_on:
+      jackett:
+        condition: service_healthy
+      radarr:
+        condition: service_started
+      sonarr:
+        condition: service_started
+      lidarr:
+        condition: service_started
+    user: ${UID}:${GID}
+    read_only: true
+    cpus: "1"
+    mem_limit: 100m
+    networks:
+      - traefik
+    environment:
+      LIDARR_URL: http://lidarr:8787
+      LIDARR_KEY: ${LIDARR_API_KEY}
+
+      RADARR_URL: http://radarr:8787
+      RADARR_KEY: ${RADARR_API_KEY}
+
+      SONARR_URL: http://sonarr:8787
+      SONARR_KEY: ${SONARR_API_KEY}
+
+      JACKETT_URL: http://jackett:9117
+      JACKETT_KEY: ${JACKETT_API_KEY}
+
   # jackett tracker site scraper with API
   hydra:
     image: guillaumedsde/nzbhydra2-distroless:latest
@@ -268,7 +301,7 @@ services:
   # queries are done with jackett
   radarr:
     hostname: movies.${root_domain}
-    image: linuxserver/radarr:nightly
+    image: ghcr.io/linuxserver/radarr:nightly
     <<: *restart
     <<: *logging
     cpus: "4"
@@ -296,7 +329,7 @@ services:
   # queries are done with jackett
   sonarr:
     hostname: series.${root_domain}
-    image: linuxserver/sonarr:preview
+    image: ghcr.io/linuxserver/sonarr:preview
     <<: *restart
     <<: *logging
     cpus: "4"
@@ -324,7 +357,7 @@ services:
   # queries are done with jackett
   lidarr:
     hostname: music.${root_domain}
-    image: linuxserver/lidarr:preview
+    image: ghcr.io/linuxserver/lidarr:preview
     <<: *restart
     <<: *logging
     cpus: "4"
@@ -380,7 +413,7 @@ services:
   # queries are done with jackett
   lazylibrarian:
     hostname: books.${root_domain}
-    image: linuxserver/lazylibrarian:latest
+    image: ghcr.io/linuxserver/lazylibrarian:latest
     <<: *restart
     <<: *logging
     mem_limit: 750m
@@ -513,7 +546,7 @@ services:
   # ombi, plex media requests
   ombi:
     hostname: ombi.${root_domain}
-    image: linuxserver/ombi:latest
+    image: ghcr.io/linuxserver/ombi:latest
     <<: *restart
     <<: *logging
     mem_limit: 500m
@@ -537,7 +570,7 @@ services:
   # calibre-web, for reading ebooks
   calibre-web:
     hostname: read.${root_domain}
-    image: linuxserver/calibre-web:latest
+    image: ghcr.io/linuxserver/calibre-web:latest
     cpus: "4"
     mem_limit: 500m
     <<: *restart
@@ -934,7 +967,7 @@ services:
   # Diskover web UI for disk usage analysis
   diskover:
     hostname: diskover.${root_domain}
-    image: linuxserver/diskover:latest
+    image: ghcr.io/linuxserver/diskover:latest
     mem_limit: 500m
     environment:
       <<: *conf
