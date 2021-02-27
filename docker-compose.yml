@@ -166,7 +166,7 @@ services:
     image: jesec/flood:master-distroless
     hostname: flood.${root_domain}
     cpus: 2.0
-    mem_limit: 100m
+    mem_limit: 250m
     read_only: true
     user: ${UID}:${GID}
     volumes:
