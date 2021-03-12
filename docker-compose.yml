@@ -147,7 +147,7 @@ services:
     environment:
       <<: *conf
       OPENVPN_PROVIDER: WINDSCRIBE
-      OPENVPN_CONFIG: France-udp
+      OPENVPN_CONFIG: Paris-Seine-udp
       OPENVPN_USERNAME: ${openvpn_user}
       OPENVPN_PASSWORD: ${openvpn_password}
       LAN: 192.168.0.0/24
