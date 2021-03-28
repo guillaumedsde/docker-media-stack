@@ -217,7 +217,7 @@ services:
     read_only: true
     cpus: "4"
     mem_limit: 1g
-    network_mode: service:openvpn
+    network_mode: service:qbittorrent
     environment:
       <<: *conf
       S6_READ_ONLY_ROOT: "1"
