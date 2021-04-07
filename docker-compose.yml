@@ -200,7 +200,6 @@ services:
 
   # jackett tracker site scraper with API
   jackett:
-    hostname: jackett.${root_domain}
     image: guillaumedsde/jackett-distroless:latest
     <<: *restart
     <<: *logging
