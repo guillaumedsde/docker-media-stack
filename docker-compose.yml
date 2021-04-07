@@ -154,18 +154,22 @@ services:
       DNS: "192.168.0.1"
     labels:
       <<: *traefik
+
       # qBittorrent
-      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
-      traefik.http.routers.qbittorrent.service: qbittorrent
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
+      # router
+      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
+      traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
+
       # Jackett
-      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
-      traefik.http.routers.jackett.service: jackett
       # service
       traefik.http.services.jackett.loadbalancer.server.port: "9117"
+      # Router
+      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
+      traefik.http.routers.jackett.service: jackett
       # Forward auth
       traefik.http.routers.jackett.middlewares: keycloak-forward-auth
 
