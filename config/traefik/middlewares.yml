@@ -2,7 +2,7 @@ http:
   middlewares:
     securityHeaders:
       headers:
-        customFrameOptionsValue: SAMEORIGIN
+        frameDeny: "DENY"
         contentTypeNosniff: true
         browserXssFilter: true
         forceSTSHeader: true
@@ -11,8 +11,10 @@ http:
         stsSeconds: 315360000
         stsIncludeSubdomains: true
         featurePolicy: "camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';"
-        referrerPolicy: "strict-origin-when-cross-origin"
+        referrerPolicy: "no-referrer"
+        contentSecurityPolicy: "default-src 'self'"
         customResponseHeaders:
           Server: ""
           X-Powered-By: ""
           X-Robots-Tag: "none"
+          Permissions-Policy: "camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';"
