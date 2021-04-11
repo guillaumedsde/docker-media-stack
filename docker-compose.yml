@@ -1052,7 +1052,7 @@ services:
     <<: *logging
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
     environment:
       discovery.type: single-node
       bootstrap.memory_lock: "true"
@@ -1070,7 +1070,7 @@ services:
     <<: *logging
 
   filebeat:
-    image: docker.elastic.co/beats/filebeat:7.9.3
+    image: docker.elastic.co/beats/filebeat:7.12.0
     user: root
     mem_limit: 200m
     command: --strict.perms=false
@@ -1089,7 +1089,7 @@ services:
     <<: *logging
 
   metricbeat:
-    image: docker.elastic.co/beats/metricbeat:7.9.3
+    image: docker.elastic.co/beats/metricbeat:7.12.0
     user: root
     cpus: "2"
     mem_limit: 250m
@@ -1113,7 +1113,7 @@ services:
       - "-system.hostfs=/hostfs"
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.9.3
+    image: docker.elastic.co/logstash/logstash:7.12.0
     <<: *restart
     <<: *logging
     mem_limit: 2500m
@@ -1137,7 +1137,7 @@ services:
       - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.9.3
+    image: docker.elastic.co/kibana/kibana:7.12.0
     networks:
       - elastic
       - kibana
