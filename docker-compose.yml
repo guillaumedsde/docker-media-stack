@@ -713,6 +713,7 @@ services:
       - nextcloud
       - nextcloud-proxy
       - ldap
+      - samba
     environment:
       <<: *conf
       POSTGRES_DB: nextcloud
