@@ -97,7 +97,6 @@ services:
       - gotify
       - robots
       - netdata
-      - diskover-proxy
       - lam
       - keycloak-proxy
     <<: *restart
@@ -981,76 +980,6 @@ services:
     mem_limit: 500m
     cpus: "2"
 
-  # Diskover web UI for disk usage analysis
-  diskover:
-    hostname: diskover.${root_domain}
-    image: ghcr.io/linuxserver/diskover:latest
-    mem_limit: 500m
-    environment:
-      <<: *conf
-      REDIS_HOST: diskover-redis
-      REDIS_PORT: "6379"
-      ES_HOST: diskover-elasticsearch
-      ES_PORT: "9200"
-      ES_USER: elastic
-      # NOTE: default password for ES is "changeme", cannot set it through environement with ES<6.1
-      ES_PASS: ${DISKOVER_ES_PASSWORD}
-      RUN_ON_START: "true"
-      USE_CRON: "true"
-      DISKOVER_OPTS: "--finddupes --optimizeindex"
-    volumes:
-      - ${docker_data_folder}/diskover/config:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-      - diskover
-      - diskover-proxy
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - diskover-elasticsearch
-      - diskover-redis
-    labels:
-      <<: *traefik
-      traefik.docker.network: diskover-proxy
-      traefik.http.routers.diskover.rule: Host(`diskover.${root_domain}`)
-      # service
-      traefik.http.services.diskover.loadbalancer.server.port: "80"
-      # Forward auth
-      traefik.http.routers.diskover.middlewares: keycloak-forward-auth
-
-  # ElasticSearch Instance for diskover
-  diskover-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.9
-    volumes:
-      - ${docker_data_folder}/diskover-elasticsearch/data:/usr/share/elasticsearch/data
-    networks:
-      - diskover
-    environment:
-      bootstrap.memory_lock: "true"
-      ES_JAVA_OPTS: -Xms1G -Xmx1G
-      # ES security features require license: disable them
-      xpack.security.enabled: "false"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 3g
-    <<: *restart
-    <<: *logging
-
-  # Redis instance for diskover
-  diskover-redis:
-    image: redis:alpine
-    mem_limit: 200m
-    cpus: "2"
-    volumes:
-      - ${docker_data_folder}/diskover-redis:/data
-    networks:
-      - diskover
-    <<: *restart
-    <<: *logging
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0
     environment:
@@ -1412,10 +1341,6 @@ networks:
   traefik:
     driver: bridge
     name: traefik
-  diskover:
-    driver: bridge
-    internal: true
-    name: diskover
   ldap:
     driver: bridge
     internal: true
@@ -1492,10 +1417,6 @@ networks:
     driver: bridge
     internal: true
     name: netdata
-  diskover-proxy:
-    driver: bridge
-    internal: true
-    name: diskover-proxy
   lam:
     driver: bridge
     internal: true
