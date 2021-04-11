@@ -31,7 +31,7 @@ x-traefik: &traefik
 services:
   # reverse proxy
   traefik:
-    image: traefik:2.3
+    image: traefik:v2.4
     command:
       - "--log.level=INFO"
       # docker configuration
