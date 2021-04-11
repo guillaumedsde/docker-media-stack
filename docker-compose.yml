@@ -591,6 +591,8 @@ services:
       traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
+      # Forward auth
+      traefik.http.routers.calibre-web.middlewares: keycloak-forward-auth
 
   # gollum for hosting documentation
   gollum:
@@ -1076,6 +1078,7 @@ services:
       - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${docker_data_folder}/filebeat:/usr/share/filebeat/data
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/:ro
+      - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
       - /var/log/:/var/log/host/:ro
     environment:
       ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-elasticsearch}
@@ -1385,6 +1388,8 @@ services:
       - "--rule.radarr-calendar.rule=Host(`movies.${root_domain}`) && PathPrefix(`/feed/calendar/{.*}`)"
       - "--rule.lidarr-calendar.action=allow"
       - "--rule.lidarr-calendar.rule=Host(`music.${root_domain}`) && PathPrefix(`/feed/v1/calendar/{.*}`)"
+      - "--rule.calibre-web-opds.action=allow"
+      - "--rule.calibre-web-opds.rule=Host(`read.${root_domain}`) && PathPrefix(`/opds{.*}`)"
     networks:
       - traefik
     depends_on:
