@@ -1317,7 +1317,7 @@ services:
       - "--rule.sonarr-calendar.action=allow"
       - "--rule.sonarr-calendar.rule=Host(`series.${root_domain}`) && PathPrefix(`/feed/calendar/{.*}`)"
       - "--rule.radarr-calendar.action=allow"
-      - "--rule.radarr-calendar.rule=Host(`movies.${root_domain}`) && PathPrefix(`/feed/calendar/{.*}`)"
+      - "--rule.radarr-calendar.rule=Host(`movies.${root_domain}`) && PathPrefix(`/feed/v3/calendar/{.*}`)"
       - "--rule.lidarr-calendar.action=allow"
       - "--rule.lidarr-calendar.rule=Host(`music.${root_domain}`) && PathPrefix(`/feed/v1/calendar/{.*}`)"
     networks:
