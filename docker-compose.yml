@@ -589,32 +589,6 @@ services:
       # Forward auth
       traefik.http.routers.gollum.middlewares: keycloak-forward-auth
 
-  # unmanic, transcode video files in the background
-  unmanic:
-    hostname: transcode.${root_domain}
-    image: josh5/unmanic:latest
-    cpus: "8"
-    mem_limit: 1g
-    <<: *restart
-    <<: *logging
-    networks:
-      - unmanic
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/unmanic:/config
-      - ${data_folder}/documentaries:/library/
-      - /tmp/unmanic:/tmp/unmanic
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.docker.network: unmanic
-      traefik.http.routers.unmanic.rule: Host(`transcode.${root_domain}`)
-      # service
-      traefik.http.services.unmanic.loadbalancer.server.port: "8888"
-      # Forward auth
-      traefik.http.routers.unmanic.middlewares: keycloak-forward-auth
-
   # youtube-dl for downloading videos
   youtube-dl:
     image: kmb32123/youtube-dl-server:latest
