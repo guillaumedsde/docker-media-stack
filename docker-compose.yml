@@ -142,7 +142,7 @@ services:
     volumes:
       - ${docker_data_folder}/qbittorrent-openvpn:/config
       - ${data_folder}:/data
-      - ${docker_data_folder}/torrent_blackhole:/blackhole
+      - torrent-blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
     cpus: 2.0
     mem_limit: 2g
@@ -216,7 +216,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
-      - ${docker_data_folder}/torrent_blackhole:/blackhole
+      - torrent-blackhole:/blackhole
     tmpfs:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
@@ -270,7 +270,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/hydra:/config
-      - ${docker_data_folder}/torrent_blackhole:/blackhole
+      - torrent-blackhole:/blackhole
     tmpfs:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
@@ -1344,3 +1344,4 @@ networks:
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
+  torrent-blackhole:
