@@ -158,7 +158,6 @@ services:
       DNS: "192.168.0.1"
     labels:
       <<: *traefik
-
       # qBittorrent
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
@@ -167,7 +166,6 @@ services:
       traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
-
       # Jackett
       # service
       traefik.http.services.jackett.loadbalancer.server.port: "9117"
@@ -176,7 +174,6 @@ services:
       traefik.http.routers.jackett.service: jackett
       # Forward auth
       traefik.http.routers.jackett.middlewares: keycloak-forward-auth
-
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
 
   flood:
@@ -1044,30 +1041,6 @@ services:
       - "--strict.perms=false"
       - "-system.hostfs=/hostfs"
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.12.0
-    <<: *restart
-    <<: *logging
-    mem_limit: 2500m
-    volumes:
-      - ./config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./config/logstash/config/:/usr/share/logstash/config/
-      - ./config/logstash/conf.d/:/usr/share/logstash/etc/logstash/conf.d/
-      - ./config/logstash/conf.d/patterns/:/usr/share/logstash/etc/logstash/conf.d/patterns/
-      - ./config/logstash/conf.d/databases/:/usr/share/logstash/etc/logstash/conf.d/databases/
-      - /usr/share/GeoIP/:/usr/share/logstash/GeoIP/
-    ports:
-      - "5000:5000"
-      - "9600:9600"
-      - "5140:5140/udp"
-    environment:
-      LS_JAVA_OPTS: -Xmx1G -Xms1G
-    networks:
-      - elastic
-      - logstash
-    depends_on:
-      - elasticsearch
-
   kibana:
     image: docker.elastic.co/kibana/kibana:7.12.0
     networks:
@@ -1371,9 +1344,6 @@ networks:
     driver: bridge
     internal: true
     name: elastic
-  logstash:
-    driver: bridge
-    name: logstash
   kibana:
     driver: bridge
     internal: true
