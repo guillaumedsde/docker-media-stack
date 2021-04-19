@@ -127,8 +127,10 @@ services:
     <<: *logging
     mem_limit: 100m
     user: ${UID}:${docker_group_id}
+    read_only: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-socket-proxy-pid:/run
     environment:
       CONTAINERS: 1
     networks:
@@ -1370,4 +1372,5 @@ networks:
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
+  traefik-socket-proxy-pid:
   torrent-blackhole:
