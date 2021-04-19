@@ -32,9 +32,12 @@ services:
   # reverse proxy
   traefik:
     image: traefik:v2.4
+    depends_on:
+      - traefik-socket-proxy
     command:
       - "--log.level=INFO"
       # docker configuration
+      - "--providers.docker.endpoint=tcp://traefik-socket-proxy:2375"
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
@@ -111,6 +114,20 @@ services:
     ports:
       - 80:80
       - 443:443
+
+  # Traefik docker socket proxy
+  traefik-socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.1
+    <<: *restart
+    <<: *logging
+    mem_limit: 100m
+    user: ${UID}:${docker_group_id}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: 1
+    networks:
+      - traefik-socket-proxy
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
@@ -1340,6 +1357,10 @@ networks:
   keycloak-proxy:
     driver: bridge
     name: keycloak-proxy
+  traefik-socket-proxy:
+    driver: bridge
+    internal: true
+    name: traefik-socket-proxy
 
 volumes:
   robots-nginx-cache:
