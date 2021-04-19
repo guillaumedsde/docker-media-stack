@@ -263,7 +263,7 @@ services:
       RADARR_KEY: ${RADARR_API_KEY}
       SONARR_URL: "http://sonarr:8989"
       SONARR_KEY: ${SONARR_API_KEY}
-      JACKETT_URL: "http://jackett:9117"
+      JACKETT_URL: "https://jackett.${root_domain}"
       JACKETT_KEY: ${JACKETT_API_KEY}
 
   # jackett tracker site scraper with API
