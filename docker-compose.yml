@@ -130,7 +130,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      CONTAINERS: 1
+      CONTAINERS: "1"
     networks:
       - traefik-socket-proxy
 
@@ -1370,5 +1370,4 @@ networks:
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
-  traefik-socket-proxy-pid:
   torrent-blackhole:
