@@ -32,8 +32,6 @@ services:
   # reverse proxy
   traefik:
     image: traefik:v2.4
-    depends_on:
-      - traefik-socket-proxy
     user: ${UID}:${docker_group_id}
     command:
       - "--log.level=INFO"
@@ -95,7 +93,6 @@ services:
     tmpfs:
       - "/tmp"
     networks:
-      - traefik-socket-proxy
       - traefik
       - kibana
       - calibre-web
@@ -1347,10 +1344,6 @@ networks:
   keycloak-proxy:
     driver: bridge
     name: keycloak-proxy
-  traefik-socket-proxy:
-    driver: bridge
-    internal: true
-    name: traefik-socket-proxy
 
 volumes:
   robots-nginx-cache:
