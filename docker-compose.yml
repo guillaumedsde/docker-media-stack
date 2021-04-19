@@ -94,6 +94,7 @@ services:
       - ./config/traefik:/config:ro
     tmpfs:
       - "/var"
+      - "/run"
       - "/tmp"
     networks:
       - traefik
@@ -131,6 +132,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     tmpfs:
       - "/var"
+      - "/run"
       - "/tmp"
     environment:
       CONTAINERS: 1
