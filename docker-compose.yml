@@ -123,7 +123,7 @@ services:
 
   # Traefik docker socket proxy
   traefik-socket-proxy:
-    image: tecnativa/docker-socket-proxy:0.1
+    image: tecnativa/docker-socket-proxy:edge
     <<: *restart
     <<: *logging
     mem_limit: 100m
@@ -133,7 +133,6 @@ services:
       CONTAINERS: "1"
     networks:
       - traefik-socket-proxy
-    privileged: true
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
