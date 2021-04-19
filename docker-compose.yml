@@ -151,7 +151,11 @@ services:
     cpus: 2.0
     mem_limit: 2g
     networks:
-      - traefik
+      traefik:
+        aliases:
+          - qbittorrent
+          - jackett
+          - flaresolverr
     environment:
       <<: *conf
       OPENVPN_PROVIDER: WINDSCRIBE
