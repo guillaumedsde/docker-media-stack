@@ -97,6 +97,7 @@ services:
       - "/run"
       - "/tmp"
     networks:
+      - traefik-socket-proxy
       - traefik
       - kibana
       - calibre-web
