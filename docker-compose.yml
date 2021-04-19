@@ -131,7 +131,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     tmpfs:
-      - "/var"
+      - "/var/lib/haproxy"
       - "/run"
       - "/tmp"
     environment:
