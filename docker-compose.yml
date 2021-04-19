@@ -34,6 +34,7 @@ services:
     image: traefik:v2.4
     depends_on:
       - traefik-socket-proxy
+    user: ${UID}:${GID}
     command:
       - "--log.level=INFO"
       # docker configuration
@@ -41,9 +42,9 @@ services:
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:8080"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.address=:4443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.middlewares=securityHeaders@file"
       # DNS challenge
@@ -87,7 +88,6 @@ services:
       traefik.http.middlewares.old-domain-redirect.redirectregex.regex: ^(http|https)://((?!jellyfin).*).${old_root_domain}/(.*)
       traefik.http.middlewares.old-domain-redirect.redirectregex.replacement: $${1}://$${2}.${root_domain}/$${3}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/
       - ${docker_data_folder}/traefik:/traefik
       - ./config/traefik:/config:ro
@@ -112,8 +112,8 @@ services:
     mem_limit: 200m
     cpus: "4"
     ports:
-      - 80:80
-      - 443:443
+      - 80:8080
+      - 443:4443
 
   # Traefik docker socket proxy
   traefik-socket-proxy:
