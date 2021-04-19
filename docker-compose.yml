@@ -34,11 +34,10 @@ services:
     image: traefik:v2.4
     depends_on:
       - traefik-socket-proxy
-    user: ${UID}:${GID}
+    user: ${UID}:${docker_group_id}
     command:
       - "--log.level=INFO"
       # docker configuration
-      - "--providers.docker.endpoint=tcp://traefik-socket-proxy:2375"
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
@@ -92,9 +91,8 @@ services:
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/
       - ${docker_data_folder}/traefik:/traefik
       - ./config/traefik:/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     tmpfs:
-      - "/var"
-      - "/run"
       - "/tmp"
     networks:
       - traefik-socket-proxy
@@ -120,19 +118,6 @@ services:
     ports:
       - 80:8080
       - 443:4443
-
-  # Traefik docker socket proxy
-  traefik-socket-proxy:
-    image: tecnativa/docker-socket-proxy:0.1
-    <<: *restart
-    <<: *logging
-    mem_limit: 100m
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      CONTAINERS: "1"
-    networks:
-      - traefik-socket-proxy
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
