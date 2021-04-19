@@ -130,7 +130,8 @@ services:
     read_only: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-socket-proxy-pid:/run
+    tmpfs:
+      - /var
     environment:
       CONTAINERS: 1
     networks:
