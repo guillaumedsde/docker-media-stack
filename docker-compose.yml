@@ -137,6 +137,43 @@ services:
       - watchtower
     command: ["--cleanup", "--schedule", "0 0 5 * * *"]
 
+  # Wirehuard VPN client
+  wireguard:
+    <<: *restart
+    <<: *logging
+    image: ghcr.io/linuxserver/wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    cpus: 2.0
+    mem_limit: 100m
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    dns:
+      - "1.1.1.1"
+    networks:
+      traefik:
+        aliases:
+          - jackett
+          - flaresolverr
+    environment:
+      <<: *conf
+      S6_BEHAVIOUR_IF_STAGE2_FAILS: 2
+    volumes:
+      - ${docker_data_folder}/wireguard:/config
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      <<: *traefik
+      # Jackett
+      # service
+      traefik.http.services.jackett.loadbalancer.server.port: "9117"
+      # Router
+      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
+      traefik.http.routers.jackett.service: jackett
+      # Forward auth
+      traefik.http.routers.jackett.middlewares: keycloak-forward-auth
+
   # Torrent client
   qbittorrent:
     container_name: qbittorrent
@@ -155,8 +192,6 @@ services:
       traefik:
         aliases:
           - qbittorrent
-          - jackett
-          - flaresolverr
     environment:
       <<: *conf
       OPENVPN_PROVIDER: WINDSCRIBE
@@ -175,16 +210,6 @@ services:
       traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
-      # Jackett
-      # service
-      traefik.http.services.jackett.loadbalancer.server.port: "9117"
-      # Router
-      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
-      traefik.http.routers.jackett.service: jackett
-      # Forward auth
-      traefik.http.routers.jackett.middlewares: keycloak-forward-auth
-    healthcheck:
-      start_period: 15s
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
 
   flood:
@@ -222,8 +247,7 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      qbittorrent:
-        condition: service_healthy
+      - wireguard
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
@@ -234,7 +258,7 @@ services:
     read_only: true
     cpus: "4"
     mem_limit: 1g
-    network_mode: service:qbittorrent
+    network_mode: service:wireguard
     environment:
       <<: *conf
       S6_READ_ONLY_ROOT: "1"
@@ -1065,9 +1089,9 @@ services:
       # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
       # CAPTCHA_SOLVER: harvester
       #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
-    network_mode: service:qbittorrent
+    network_mode: service:wireguard
     labels:
-      com.centurylinklabs.watchtower.depends-on: qbittorrent
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   ##################################################################
   # Authentication
