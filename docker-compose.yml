@@ -139,6 +139,7 @@ services:
 
   # Torrent client
   qbittorrent:
+    container_name: qbittorrent
     <<: *restart
     <<: *logging
     cap_add:
@@ -235,6 +236,8 @@ services:
     environment:
       <<: *conf
       S6_READ_ONLY_ROOT: "1"
+    labels:
+      com.centurylinklabs.watchtower.depends-on: qbittorrent
 
   # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
   jackett-sync-ts:
@@ -1047,6 +1050,8 @@ services:
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
+    <<: *restart
+    <<: *logging
     cpus: 2.0
     mem_limit: 500m
     user: ${UID}:${GID}
@@ -1059,8 +1064,8 @@ services:
       # CAPTCHA_SOLVER: harvester
       #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
     network_mode: service:qbittorrent
-    <<: *restart
-    <<: *logging
+    labels:
+      com.centurylinklabs.watchtower.depends-on: qbittorrent
 
   ##################################################################
   # Authentication
