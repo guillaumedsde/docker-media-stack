@@ -183,6 +183,8 @@ services:
       traefik.http.routers.jackett.service: jackett
       # Forward auth
       traefik.http.routers.jackett.middlewares: keycloak-forward-auth
+    healthcheck:
+      start_period: 15s
     image: guillaumedsde/alpine-qbittorrent-openvpn:development
 
   flood:
