@@ -183,7 +183,7 @@ services:
     depends_on:
       - wireguard
     volumes:
-      - ${docker_data_folder}/qbittorrent-openvpn:/config
+      - ${docker_data_folder}/qbittorrent:/config
       - ${data_folder}:/data
       - torrent-blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
