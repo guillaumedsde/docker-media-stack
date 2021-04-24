@@ -155,6 +155,7 @@ services:
         aliases:
           - jackett
           - flaresolverr
+          - qbittorrent
     volumes:
       - ${docker_data_folder}/wireguard/wg0.conf:/etc/wireguard/wg0.conf:ro
     labels:
