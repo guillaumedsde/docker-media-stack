@@ -142,6 +142,7 @@ services:
     <<: *restart
     <<: *logging
     image: jordanpotter/wireguard:2.1.1
+    container_name: wireguard
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -256,7 +257,7 @@ services:
       <<: *conf
       S6_READ_ONLY_ROOT: "1"
     labels:
-      com.centurylinklabs.watchtower.depends-on: qbittorrent
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
   jackett-sync-ts:
