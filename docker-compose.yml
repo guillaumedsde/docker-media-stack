@@ -167,35 +167,6 @@ services:
       traefik.http.routers.jackett.service: jackett
       # Forward auth
       traefik.http.routers.jackett.middlewares: keycloak-forward-auth
-
-  # Torrent client
-  qbittorrent:
-    container_name: qbittorrent
-    <<: *restart
-    <<: *logging
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ${docker_data_folder}/qbittorrent-openvpn:/config
-      - ${data_folder}:/data
-      - torrent-blackhole:/blackhole
-      - /etc/localtime:/etc/localtime:ro
-    cpus: 2.0
-    mem_limit: 2g
-    networks:
-      traefik:
-        aliases:
-          - qbittorrent
-    environment:
-      <<: *conf
-      OPENVPN_PROVIDER: WINDSCRIBE
-      OPENVPN_CONFIG: Paris-Seine-udp
-      OPENVPN_USERNAME: ${openvpn_user}
-      OPENVPN_PASSWORD: ${openvpn_password}
-      LAN: 192.168.0.0/24
-      DNS: "192.168.0.1"
-    labels:
-      <<: *traefik
       # qBittorrent
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
@@ -204,7 +175,28 @@ services:
       traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
-    image: guillaumedsde/alpine-qbittorrent-openvpn:development
+
+  # Torrent client
+  qbittorrent:
+    <<: *restart
+    <<: *logging
+    depends_on:
+      - wireguard
+    volumes:
+      - ${docker_data_folder}/qbittorrent-openvpn:/config
+      - ${data_folder}:/data
+      - torrent-blackhole:/blackhole
+      - /etc/localtime:/etc/localtime:ro
+    tmpfs:
+      - /tmp
+    read_only: true
+    cpus: 2.0
+    mem_limit: 2g
+    user: ${UID}:${GID}
+    network_mode: service:wireguard
+    image: guillaumedsde/qbittorrent-distroless:latest
+    labels:
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   flood:
     <<: *restart
