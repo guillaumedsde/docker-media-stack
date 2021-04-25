@@ -137,44 +137,29 @@ services:
       - watchtower
     command: ["--cleanup", "--schedule", "0 0 5 * * *"]
 
-  # Torrent client
-  qbittorrent:
-    container_name: qbittorrent
+  # Wireguard VPN client
+  wireguard:
     <<: *restart
     <<: *logging
+    image: jordanpotter/wireguard:2.1.1
+    container_name: wireguard
     cap_add:
       - NET_ADMIN
-    volumes:
-      - ${docker_data_folder}/qbittorrent-openvpn:/config
-      - ${data_folder}:/data
-      - torrent-blackhole:/blackhole
-      - /etc/localtime:/etc/localtime:ro
+      - SYS_MODULE
     cpus: 2.0
-    mem_limit: 2g
+    mem_limit: 100m
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
     networks:
       traefik:
         aliases:
-          - qbittorrent
           - jackett
           - flaresolverr
-    environment:
-      <<: *conf
-      OPENVPN_PROVIDER: WINDSCRIBE
-      OPENVPN_CONFIG: Paris-Seine-udp
-      OPENVPN_USERNAME: ${openvpn_user}
-      OPENVPN_PASSWORD: ${openvpn_password}
-      LAN: 192.168.0.0/24
-      DNS: "192.168.0.1"
+          - qbittorrent
+    volumes:
+      - ${docker_data_folder}/wireguard/wg0.conf:/etc/wireguard/wg0.conf:ro
     labels:
       <<: *traefik
-      # qBittorrent
-      # service
-      traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
-      # router
-      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
-      traefik.http.routers.qbittorrent.service: qbittorrent
-      # Forward auth
-      traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
       # Jackett
       # service
       traefik.http.services.jackett.loadbalancer.server.port: "9117"
@@ -183,9 +168,36 @@ services:
       traefik.http.routers.jackett.service: jackett
       # Forward auth
       traefik.http.routers.jackett.middlewares: keycloak-forward-auth
-    healthcheck:
-      start_period: 15s
-    image: guillaumedsde/alpine-qbittorrent-openvpn:development
+      # qBittorrent
+      # service
+      traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
+      # router
+      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
+      traefik.http.routers.qbittorrent.service: qbittorrent
+      # Forward auth
+      traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
+
+  # Torrent client
+  qbittorrent:
+    <<: *restart
+    <<: *logging
+    depends_on:
+      - wireguard
+    volumes:
+      - ${docker_data_folder}/qbittorrent:/config
+      - ${data_folder}:/data
+      - torrent-blackhole:/blackhole
+      - /etc/localtime:/etc/localtime:ro
+    tmpfs:
+      - /tmp
+    read_only: true
+    cpus: 2.0
+    mem_limit: 2g
+    user: ${UID}:${GID}
+    network_mode: service:wireguard
+    image: guillaumedsde/qbittorrent-distroless:latest
+    labels:
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   flood:
     <<: *restart
@@ -222,8 +234,7 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      qbittorrent:
-        condition: service_healthy
+      - wireguard
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
@@ -234,12 +245,12 @@ services:
     read_only: true
     cpus: "4"
     mem_limit: 1g
-    network_mode: service:qbittorrent
+    network_mode: service:wireguard
     environment:
       <<: *conf
       S6_READ_ONLY_ROOT: "1"
     labels:
-      com.centurylinklabs.watchtower.depends-on: qbittorrent
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
   jackett-sync-ts:
@@ -1065,9 +1076,9 @@ services:
       # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
       # CAPTCHA_SOLVER: harvester
       #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
-    network_mode: service:qbittorrent
+    network_mode: service:wireguard
     labels:
-      com.centurylinklabs.watchtower.depends-on: qbittorrent
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   ##################################################################
   # Authentication
