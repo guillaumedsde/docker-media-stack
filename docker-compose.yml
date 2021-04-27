@@ -987,7 +987,7 @@ services:
     <<: *logging
 
   metricbeat:
-    image: docker.elastic.co/beats/metricbeat:7.12.0
+    image: docker.elastic.co/beats/metricbeat:7.12.1
     user: root
     cpus: "2"
     mem_limit: 250m
