@@ -82,8 +82,8 @@ services:
       traefik.http.routers.dashboard.middlewares: traefik-forward-auth
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
-      traefik.http.middlewares.old-domain-redirect.redirectregex.regex: ^(http|https)://([a-z]+)\.${old_root_domain_regex}/(.*)$
-      traefik.http.middlewares.old-domain-redirect.redirectregex.replacement: $${1}://$${2}.${root_domain}/$${3}
+      # traefik.http.middlewares.old-domain-redirect.redirectregex.regex: ^(http|https)://([a-z]+)\.${old_root_domain_regex}/(.*)$
+      # traefik.http.middlewares.old-domain-redirect.redirectregex.replacement: $${1}://$${2}.${root_domain}/$${3}
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/
