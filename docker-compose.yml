@@ -33,15 +33,17 @@ services:
   traefik:
     image: traefik:v2.4
     user: ${UID}:${docker_group_id}
+    cap_add:
+      - NET_BIND_SERVICE
     command:
       - "--log.level=INFO"
       # docker configuration
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
-      - "--entrypoints.web.address=:8080"
+      - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.websecure.address=:4443"
+      - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.middlewares=securityHeaders@file"
       # DNS challenge
@@ -82,8 +84,6 @@ services:
       traefik.http.routers.dashboard.middlewares: traefik-forward-auth
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
-      # traefik.http.middlewares.old-domain-redirect.redirectregex.regex: ^(http|https)://([a-z]+)\.${old_root_domain_regex}/(.*)$
-      # traefik.http.middlewares.old-domain-redirect.redirectregex.replacement: $${1}://$${2}.${root_domain}/$${3}
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/
@@ -113,8 +113,8 @@ services:
     mem_limit: 200m
     cpus: "4"
     ports:
-      - 80:8080
-      - 443:4443
+      - 80:80
+      - 443:443
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
