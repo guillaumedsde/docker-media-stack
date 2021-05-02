@@ -135,7 +135,10 @@ services:
       WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: "${WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN}"
     networks:
       - watchtower
-    command: ["--cleanup", "--schedule", "0 0 5 * * *"]
+    command:
+      - "--cleanup"
+      - "--schedule"
+      - "0 0 5 * * *"
 
   # Wireguard VPN client
   wireguard:
