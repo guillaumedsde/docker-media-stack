@@ -590,6 +590,8 @@ services:
       traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
+      # Forward auth
+      traefik.http.routers.flood.middlewares: keycloak-forward-auth
 
   # gollum for hosting documentation
   gollum:
@@ -1267,6 +1269,8 @@ services:
       - "--rule.radarr-calendar.rule=Host(`movies.${root_domain}`) && PathPrefix(`/feed/v3/calendar/{.*}`)"
       - "--rule.lidarr-calendar.action=allow"
       - "--rule.lidarr-calendar.rule=Host(`music.${root_domain}`) && PathPrefix(`/feed/v1/calendar/{.*}`)"
+      - "--rule.calibre-web-opds.action=allow"
+      - "--rule.calibre-web-opds.rule=Host(`read.${root_domain}`) && (PathPrefix(`/opds/{.*}`) || Path(`/opds`))"
     networks:
       - traefik
     depends_on:
