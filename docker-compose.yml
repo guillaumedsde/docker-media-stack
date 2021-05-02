@@ -591,7 +591,7 @@ services:
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
       # Forward auth
-      traefik.http.routers.flood.middlewares: keycloak-forward-auth
+      traefik.http.routers.calibre-web.middlewares: keycloak-forward-auth
 
   # gollum for hosting documentation
   gollum:
