@@ -149,6 +149,9 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
     cpus: 2.0
     mem_limit: 100m
     sysctls:
