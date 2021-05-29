@@ -448,9 +448,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lazylibrarian:/config
-      - ${data_folder}/books:/books
-      - ${data_folder}/download/books:/downloads
       - ${data_folder}:/data
+      - torrent-blackhole:/blackhole
     networks:
       - traefik
     environment:
