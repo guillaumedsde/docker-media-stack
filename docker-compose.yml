@@ -380,7 +380,7 @@ services:
   # queries are done with jackett
   lidarr:
     hostname: music.${root_domain}
-    image: ghcr.io/linuxserver/lidarr:preview
+    image: ghcr.io/linuxserver/lidarr:latest
     <<: *restart
     <<: *logging
     cpus: "4"
