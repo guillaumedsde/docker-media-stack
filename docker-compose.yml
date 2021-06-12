@@ -352,7 +352,7 @@ services:
   # queries are done with jackett
   sonarr:
     hostname: series.${root_domain}
-    image: ghcr.io/linuxserver/sonarr:preview
+    image: ghcr.io/linuxserver/sonarr:latest
     <<: *restart
     <<: *logging
     cpus: "4"
