@@ -8,7 +8,7 @@ http:
         browserXssFilter: true
         forceSTSHeader: true
         sslRedirect: true
-        stsPreload: true
+        stsPreload: false
         stsSeconds: 315360000
         stsIncludeSubdomains: true
         featurePolicy: "camera 'none'; fullscreen 'none'; geolocation 'none'; microphone 'none'; payment 'none'; speaker 'none'; usb 'none'; vibrate 'none'; vr 'none';"
