@@ -18,4 +18,4 @@ http:
           Server: ""
           X-Powered-By: ""
           X-Robots-Tag: "none"
-          Permissions-Policy: "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; document-write 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; speaker 'none'; sync-xhr 'none'; usb 'none'; wake-lock 'none'; webauthn 'none'; vr 'none'; xr 'none'; interest-cohort=();"
+          Permissions-Policy: "accelerometer=(), ambient-light-sensor=(), autoplay=(), camera=(), display-capture=(), document-domain=(), document-write=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), speaker=(), sync-xhr=(), usb=(), wake-lock=(), webauthn=(), vr=(), xr=(), interest-cohort=()"
