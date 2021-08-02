@@ -890,6 +890,7 @@ services:
     mem_limit: 750m
     cpus: "4"
     environment:
+      <<: *conf
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: n8n-postgres
       DB_POSTGRESDB_DATABASE: n8n
