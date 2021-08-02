@@ -908,6 +908,8 @@ services:
       traefik.http.routers.n8n.rule: Host(`n8n.${root_domain}`)
       # service
       traefik.http.services.n8n.loadbalancer.server.port: "5678"
+      # Forward auth
+      traefik.http.routers.n8n.middlewares: keycloak-forward-auth
     <<: *restart
     <<: *logging
     image: n8nio/n8n:latest
