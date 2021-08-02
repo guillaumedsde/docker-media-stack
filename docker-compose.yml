@@ -922,7 +922,7 @@ services:
       POSTGRES_PASSWORD: ${N8N_DB_PASS}
     image: postgres:13-alpine
     volumes:
-      - ${docker_data_folder}/keycloak-db:/var/lib/postgresql/data
+      - ${docker_data_folder}/n8n-postgres:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     networks:
       - n8n
