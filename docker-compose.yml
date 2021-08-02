@@ -882,7 +882,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${HUGINN_DB_PASS}
 
-
   # automation platform
   n8n:
     hostname: n8n.${root_domain}
@@ -911,8 +910,8 @@ services:
     <<: *restart
     <<: *logging
     image: n8nio/n8n:latest
-  
-   n8n-postgres:
+
+  n8n-postgres:
     <<: *restart
     <<: *logging
     mem_limit: 250m
