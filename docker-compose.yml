@@ -737,7 +737,7 @@ services:
       - nextcloud
     <<: *restart
     <<: *logging
-    image: postgres:12-alpine
+    image: postgres:13-alpine
 
   # cache for nextcloud
   nextcloud-redis:
@@ -1256,7 +1256,7 @@ services:
       # Tell Postgress what user/password to create
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-    image: postgres:12-alpine
+    image: postgres:13-alpine
     volumes:
       - ${docker_data_folder}/keycloak-db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
