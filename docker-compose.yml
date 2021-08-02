@@ -919,7 +919,7 @@ services:
     environment:
       POSTGRES_USER: n8n
       POSTGRES_PASSWORD: ${N8N_DB_PASS}
-    image: postgres:13-alpine
+    image: postgres:13
     volumes:
       - ${docker_data_folder}/n8n-postgres:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
