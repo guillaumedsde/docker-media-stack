@@ -108,6 +108,7 @@ services:
       - netdata
       - lam
       - keycloak-proxy
+      - n8n-proxy
     <<: *restart
     <<: *logging
     mem_limit: 200m
@@ -881,6 +882,51 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${HUGINN_DB_PASS}
 
+
+  # automation platform
+  n8n:
+    hostname: n8n.${root_domain}
+    depends_on:
+      - "n8n-postgres"
+    mem_limit: 750m
+    cpus: "4"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8n-postgres
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASS}
+    volumes:
+      - ${docker_data_folder}/n8n:/home/node/.n8n
+    networks:
+      - n8n
+      - n8n-proxy
+    labels:
+      <<: *traefik
+      traefik.docker.network: n8n-proxy
+      traefik.http.routers.n8n.rule: Host(`n8n.${root_domain}`)
+      # service
+      traefik.http.services.n8n.loadbalancer.server.port: "5678"
+    <<: *restart
+    <<: *logging
+    image: n8nio/n8n:latest
+  
+   n8n-postgres:
+    <<: *restart
+    <<: *logging
+    mem_limit: 250m
+    user: ${UID}:${GID}
+    environment:
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: ${N8N_DB_PASS}
+    image: postgres:13-alpine
+    volumes:
+      - ${docker_data_folder}/keycloak-db:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - n8n
+
   # Push notification service
   gotify:
     hostname: gotify.${root_domain}
@@ -1375,6 +1421,12 @@ networks:
   keycloak-proxy:
     driver: bridge
     name: keycloak-proxy
+  n8n-proxy:
+    driver: bridge
+    name: n8n-proxy
+  n8n:
+    driver: bridge
+    name: n8n
 
 volumes:
   robots-nginx-cache:
