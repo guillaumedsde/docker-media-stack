@@ -1323,6 +1323,8 @@ services:
       - "--rule.lidarr-calendar.rule=Host(`music.${root_domain}`) && PathPrefix(`/feed/v1/calendar/{.*}`)"
       - "--rule.calibre-web-opds.action=allow"
       - "--rule.calibre-web-opds.rule=Host(`read.${root_domain}`) && (PathPrefix(`/opds/{.*}`) || Path(`/opds`))"
+      - "--rule.n8n-webjooks.action=allow"
+      - "--rule.n8n-webjooks-dl.rule=Host(`n8n.${root_domain}`) && PathPrefix(`/webhook/{.*}`)"
     networks:
       - traefik
     depends_on:
