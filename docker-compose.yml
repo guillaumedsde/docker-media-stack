@@ -897,6 +897,8 @@ services:
       DB_POSTGRESDB_PORT: "5432"
       DB_POSTGRESDB_USER: n8n
       DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASS}
+      WEBHOOK_TUNNEL_URL: https://n8n.${root_domain}/
+      GENERIC_TIMEZONE: ${TZ}
     volumes:
       - ${docker_data_folder}/n8n:/home/node/.n8n
     networks:
