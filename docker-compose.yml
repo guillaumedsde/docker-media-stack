@@ -145,7 +145,7 @@ services:
   wireguard:
     <<: *restart
     <<: *logging
-    image: jordanpotter/wireguard:2.1.1
+    image: jordanpotter/wireguard:2.1.2
     container_name: wireguard
     cap_add:
       - NET_ADMIN
