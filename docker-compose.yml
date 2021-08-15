@@ -835,7 +835,7 @@ services:
     cpus: "4"
     environment:
       <<: *conf
-      HUGINN_DOMAIN: huginn.${root_domain}
+      HUGINN_DOMAIN: huginn.${old_root_domain}
       HUGINN_RAILS_ENV: production
       HUGINN_INVITATION_CODE: ${HUGINN_INVITATION_CODE}
       HUGINN_DATABASE_NAME: huginn
@@ -862,7 +862,7 @@ services:
     labels:
       <<: *traefik
       traefik.docker.network: huginn-proxy
-      traefik.http.routers.huginn.rule: Host(`huginn.${root_domain}`)
+      traefik.http.routers.huginn.rule: Host(`huginn.${root_domain}`,`huginn.${old_root_domain}`)
       # service
       traefik.http.services.huginn.loadbalancer.server.port: "3000"
     <<: *restart
