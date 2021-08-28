@@ -828,7 +828,7 @@ services:
 
   # automation platform
   huginn:
-    hostname: huginn.${root_domain}
+    hostname: huginn.${old_root_domain}
     depends_on:
       - "huginn-mariadb"
     mem_limit: 750m
