@@ -54,7 +54,7 @@ services:
       - "--certificatesresolvers.le.acme.dnschallenge.provider=ovh"
       - "--certificatesresolvers.le.acme.email=${letsencrypt_email}"
       - "--certificatesresolvers.le.acme.keytype=EC384"
-      - "--certificatesresolvers.le.acme.dnsChallenge.resolvers=80.67.169.12:53"
+      - "--certificatesresolvers.le.acme.dnsChallenge.resolvers=1.1.1.1:53"
       # configs
       - "--providers.file.directory=/config/"
       # traefik API and dashboard
