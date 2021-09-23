@@ -252,10 +252,10 @@ services:
     read_only: true
     cpus: "4"
     mem_limit: 1g
+    user: ${UID}:${GID}
     network_mode: service:wireguard
     environment:
       <<: *conf
-      S6_READ_ONLY_ROOT: "1"
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
