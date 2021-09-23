@@ -854,8 +854,6 @@ services:
       HUGINN_SMTP_ENABLE_STARTTLS_AUTO: "false"
       HUGINN_SMTP_SSL: "true"
       HUGINN_EMAIL_FROM_ADDRESS: huginn@${root_domain}
-    volumes:
-      - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
     networks:
       - huginn
       - huginn-proxy
@@ -867,14 +865,14 @@ services:
       traefik.http.services.huginn.loadbalancer.server.port: "3000"
     <<: *restart
     <<: *logging
-    image: huginn/huginn:latest
+    image: huginn/huginn:4d17829cf6b15b004ad3f4be196303dca4944810
 
   huginn-mariadb:
-    image: mariadb
+    image: mariadb:10.6-focal
     mem_limit: 250m
     cpus: "2"
     volumes:
-      - ${docker_data_folder}/huginn/mysql-data:/var/lib/mysql
+      - ${docker_data_folder}/huginn-mariadb:/var/lib/mysql
     networks:
       - huginn
     <<: *restart
