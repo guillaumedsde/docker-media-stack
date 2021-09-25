@@ -291,7 +291,7 @@ services:
 
   # jackett tracker site scraper with API
   hydra:
-    image: guillaumedsde/nzbhydra2-distroless:latest
+    image: guillaumedsde/nzbhydra2-distroless:latest-distroless
     hostname: hydra.${root_domain}
     <<: *restart
     <<: *logging
