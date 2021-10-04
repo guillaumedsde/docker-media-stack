@@ -183,6 +183,10 @@ services:
       traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
       traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
+      # Disable watchtower for this container because of these issues
+      # https://github.com/containrrr/watchtower/issues/188
+      # https://github.com/containrrr/watchtower/issues/1013
+      com.centurylinklabs.watchtower.enable: "false"
 
   # Torrent client
   qbittorrent:
@@ -1131,7 +1135,6 @@ services:
       # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
       # CAPTCHA_SOLVER: harvester
       #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
-    network_mode: service:wireguard
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
