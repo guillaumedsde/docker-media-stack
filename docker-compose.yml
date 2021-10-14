@@ -1009,7 +1009,7 @@ services:
     cpus: "2"
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
     environment:
       discovery.type: single-node
       bootstrap.memory_lock: "true"
