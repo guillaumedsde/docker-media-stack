@@ -28,7 +28,7 @@ render-compose-graph:
 pages:
   stage: deploy
   # requiring the environment of NodeJS 10
-  image: node:10
+  image: node:17
   # add 'node_modules' to cache for speeding up builds
   cache:
     paths:
