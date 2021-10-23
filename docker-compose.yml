@@ -98,17 +98,13 @@ services:
       - calibre-web
       - homer
       - gollum
-      - unmanic
-      - ytdl
       - ghost
       - nextcloud-proxy
-      - huginn-proxy
       - gotify
       - robots
       - netdata
       - lam
       - keycloak-proxy
-      - n8n-proxy
     <<: *restart
     <<: *logging
     mem_limit: 200m
@@ -1121,10 +1117,6 @@ networks:
     driver: bridge
     internal: true
     name: nextcloud
-  huginn:
-    driver: bridge
-    internal: true
-    name: huginn
   samba:
     driver: bridge
     name: samba
@@ -1134,10 +1126,6 @@ networks:
   gitlab-runner:
     driver: bridge
     name: gitlab-runner
-  elastic:
-    driver: bridge
-    internal: true
-    name: elastic
   kibana:
     driver: bridge
     internal: true
@@ -1153,23 +1141,12 @@ networks:
     driver: bridge
     internal: true
     name: gollum
-  unmanic:
-    driver: bridge
-    internal: true
-    name: unmanic
-  ytdl:
-    driver: bridge
-    internal: true
-    name: ytdl
   ghost:
     driver: bridge
     name: ghost
   nextcloud-proxy:
     driver: bridge
     name: nextcloud-proxy
-  huginn-proxy:
-    driver: bridge
-    name: huginn-proxy
   gotify:
     driver: bridge
     internal: true
@@ -1189,12 +1166,6 @@ networks:
   keycloak-proxy:
     driver: bridge
     name: keycloak-proxy
-  n8n-proxy:
-    driver: bridge
-    name: n8n-proxy
-  n8n:
-    driver: bridge
-    name: n8n
 
 volumes:
   robots-nginx-cache:
