@@ -125,7 +125,7 @@ services:
     read_only: true
     user: ${UID}:${docker_group_id}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       WATCHTOWER_NOTIFICATIONS: "gotify"
       WATCHTOWER_NOTIFICATION_GOTIFY_URL: "${WATCHTOWER_NOTIFICATION_GOTIFY_URL}"
@@ -789,19 +789,6 @@ services:
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
     image: guillaumedsde/wsdd:latest
 
-  # gitlab runner
-  gitlab-runner:
-    <<: *restart
-    <<: *logging
-    mem_limit: 200m
-    cpus: "2"
-    networks:
-      - gitlab-runner
-    volumes:
-      - ${docker_data_folder}/gitlab-runner:/etc/gitlab-runner
-      - /var/run/docker.sock:/var/run/docker.sock
-    image: gitlab/gitlab-runner:alpine
-
   # Push notification service
   gotify:
     hostname: gotify.${root_domain}
@@ -834,6 +821,7 @@ services:
       - ./config/nginx/robots.txt:/usr/share/nginx/html/robots.txt:ro
       - robots-nginx-cache:/var/cache/nginx
       - robots-nginx-pid:/var/run
+      - robots-nginx-conf:/etc/nginx/conf.d/
     networks:
       - robots
     labels:
@@ -932,21 +920,6 @@ services:
       - ./ldap_templates/memberof.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/memberof.ldif:ro
       # certificates
       - ${docker_data_folder}/openldap/certs/ldap.${old_root_domain}:/container/service/slapd/assets/certs:ro
-
-  # OpenLDAP certificate handler
-  openldap-acme:
-    image: guillaumedsde/acme.sh:latest
-    user: ${UID}:${GID}
-    mem_limit: 100m
-    environment:
-      OVH_AK: ${OVH_APPLICATION_KEY}
-      OVH_AS: ${OVH_APPLICATION_SECRET}
-      OVH_CK: ${OVH_CONSUMER_KEY}
-      OVH_END_POINT: ${OVH_ENDPOINT}
-    command:
-      - daemon
-    volumes:
-      - ${docker_data_folder}/openldap/certs:/acme.sh
 
   # LDAP Server management web GUI
   lam:
@@ -1170,4 +1143,5 @@ networks:
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
+  robots-nginx-conf:
   torrent-blackhole:
