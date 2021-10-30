@@ -731,7 +731,6 @@ services:
       SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
       SID: ${SID}
     ports:
-      - "139:139"
       - "445:445"
     volumes:
       - /etc/localtime:/etc/localtime:ro
