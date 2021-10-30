@@ -1095,9 +1095,6 @@ networks:
   ssh:
     driver: bridge
     name: ssh
-  gitlab-runner:
-    driver: bridge
-    name: gitlab-runner
   kibana:
     driver: bridge
     internal: true
