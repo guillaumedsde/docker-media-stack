@@ -205,6 +205,8 @@ services:
     image: guillaumedsde/qbittorrent-distroless:latest
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
+    healthcheck:
+      disable: true
 
   flood:
     <<: *restart
