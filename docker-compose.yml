@@ -291,38 +291,6 @@ services:
       JACKETT_URL: "http://jackett:9117"
       JACKETT_KEY: ${JACKETT_API_KEY}
 
-  # jackett tracker site scraper with API
-  hydra:
-    image: guillaumedsde/nzbhydra2-distroless:latest-distroless
-    hostname: hydra.${root_domain}
-    <<: *restart
-    <<: *logging
-    depends_on:
-      jackett:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/hydra:/config
-      - torrent-blackhole:/blackhole
-    tmpfs:
-      - "/var:rw,exec"
-      - "/tmp:rw,exec"
-    read_only: true
-    mem_limit: 750m
-    cpus: "2"
-    user: ${UID}:${GID}
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.nzbhydra.rule: Host(`hydra.${root_domain}`)
-      # service
-      traefik.http.services.nzbhydra.loadbalancer.server.port: "5076"
-      # Forward auth
-      traefik.http.routers.nzbhydra.middlewares: keycloak-forward-auth
-
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
