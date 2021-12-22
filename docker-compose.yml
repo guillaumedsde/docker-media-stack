@@ -64,14 +64,7 @@ services:
       - "--ping=true"
       - "--ping.manualrouting=true"
       # traefik access logs
-      - "--accesslog=true"
-      - "--accesslog.filepath=/var/log/traefik/access.log"
-      - "--accesslog.bufferingsize=100"
-      - "--accesslog.fields.headers.defaultmode=drop"
-      - "--accesslog.fields.headers.names.User-Agent=keep"
-      - "--accesslog.fields.headers.names.accept=keep"
-      - "--accesslog.fields.headers.names.Referer=accept-language"
-      - "--accesslog.fields.headers.names.Referer=keep"
+      - "--accesslog=false"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
