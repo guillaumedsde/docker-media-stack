@@ -47,7 +47,6 @@ session:
   name: authelia_session
   domain: $root_domain
   same_site: lax
-  secret: $AUTHELIA_SESSION_SECRET
   expiration: 1h
   inactivity: 5m
   remember_me_duration: 1M
@@ -61,8 +60,3 @@ storage:
     schema: public
     username: authelia
     password: $AUTHELIA_DB_PASSWORD
-    ssl:
-      mode: disable
-      root_certificate: /path/to/root_cert.pem
-      certificate: /path/to/cert.pem
-      key: /path/to/key.pem
