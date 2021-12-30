@@ -423,6 +423,7 @@ services:
       - /config/config.yml
     <<: *restart
     <<: *logging
+    user: ${UID}:${GID}
     mem_limit: 500m
     depends_on:
       - authelia-db
