@@ -129,6 +129,30 @@ services:
       - "--cleanup"
       - "--schedule"
       - "0 0 5 * * *"
+
+  # homer is a homepage container
+  homer:
+    hostname: ${root_domain}
+    image: b4bz/homer:latest
+    cpus: "1"
+    mem_limit: 100m
+    read_only: true
+    <<: *restart
+    <<: *logging
+    environment:
+      UID: ${UID}
+      GID: ${GID}
+    networks:
+      - homer
+    volumes:
+      - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
+      - ${docker_data_folder}/homer/assets:/www/assets
+    labels:
+      <<: *traefik
+      traefik.docker.network: homer
+      traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
+      # service
+      traefik.http.services.homer.loadbalancer.server.port: "8080"
   samba:
     environment:
       SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
