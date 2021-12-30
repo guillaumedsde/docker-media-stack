@@ -131,6 +131,82 @@ services:
       - "--schedule"
       - "0 0 5 * * *"
 
+  # personal cloud
+  nextcloud:
+    hostname: cloud.${root_domain}
+    depends_on:
+      - nextcloud-postgres
+      - nextcloud-redis
+      - samba
+      - openldap
+    volumes:
+      - ${docker_data_folder}/nextcloud:/var/www/html
+      - ${data_folder}:/data
+    networks:
+      - traefik
+      - nextcloud
+      - nextcloud-proxy
+      - ldap
+      - samba
+    environment:
+      <<: *conf
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: ${nextcloud_db_pass}
+      POSTGRES_HOST: nextcloud-postgres
+      REDIS_HOST: nextcloud-redis
+      REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
+      SMTP_HOST: smtp.sendgrid.net
+      SMTP_SECURE: ssl
+      SMTP_PORT: "465"
+      SMTP_AUTHTYPE: login
+      SMTP_NAME: apikey
+      SMTP_PASSWORD: ${SENDGRID_PASS}
+      MAIL_FROM_ADDRESS: nextcloud
+      MAIL_DOMAIN: ${root_domain}
+    labels:
+      <<: *traefik
+      traefik.docker.network: nextcloud-proxy
+      traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
+      traefik.http.routers.nextcloud.middlewares: nextcloud-redirectregex
+      # service
+      traefik.http.services.nextcloud.loadbalancer.server.port: "80"
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: https://cloud.${root_domain}/.well-known/(card|cal)dav
+      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
+    <<: *restart
+    <<: *logging
+    mem_limit: 1g
+    cpus: "8"
+    image: guillaumedsde/nextcloud-samba:latest
+
+  # databse for nextcloud
+  nextcloud-postgres:
+    cpus: "2"
+    mem_limit: 250m
+    environment:
+      POSTGRES_PASSWORD: ${nextcloud_db_pass}
+      POSTGRES_USER: nextcloud
+    volumes:
+      - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
+    networks:
+      - nextcloud
+    <<: *restart
+    <<: *logging
+    image: postgres:12-alpine
+
+  # cache for nextcloud
+  nextcloud-redis:
+    cpus: "2"
+    mem_limit: 200m
+    networks:
+      - nextcloud
+    <<: *restart
+    <<: *logging
+    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
+    image: redis:alpine
+
+
   # homer is a homepage container
   homer:
     hostname: ${root_domain}
