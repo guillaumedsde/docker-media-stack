@@ -23,8 +23,8 @@ authentication_backend:
   ldap:
     url: ldap://openldap
     username_attribute: uid
-    users_filter: (|(objectclass=inetOrgPerson))
-    groups_filter: (&(|(objectclass=posixGroup))(|(cn=family)))
+    users_filter: (&({username_attribute}={input})(objectClass=inetOrgPerson))
+    groups_filter: (&(member={dn})(objectClass=posixGroup))
     group_name_attribute: cn
     mail_attribute: mail
     display_name_attribute: displayName
