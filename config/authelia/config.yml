@@ -30,8 +30,6 @@ authentication_backend:
     display_name_attribute: displayName
 
 session:
-  name: authelia_session
-  same_site: lax
   expiration: 1h
   inactivity: 5m
   remember_me_duration: 1M
