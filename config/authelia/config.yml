@@ -54,7 +54,7 @@ session:
 storage:
   encryption_key: $AUTHELIA_DB_ENCRYPTION_KEY
   postgres:
-    host: authelia-postgres
+    host: authelia-db
     port: 5432
     database: authelia
     schema: public
