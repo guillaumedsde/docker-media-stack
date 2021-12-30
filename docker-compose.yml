@@ -31,7 +31,7 @@ x-traefik: &traefik
 services:
   # reverse proxy
   traefik:
-    image: traefik:v2.6
+    image: traefik:v2.5
     user: ${UID}:${docker_group_id}
     cap_add:
       - NET_BIND_SERVICE
@@ -129,566 +129,6 @@ services:
       - "--cleanup"
       - "--schedule"
       - "0 0 5 * * *"
-
-  # Wireguard VPN client
-  wireguard:
-    <<: *restart
-    <<: *logging
-    image: jordanpotter/wireguard:2.1.3
-    container_name: wireguard
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-    cpus: 2.0
-    mem_limit: 100m
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-    networks:
-      traefik:
-        aliases:
-          - jackett
-          - flaresolverr
-          - qbittorrent
-    volumes:
-      - ${docker_data_folder}/wireguard/wg0.conf:/etc/wireguard/wg0.conf:ro
-    labels:
-      <<: *traefik
-      # Jackett
-      # service
-      traefik.http.services.jackett.loadbalancer.server.port: "9117"
-      # Router
-      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
-      traefik.http.routers.jackett.service: jackett
-      # Forward auth
-      traefik.http.routers.jackett.middlewares: keycloak-forward-auth
-      # qBittorrent
-      # service
-      traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
-      # router
-      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
-      traefik.http.routers.qbittorrent.service: qbittorrent
-      # Forward auth
-      traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
-      # Disable watchtower for this container because of these issues
-      # https://github.com/containrrr/watchtower/issues/188
-      # https://github.com/containrrr/watchtower/issues/1013
-      com.centurylinklabs.watchtower.enable: "false"
-
-  # Torrent client
-  qbittorrent:
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - wireguard
-    volumes:
-      - ${docker_data_folder}/qbittorrent:/config
-      - ${data_folder}:/data
-      - torrent-blackhole:/blackhole
-      - /etc/localtime:/etc/localtime:ro
-    tmpfs:
-      - /tmp
-    read_only: true
-    cpus: 2.0
-    mem_limit: 2g
-    user: ${UID}:${GID}
-    network_mode: service:wireguard
-    image: guillaumedsde/qbittorrent-distroless:latest
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
-    healthcheck:
-      disable: true
-
-  flood:
-    <<: *restart
-    <<: *logging
-    image: jesec/flood:master-distroless
-    hostname: flood.${root_domain}
-    cpus: "2"
-    mem_limit: 250M
-    read_only: true
-    user: ${UID}:${GID}
-    volumes:
-      - ${docker_data_folder}/flood:/config
-      - ${data_folder}:/data:ro
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - traefik
-    command:
-      - --auth=none
-      - --qburl=http://qbittorrent:8080
-      - --qbuser=${QBT_USER}
-      - --qbpass=${QBT_PASS}
-      - --rundir=/config
-    labels:
-      <<: *traefik
-      traefik.http.routers.flood.rule: Host(`flood.${root_domain}`)
-      # service
-      traefik.http.services.flood.loadbalancer.server.port: "3000"
-      # Forward auth
-      traefik.http.routers.flood.middlewares: keycloak-forward-auth
-
-  # jackett tracker site scraper with API
-  jackett:
-    image: guillaumedsde/jackett-distroless:latest
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - wireguard
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/jackett:/config
-      - torrent-blackhole:/blackhole
-    tmpfs:
-      - "/var:rw,exec"
-      - "/tmp:rw,exec"
-    read_only: true
-    cpus: "4"
-    mem_limit: 1g
-    user: ${UID}:${GID}
-    network_mode: service:wireguard
-    environment:
-      <<: *conf
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
-
-  # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
-  jackett-sync-ts:
-    image: allergicduck/jackett-sync
-    <<: *restart
-    <<: *logging
-    depends_on:
-      jackett:
-        condition: service_healthy
-      radarr:
-        condition: service_started
-      sonarr:
-        condition: service_started
-      lidarr:
-        condition: service_started
-    user: ${UID}:${GID}
-    read_only: true
-    cpus: "1"
-    mem_limit: 100m
-    networks:
-      - traefik
-    environment:
-      LIDARR_URL: "http://lidarr:8686"
-      LIDARR_KEY: ${LIDARR_API_KEY}
-      RADARR_URL: "http://radarr:7878"
-      RADARR_KEY: ${RADARR_API_KEY}
-      SONARR_URL: "http://sonarr:8989"
-      SONARR_KEY: ${SONARR_API_KEY}
-      JACKETT_URL: "http://jackett:9117"
-      JACKETT_KEY: ${JACKETT_API_KEY}
-
-  # radarr, webapp for downloading movies through torrent client
-  # queries are done with jackett
-  radarr:
-    hostname: movies.${root_domain}
-    image: ghcr.io/linuxserver/radarr:nightly
-    <<: *restart
-    <<: *logging
-    cpus: "4"
-    mem_limit: 2G
-    depends_on:
-      jackett:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/radarr:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.radarr.rule: Host(`movies.${root_domain}`)
-      # service
-      traefik.http.services.radarr.loadbalancer.server.port: "7878"
-      # Forward auth
-      traefik.http.routers.radarr.middlewares: keycloak-forward-auth
-
-  # sonarr, webapp for downloading series through torrent client
-  # queries are done with jackett
-  sonarr:
-    hostname: series.${root_domain}
-    image: ghcr.io/linuxserver/sonarr:latest
-    <<: *restart
-    <<: *logging
-    cpus: "4"
-    mem_limit: 2G
-    depends_on:
-      jackett:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/sonarr:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.sonarr.rule: Host(`series.${root_domain}`)
-      # service
-      traefik.http.services.sonarr.loadbalancer.server.port: "8989"
-      # Forward auth
-      traefik.http.routers.sonarr.middlewares: keycloak-forward-auth
-
-  # lidarr, webapp for downloading music through torrent client
-  # queries are done with jackett
-  lidarr:
-    hostname: music.${root_domain}
-    image: ghcr.io/linuxserver/lidarr:latest
-    <<: *restart
-    <<: *logging
-    cpus: "4"
-    mem_limit: 1G
-    depends_on:
-      jackett:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/lidarr:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.lidarr.rule: Host(`music.${root_domain}`)
-      # service
-      traefik.http.services.lidarr.loadbalancer.server.port: "8686"
-      # Forward auth
-      traefik.http.routers.lidarr.middlewares: keycloak-forward-auth
-
-  # bazarr, webapp for downloading subtitles
-  bazarr:
-    hostname: subtitles.${root_domain}
-    image: hotio/bazarr:release
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - "radarr"
-      - "sonarr"
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
-      # service
-      traefik.http.services.bazarr.loadbalancer.server.port: "6767"
-      # Forward auth
-      traefik.http.routers.bazarr.middlewares: keycloak-forward-auth
-    cpus: "2"
-    mem_limit: 300M
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/bazarr:/config
-      - ${data_folder}:/data
-      - ./config/bazarr/sub-clean.sh:/usr/bin/sub-clean.sh
-      - ./config/bazarr/chmod-custom-script.sh:/etc/cont-init.d/99-chmod-custom-script
-    networks:
-      - traefik
-
-  # lazylibrarian, webapp for downloading books through torrent client
-  # queries are done with jackett
-  lazylibrarian:
-    hostname: books.${root_domain}
-    image: ghcr.io/linuxserver/lazylibrarian:latest
-    <<: *restart
-    <<: *logging
-    mem_limit: 500M
-    cpus: "2"
-    depends_on:
-      jackett:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/lazylibrarian:/config
-      - ${data_folder}:/data
-      - torrent-blackhole:/blackhole
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-      DOCKER_MODS: linuxserver/calibre-web:calibre
-    labels:
-      <<: *traefik
-      traefik.http.routers.lazylibrarian.rule: Host(`books.${root_domain}`)
-      # service
-      traefik.http.services.lazylibrarian.loadbalancer.server.port: "5299"
-      # Forward auth
-      traefik.http.routers.lazylibrarian.middlewares: keycloak-forward-auth
-
-  # automatically extract torrented archives
-  unpackerr:
-    image: golift/unpackerr
-    user: ${UID}:${GID}
-    read_only: true
-    cpus: "4"
-    mem_limit: 100m
-    <<: *restart
-    <<: *logging
-    networks:
-      - traefik
-    volumes:
-      - ${data_folder}:/data
-    environment:
-      UN_SONARR_0_URL: http://sonarr:8989
-      UN_SONARR_0_API_KEY: ${SONARR_API_KEY}
-      UN_SONARR_0_PATH: /data/download/series
-      UN_RADARR_0_URL: http://radarr:7878
-      UN_RADARR_0_API_KEY: ${RADARR_API_KEY}
-      UN_RADARR_0_PATH: /data/download/series
-      UN_LIDARR_0_URL: http://lidarr:8686
-      UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
-      UN_LIDARR_0_PATH: /data/download/music
-
-  # homer is a homepage container
-  homer:
-    hostname: ${root_domain}
-    image: b4bz/homer:latest
-    cpus: "1"
-    mem_limit: 100m
-    read_only: true
-    <<: *restart
-    <<: *logging
-    environment:
-      UID: ${UID}
-      GID: ${GID}
-    networks:
-      - homer
-    volumes:
-      - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
-      - ${docker_data_folder}/homer/assets:/www/assets
-    labels:
-      <<: *traefik
-      traefik.docker.network: homer
-      traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
-      # service
-      traefik.http.services.homer.loadbalancer.server.port: "8080"
-
-  # jellyfin media server
-  jellyfin:
-    hostname: jellyfin.${root_domain}
-    image: jellyfin/jellyfin:10.7.7
-    user: ${UID}:${GID}
-    cpus: "16"
-    mem_limit: 4g
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - openldap
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/jellyfin:/config
-      - ${data_folder}:/data:ro
-    networks:
-      - traefik
-      - ldap
-    environment:
-      <<: *conf
-      JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
-      #Uncomment forofficial Jellyfin image:
-      JELLYFIN_DATA_DIR: /config/data
-      JELLYFIN_CONFIG_DIR: /config
-      JELLYFIN_LOG_DIR: /config/log
-      JELLYFIN_CACHE_DIR: /config/cache
-    labels:
-      <<: *traefik
-      traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`,`jellyfin.${old_root_domain}`)
-      # service
-      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
-
-  # ombi, plex media requests
-  ombi:
-    hostname: ombi.${root_domain}
-    image: ghcr.io/linuxserver/ombi:latest
-    <<: *restart
-    <<: *logging
-    mem_limit: 500m
-    cpus: "2"
-    depends_on:
-      - "sonarr"
-      - "radarr"
-      - "lidarr"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/ombi:/config
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
-      # service
-      traefik.http.services.ombi.loadbalancer.server.port: "3579"
-
-  # calibre-web, for reading ebooks
-  calibre-web:
-    hostname: read.${root_domain}
-    image: ghcr.io/linuxserver/calibre-web:latest
-    cpus: "4"
-    mem_limit: 300M
-    <<: *restart
-    <<: *logging
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/calibre-web:/config
-      - ${data_folder}/books:/books
-    networks:
-      - calibre-web
-      - ldap
-    environment:
-      <<: *conf
-      DOCKER_MODS: linuxserver/calibre-web:calibre
-    labels:
-      <<: *traefik
-      traefik.docker.network: calibre-web
-      traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
-      # service
-      traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
-      # Forward auth
-      traefik.http.routers.calibre-web.middlewares: keycloak-forward-auth
-
-  # gollum for hosting documentation
-  gollum:
-    hostname: docs.${root_domain}
-    image: cuotos/gollum-alpine:latest
-    <<: *restart
-    <<: *logging
-    cpus: "2"
-    mem_limit: 250m
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/gollum:/wiki
-    networks:
-      - gollum
-    environment:
-      <<: *conf
-      GOLLUMARGS: "--allow-uploads dir"
-    labels:
-      <<: *traefik
-      traefik.docker.network: gollum
-      traefik.http.routers.gollum.rule: Host(`docs.${root_domain}`)
-      # service
-      traefik.http.services.gollum.loadbalancer.server.port: "4567"
-      # Forward auth
-      traefik.http.routers.gollum.middlewares: keycloak-forward-auth
-
-  # JS CMS
-  ghost_guillaume:
-    environment:
-      <<: *conf
-      url: "https://blog.guillaume.${secondary_tld}"
-      mail__transport: SMTP
-      mail__from: ghost@${root_domain}
-      mail__options__service: SendGrid
-      mail__options__host: smtp.sendgrid.net
-      mail__options__port: "465"
-      mail__options__secureConnection: "true"
-      mail__options__auth__user: apikey
-      mail__options__auth__pass: ${SENDGRID_PASS}
-    labels:
-      <<: *traefik
-      traefik.docker.network: ghost
-      traefik.http.routers.blog-guillaume.rule: Host(`blog.guillaume.${secondary_tld}`)
-      # service
-      traefik.http.services.blog-guillaume.loadbalancer.server.port: "2368"
-    volumes:
-      - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - ghost
-    <<: *restart
-    <<: *logging
-    mem_limit: 250m
-    cpus: "2"
-    image: ghost:alpine
-
-  # personal cloud
-  nextcloud:
-    hostname: cloud.${root_domain}
-    depends_on:
-      - nextcloud-postgres
-      - nextcloud-redis
-      - samba
-      - openldap
-    volumes:
-      - ${docker_data_folder}/nextcloud:/var/www/html
-      - ${data_folder}:/data
-    networks:
-      - traefik
-      - nextcloud
-      - nextcloud-proxy
-      - ldap
-      - samba
-    environment:
-      <<: *conf
-      POSTGRES_DB: nextcloud
-      POSTGRES_USER: nextcloud
-      POSTGRES_PASSWORD: ${nextcloud_db_pass}
-      POSTGRES_HOST: nextcloud-postgres
-      REDIS_HOST: nextcloud-redis
-      REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
-      SMTP_HOST: smtp.sendgrid.net
-      SMTP_SECURE: ssl
-      SMTP_PORT: "465"
-      SMTP_AUTHTYPE: login
-      SMTP_NAME: apikey
-      SMTP_PASSWORD: ${SENDGRID_PASS}
-      MAIL_FROM_ADDRESS: nextcloud
-      MAIL_DOMAIN: ${root_domain}
-    labels:
-      <<: *traefik
-      traefik.docker.network: nextcloud-proxy
-      traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
-      traefik.http.routers.nextcloud.middlewares: nextcloud-redirectregex
-      # service
-      traefik.http.services.nextcloud.loadbalancer.server.port: "80"
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: https://cloud.${root_domain}/.well-known/(card|cal)dav
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
-    <<: *restart
-    <<: *logging
-    mem_limit: 1g
-    cpus: "8"
-    image: guillaumedsde/nextcloud-samba:latest
-
-  # databse for nextcloud
-  nextcloud-postgres:
-    cpus: "2"
-    mem_limit: 250m
-    environment:
-      POSTGRES_PASSWORD: ${nextcloud_db_pass}
-      POSTGRES_USER: nextcloud
-    volumes:
-      - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
-    networks:
-      - nextcloud
-    <<: *restart
-    <<: *logging
-    image: postgres:12-alpine
-
-  # cache for nextcloud
-  nextcloud-redis:
-    cpus: "2"
-    mem_limit: 200m
-    networks:
-      - nextcloud
-    <<: *restart
-    <<: *logging
-    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
-    image: redis:alpine
-
   samba:
     environment:
       SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
@@ -797,54 +237,36 @@ services:
   ##################################################################
   # Monitoring
 
-  # netdata, server monitoring
-  netdata:
-    hostname: status.${root_domain}
-    image: netdata/netdata:latest
-    <<: *restart
-    <<: *logging
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
-    networks:
-      - netdata
-    environment:
-      <<: *conf
-      PGID: ${docker_group_id}
-    labels:
-      <<: *traefik
-      traefik.docker.network: netdata
-      traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
-      # service
-      traefik.http.services.netdata.loadbalancer.server.port: "19999"
-      # Forward auth
-      traefik.http.routers.netdata.middlewares: keycloak-forward-auth
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - apparmor:unconfined
-    mem_limit: 500m
-    cpus: "2"
-
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    <<: *restart
-    <<: *logging
-    cpus: 2.0
-    mem_limit: 500m
-    user: ${UID}:${GID}
-    environment:
-      # Used to change the verbosity of the logging
-      LOG_LEVEL: info
-      # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
-      CAPTCHA_SOLVER: hcaptcha-solver
-      # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
-      # CAPTCHA_SOLVER: harvester
-      #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
+  # # netdata, server monitoring
+  # netdata:
+  #   hostname: status.${root_domain}
+  #   image: netdata/netdata:latest
+  #   <<: *restart
+  #   <<: *logging
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
+  #   networks:
+  #     - netdata
+  #   environment:
+  #     <<: *conf
+  #     PGID: ${docker_group_id}
+  #   labels:
+  #     <<: *traefik
+  #     traefik.docker.network: netdata
+  #     traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
+  #     # service
+  #     traefik.http.services.netdata.loadbalancer.server.port: "19999"
+  #     # Forward auth
+  #     traefik.http.routers.netdata.middlewares: keycloak-forward-auth
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   mem_limit: 500m
+  #   cpus: "2"
 
   ##################################################################
   # Authentication
@@ -959,6 +381,56 @@ services:
     networks:
       - keycloak
 
+  authelia:
+    image: authelia/authelia:4.33
+    environment:
+      AUTHELIA_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
+      AUTHELIA_DB_PASSWORD: ${AUTHELIA_DB_PASSWORD}
+      AUTHELIA_DB_ENCRYPTION_KEY: ${AUTHELIA_DB_ENCRYPTION_KEY}
+      root_domain: ${root_domain}
+      AUTHELIA_SESSION_SECRET: ${AUTHELIA_SESSION_SECRET}
+      LDAP_BASE_DN: ${LDAP_BASE_DN}
+      LDAP_ADMIN_USER: ${LDAP_ADMIN_USER}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      AUTHELIA_CHECK_EMAIL: ${letsencrypt_email}
+      SENDGRID_PASS: ${SENDGRID_PASS}
+    command:
+      - --config
+      - /config/config.yml
+    <<: *restart
+    <<: *logging
+    mem_limit: 500m
+    depends_on:
+      - authelia-db
+      - openldap
+    volumes:
+      - ./config/authelia:/config:ro
+    networks:
+      - authelia-proxy
+      - ldap
+      - authelia
+    labels:
+      <<: *traefik
+      traefik.docker.network: authelia-proxy
+      traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
+      # service
+      traefik.http.services.authelia.loadbalancer.server.port: "9091"
+
+  # DB for authelia
+  authelia-db:
+    <<: *restart
+    <<: *logging
+    mem_limit: 250m
+    environment:
+      POSTGRES_USER: authelia
+      POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
+    image: postgres:14-alpine
+    volumes:
+      - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - authelia
+
   # OIDC forward authentication for traefik
   traefik-forward-auth:
     image: thomseddon/traefik-forward-auth:2
@@ -988,52 +460,6 @@ services:
       traefik.http.routers.traefik-forward-auth.middlewares: traefik-forward-auth
       traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
 
-  # OIDC forward authentication for traefik
-  keycloak-forward-auth:
-    image: thomseddon/traefik-forward-auth:2
-    <<: *restart
-    <<: *logging
-    mem_limit: 100m
-    environment:
-      PROVIDERS_OIDC_CLIENT_ID: ${KEYCLOAK_OIDC_CLIENT_ID}
-      PROVIDERS_OIDC_CLIENT_SECRET: ${KEYCLOAK_OIDC_CLIENT_SECRET}
-      SECRET: ${KEYCLOAK_OIDC_COOKIE_SECRET}
-      PROVIDERS_OIDC_ISSUER_URL: https://keycloak.${root_domain}/auth/realms/${KEYCLOAK_REALM}
-      AUTH_HOST: auth.${root_domain}
-      COOKIE_DOMAIN: ${root_domain}
-      DEFAULT_PROVIDER: oidc
-      COOKIE_NAME: _keycloak_forward_auth
-      CSRF_COOKIE_NAME: _keycloak_forward_auth_csrf
-    command:
-      - "--rule.jackett-api.action=allow"
-      - "--rule.jackett-api.rule=Host(`jackett.${root_domain}`) && PathPrefix(`/api/{.*}`)"
-      - "--rule.jackett-dl.action=allow"
-      - "--rule.jackett-dl.rule=Host(`jackett.${root_domain}`) && PathPrefix(`/dl/{.*}`)"
-      - "--rule.sonarr-calendar.action=allow"
-      - "--rule.sonarr-calendar.rule=Host(`series.${root_domain}`) && PathPrefix(`/feed/calendar/{.*}`)"
-      - "--rule.radarr-calendar.action=allow"
-      - "--rule.radarr-calendar.rule=Host(`movies.${root_domain}`) && PathPrefix(`/feed/v3/calendar/{.*}`)"
-      - "--rule.lidarr-calendar.action=allow"
-      - "--rule.lidarr-calendar.rule=Host(`music.${root_domain}`) && PathPrefix(`/feed/v1/calendar/{.*}`)"
-      - "--rule.calibre-web-opds.action=allow"
-      - "--rule.calibre-web-opds.rule=Host(`read.${root_domain}`) && (PathPrefix(`/opds/{.*}`) || Path(`/opds`))"
-      - "--rule.n8n-webjooks.action=allow"
-      - "--rule.n8n-webjooks-dl.rule=Host(`n8n.${root_domain}`) && PathPrefix(`/webhook/{.*}`)"
-    networks:
-      - traefik
-    depends_on:
-      - keycloak
-    labels:
-      <<: *traefik
-      # HTTP entrypoint
-      traefik.http.routers.keycloak-forward-auth.rule: Host(`auth.${root_domain}`)
-      # service
-      traefik.http.services.keycloak-forward-auth.loadbalancer.server.port: "4181"
-      # Forward auth
-      traefik.http.middlewares.keycloak-forward-auth.forwardauth.address: http://keycloak-forward-auth:4181
-      traefik.http.routers.keycloak-forward-auth.middlewares: keycloak-forward-auth
-      traefik.http.middlewares.keycloak-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
-
 networks:
   watchtower:
     driver: bridge
@@ -1049,6 +475,10 @@ networks:
     driver: bridge
     internal: true
     name: keycloak
+  authelia:
+    driver: bridge
+    internal: true
+    name: authelia
   nextcloud:
     driver: bridge
     internal: true
@@ -1099,6 +529,10 @@ networks:
   keycloak-proxy:
     driver: bridge
     name: keycloak-proxy
+  authelia-proxy:
+    driver: bridge
+    name: authelia-proxy
+
 
 volumes:
   robots-nginx-cache:
