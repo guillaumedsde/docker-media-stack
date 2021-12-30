@@ -36,7 +36,7 @@ services:
     cap_add:
       - NET_BIND_SERVICE
     command:
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       # docker configuration
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
@@ -87,7 +87,6 @@ services:
       - "/tmp"
     networks:
       - traefik
-      - kibana
       - calibre-web
       - homer
       - gollum
@@ -1008,10 +1007,6 @@ networks:
   ssh:
     driver: bridge
     name: ssh
-  kibana:
-    driver: bridge
-    internal: true
-    name: kibana
   calibre-web:
     driver: bridge
     name: calibre-web
