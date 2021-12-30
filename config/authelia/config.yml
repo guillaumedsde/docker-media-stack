@@ -21,12 +21,9 @@ authentication_backend:
   disable_reset_password: true
   refresh_interval: 5m
   ldap:
-    implementation: custom
     url: ldap://openldap
-    timeout: 5s
-    start_tls: false
     username_attribute: uid
-    additional_users_dn: ou=users
+    additional_users_dn: ou=People
     users_filter: (&({username_attribute}={input})(objectClass=person))
     additional_groups_dn: ou=groups
     groups_filter: (&(member={dn})(objectClass=groupOfNames))
