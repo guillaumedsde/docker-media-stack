@@ -44,7 +44,5 @@ session:
 storage:
   postgres:
     host: authelia-db
-    port: 5432
     database: authelia
-    schema: public
     username: authelia
