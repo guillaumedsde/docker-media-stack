@@ -230,6 +230,7 @@ services:
       traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
       # service
       traefik.http.services.homer.loadbalancer.server.port: "8080"
+      traefik.http.routers.homer.middlewares: authelia@docker
   samba:
     environment:
       SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
@@ -524,6 +525,10 @@ services:
       traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
       # service
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
+      traefik.http.middlewares.authelia.forwardauth.address: http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/'
+      traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: "true"
+      traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: Remote-User, Remote-Groups, Remote-Name, Remote-Email
+
 
   # DB for authelia
   authelia-db:
