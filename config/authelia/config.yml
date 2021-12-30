@@ -1,6 +1,3 @@
-jwt_secret: $AUTHELIA_JWT_SECRET
-default_redirection_url: https://$root_domain
-
 access_control:
   default_policy: one_factor
 
@@ -11,11 +8,8 @@ notifier:
     port: 465
     timeout: 5s
     username: apikey
-    password: $SENDGRID_PASS
-    sender: "Authelia <authelia@$root_domain>"
     identifier: authelia
     subject: "[Authelia] {title}"
-    startup_check_address: $AUTHELIA_CHECK_EMAIL
     disable_require_tls: false
     disable_html_emails: false
     tls:
@@ -31,7 +25,6 @@ authentication_backend:
     url: ldap://openldap
     timeout: 5s
     start_tls: false
-    base_dn: $LDAP_BASE_DN
     username_attribute: uid
     additional_users_dn: ou=users
     users_filter: (&({username_attribute}={input})(objectClass=person))
@@ -40,23 +33,18 @@ authentication_backend:
     group_name_attribute: cn
     mail_attribute: mail
     display_name_attribute: displayName
-    user: $LDAP_ADMIN_USER
-    password: $LDAP_ADMIN_PASSWORD
 
 session:
   name: authelia_session
-  domain: $root_domain
   same_site: lax
   expiration: 1h
   inactivity: 5m
   remember_me_duration: 1M
 
 storage:
-  encryption_key: $AUTHELIA_DB_ENCRYPTION_KEY
   postgres:
     host: authelia-db
     port: 5432
     database: authelia
     schema: public
     username: authelia
-    password: $AUTHELIA_DB_PASSWORD
