@@ -8,7 +8,7 @@ notifier:
   disable_startup_check: false
   smtp:
     host: smtp.sendgrid.net
-    port: 587
+    port: 465
     timeout: 5s
     username: apikey
     password: $SENDGRID_PASS
