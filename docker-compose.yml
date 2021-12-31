@@ -31,7 +31,7 @@ x-traefik: &traefik
 services:
   # reverse proxy
   traefik:
-    image: traefik:v2.6
+    image: traefik:v2.5
     user: ${UID}:${docker_group_id}
     cap_add:
       - NET_BIND_SERVICE
@@ -87,7 +87,6 @@ services:
       - "/tmp"
     networks:
       - traefik
-      - kibana
       - calibre-web
       - homer
       - gollum
@@ -97,7 +96,7 @@ services:
       - robots
       - netdata
       - lam
-      - keycloak-proxy
+      - authelia-proxy
     <<: *restart
     <<: *logging
     mem_limit: 200m
@@ -130,7 +129,7 @@ services:
       - "--schedule"
       - "0 0 5 * * *"
 
-  # Wireguard VPN client
+# Wireguard VPN client
   wireguard:
     <<: *restart
     <<: *logging
@@ -163,7 +162,7 @@ services:
       traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
       traefik.http.routers.jackett.service: jackett
       # Forward auth
-      traefik.http.routers.jackett.middlewares: keycloak-forward-auth
+      traefik.http.routers.jackett.middlewares: authelia@docker
       # qBittorrent
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
@@ -171,7 +170,7 @@ services:
       traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
       traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
-      traefik.http.routers.qbittorrent.middlewares: keycloak-forward-auth
+      traefik.http.routers.qbittorrent.middlewares: authelia@docker
       # Disable watchtower for this container because of these issues
       # https://github.com/containrrr/watchtower/issues/188
       # https://github.com/containrrr/watchtower/issues/1013
@@ -228,7 +227,7 @@ services:
       # service
       traefik.http.services.flood.loadbalancer.server.port: "3000"
       # Forward auth
-      traefik.http.routers.flood.middlewares: keycloak-forward-auth
+      traefik.http.routers.flood.middlewares: authelia@docker
 
   # jackett tracker site scraper with API
   jackett:
@@ -310,7 +309,7 @@ services:
       # service
       traefik.http.services.radarr.loadbalancer.server.port: "7878"
       # Forward auth
-      traefik.http.routers.radarr.middlewares: keycloak-forward-auth
+      traefik.http.routers.radarr.middlewares: authelia@docker
 
   # sonarr, webapp for downloading series through torrent client
   # queries are done with jackett
@@ -338,7 +337,7 @@ services:
       # service
       traefik.http.services.sonarr.loadbalancer.server.port: "8989"
       # Forward auth
-      traefik.http.routers.sonarr.middlewares: keycloak-forward-auth
+      traefik.http.routers.sonarr.middlewares: authelia@docker
 
   # lidarr, webapp for downloading music through torrent client
   # queries are done with jackett
@@ -366,7 +365,7 @@ services:
       # service
       traefik.http.services.lidarr.loadbalancer.server.port: "8686"
       # Forward auth
-      traefik.http.routers.lidarr.middlewares: keycloak-forward-auth
+      traefik.http.routers.lidarr.middlewares: authelia@docker
 
   # bazarr, webapp for downloading subtitles
   bazarr:
@@ -385,7 +384,7 @@ services:
       # service
       traefik.http.services.bazarr.loadbalancer.server.port: "6767"
       # Forward auth
-      traefik.http.routers.bazarr.middlewares: keycloak-forward-auth
+      traefik.http.routers.bazarr.middlewares: authelia@docker
     cpus: "2"
     mem_limit: 300M
     volumes:
@@ -425,7 +424,7 @@ services:
       # service
       traefik.http.services.lazylibrarian.loadbalancer.server.port: "5299"
       # Forward auth
-      traefik.http.routers.lazylibrarian.middlewares: keycloak-forward-auth
+      traefik.http.routers.lazylibrarian.middlewares: authelia@docker
 
   # automatically extract torrented archives
   unpackerr:
@@ -557,7 +556,7 @@ services:
       # service
       traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
       # Forward auth
-      traefik.http.routers.calibre-web.middlewares: keycloak-forward-auth
+      traefik.http.routers.calibre-web.middlewares: authelia@docker
 
   # gollum for hosting documentation
   gollum:
@@ -582,7 +581,7 @@ services:
       # service
       traefik.http.services.gollum.loadbalancer.server.port: "4567"
       # Forward auth
-      traefik.http.routers.gollum.middlewares: keycloak-forward-auth
+      traefik.http.routers.gollum.middlewares: authelia@docker
 
   # JS CMS
   ghost_guillaume:
@@ -820,31 +819,13 @@ services:
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
       # Forward auth
-      traefik.http.routers.netdata.middlewares: keycloak-forward-auth
+      traefik.http.routers.netdata.middlewares: authelia@docker
     cap_add:
       - SYS_PTRACE
     security_opt:
       - apparmor:unconfined
     mem_limit: 500m
     cpus: "2"
-
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    <<: *restart
-    <<: *logging
-    cpus: 2.0
-    mem_limit: 500m
-    user: ${UID}:${GID}
-    environment:
-      # Used to change the verbosity of the logging
-      LOG_LEVEL: info
-      # Enables hcaptcha-solver => https://github.com/JimmyLaurent/hcaptcha-solver
-      CAPTCHA_SOLVER: hcaptcha-solver
-      # Enables CaptchaHarvester => https://github.com/NoahCardoza/CaptchaHarvester
-      # CAPTCHA_SOLVER: harvester
-      #- HARVESTER_ENDPOINT=https://127.0.0.1:5000/token
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
 
   ##################################################################
   # Authentication
@@ -910,54 +891,67 @@ services:
       traefik.http.routers.lam.middlewares: traefik-forward-auth
 
   # SSO
-  keycloak:
-    image: jboss/keycloak:latest
+  authelia:
+    image: authelia/authelia:4.33
     environment:
-      # Technically, this could be auto-detected, but we prefer to be prescriptive
-      DB_VENDOR: postgres
-      DB_DATABASE: keycloak
-      DB_ADDR: keycloak-db
-      DB_USER: keycloak
-      DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
-      # This is required to run keycloak behind traefik
-      PROXY_ADDRESS_FORWARDING: "true"
-      KEYCLOAK_HOSTNAME: keycloak.${root_domain}
+      # Global configuration
+      AUTHELIA_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
+      AUTHELIA_DEFAULT_REDIRECTION_URL: https://${root_domain}
+      # Notifier configuration
+      AUTHELIA_NOTIFIER_SMTP_PASSWORD: ${SENDGRID_PASS}
+      AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@${root_domain}>
+      AUTHELIA_NOTIFIER_SMTP_STARTUP_CHECK_ADDRESS: ${letsencrypt_email}
+      # LDAP backend configuration
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN: ${LDAP_BASE_DN}
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER: ${LDAP_ADMIN_USER}
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      # Session configuration
+      AUTHELIA_SESSION_DOMAIN: ${root_domain}
+      # Storage configuration
+      AUTHELIA_STORAGE_ENCRYPTION_KEY: ${AUTHELIA_DB_ENCRYPTION_KEY}
+      AUTHELIA_STORAGE_POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
+      AUTHELIA_SESSION_SECRET: ${AUTHELIA_SESSION_SECRET}
+    command:
+      - --config
+      - /config/config.yml
     <<: *restart
     <<: *logging
-    mem_limit: 750m
+    user: ${UID}:${GID}
+    mem_limit: 500m
     depends_on:
-      - keycloak-db
+      - authelia-db
       - openldap
     volumes:
-      - /etc/localtime:/etc/localtime:ro
+      - ./config/authelia:/config:ro
     networks:
-      - keycloak-proxy
+      - authelia-proxy
       - ldap
-      - keycloak
+      - authelia
     labels:
       <<: *traefik
-      traefik.docker.network: keycloak-proxy
-      traefik.http.routers.keycloak.rule: Host(`keycloak.${root_domain}`)
+      traefik.docker.network: authelia-proxy
+      traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
       # service
-      traefik.http.services.keycloak.loadbalancer.server.port: "8080"
+      traefik.http.services.authelia.loadbalancer.server.port: "9091"
+      traefik.http.middlewares.authelia.forwardauth.address: http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/'
+      traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: "true"
+      traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: Remote-User, Remote-Groups, Remote-Name, Remote-Email
 
-  # DB for keycloak
-  keycloak-db:
+
+  # DB for authelia
+  authelia-db:
     <<: *restart
     <<: *logging
     mem_limit: 250m
     environment:
-      # Tell Postgress what user/password to create
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-    image: postgres:12-alpine
+      POSTGRES_USER: authelia
+      POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
+    image: postgres:14-alpine
     volumes:
-      - ${docker_data_folder}/keycloak-db:/var/lib/postgresql/data
+      - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - keycloak
+      - authelia
 
   # OIDC forward authentication for traefik
   traefik-forward-auth:
@@ -988,52 +982,6 @@ services:
       traefik.http.routers.traefik-forward-auth.middlewares: traefik-forward-auth
       traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
 
-  # OIDC forward authentication for traefik
-  keycloak-forward-auth:
-    image: thomseddon/traefik-forward-auth:2
-    <<: *restart
-    <<: *logging
-    mem_limit: 100m
-    environment:
-      PROVIDERS_OIDC_CLIENT_ID: ${KEYCLOAK_OIDC_CLIENT_ID}
-      PROVIDERS_OIDC_CLIENT_SECRET: ${KEYCLOAK_OIDC_CLIENT_SECRET}
-      SECRET: ${KEYCLOAK_OIDC_COOKIE_SECRET}
-      PROVIDERS_OIDC_ISSUER_URL: https://keycloak.${root_domain}/auth/realms/${KEYCLOAK_REALM}
-      AUTH_HOST: auth.${root_domain}
-      COOKIE_DOMAIN: ${root_domain}
-      DEFAULT_PROVIDER: oidc
-      COOKIE_NAME: _keycloak_forward_auth
-      CSRF_COOKIE_NAME: _keycloak_forward_auth_csrf
-    command:
-      - "--rule.jackett-api.action=allow"
-      - "--rule.jackett-api.rule=Host(`jackett.${root_domain}`) && PathPrefix(`/api/{.*}`)"
-      - "--rule.jackett-dl.action=allow"
-      - "--rule.jackett-dl.rule=Host(`jackett.${root_domain}`) && PathPrefix(`/dl/{.*}`)"
-      - "--rule.sonarr-calendar.action=allow"
-      - "--rule.sonarr-calendar.rule=Host(`series.${root_domain}`) && PathPrefix(`/feed/calendar/{.*}`)"
-      - "--rule.radarr-calendar.action=allow"
-      - "--rule.radarr-calendar.rule=Host(`movies.${root_domain}`) && PathPrefix(`/feed/v3/calendar/{.*}`)"
-      - "--rule.lidarr-calendar.action=allow"
-      - "--rule.lidarr-calendar.rule=Host(`music.${root_domain}`) && PathPrefix(`/feed/v1/calendar/{.*}`)"
-      - "--rule.calibre-web-opds.action=allow"
-      - "--rule.calibre-web-opds.rule=Host(`read.${root_domain}`) && (PathPrefix(`/opds/{.*}`) || Path(`/opds`))"
-      - "--rule.n8n-webjooks.action=allow"
-      - "--rule.n8n-webjooks-dl.rule=Host(`n8n.${root_domain}`) && PathPrefix(`/webhook/{.*}`)"
-    networks:
-      - traefik
-    depends_on:
-      - keycloak
-    labels:
-      <<: *traefik
-      # HTTP entrypoint
-      traefik.http.routers.keycloak-forward-auth.rule: Host(`auth.${root_domain}`)
-      # service
-      traefik.http.services.keycloak-forward-auth.loadbalancer.server.port: "4181"
-      # Forward auth
-      traefik.http.middlewares.keycloak-forward-auth.forwardauth.address: http://keycloak-forward-auth:4181
-      traefik.http.routers.keycloak-forward-auth.middlewares: keycloak-forward-auth
-      traefik.http.middlewares.keycloak-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
-
 networks:
   watchtower:
     driver: bridge
@@ -1045,10 +993,10 @@ networks:
     driver: bridge
     internal: true
     name: ldap
-  keycloak:
+  authelia:
     driver: bridge
     internal: true
-    name: keycloak
+    name: authelia
   nextcloud:
     driver: bridge
     internal: true
@@ -1059,10 +1007,6 @@ networks:
   ssh:
     driver: bridge
     name: ssh
-  kibana:
-    driver: bridge
-    internal: true
-    name: kibana
   calibre-web:
     driver: bridge
     name: calibre-web
@@ -1096,9 +1040,10 @@ networks:
     driver: bridge
     internal: true
     name: lam
-  keycloak-proxy:
+  authelia-proxy:
     driver: bridge
-    name: keycloak-proxy
+    name: authelia-proxy
+
 
 volumes:
   robots-nginx-cache:
