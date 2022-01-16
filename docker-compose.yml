@@ -694,6 +694,8 @@ services:
     image: photoprism/photoprism:20220107
     <<: *restart
     <<: *logging
+    cpus: "4"
+    mem_limit: 4GB
     user: ${UID}:${GID}
     depends_on:
       - photoprism-mariadb
