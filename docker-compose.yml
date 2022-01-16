@@ -723,7 +723,7 @@ services:
       - ${data_folder}/pictures:/photoprism/originals:ro
     labels:
       <<: *traefik
-      traefik.docker.network: photoprism
+      traefik.docker.network: photoprism-proxy
       traefik.http.routers.photoprism.rule: Host(`photos.${root_domain}`)
       # service
       traefik.http.services.photoprism.loadbalancer.server.port: "2342"
