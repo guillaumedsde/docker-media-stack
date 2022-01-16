@@ -97,6 +97,7 @@ services:
       - netdata
       - lam
       - authelia-proxy
+      - photoprism-proxy
     <<: *restart
     <<: *logging
     mem_limit: 200m
@@ -688,6 +689,69 @@ services:
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
     image: redis:alpine
 
+  # Photo gallery
+  photoprism:
+    image: photoprism/photoprism:20220107
+    <<: *restart
+    <<: *logging
+    user: ${UID}:${GID}
+    depends_on:
+      - photoprism-mariadb
+    networks:
+      - photoprism
+      - photoprism-proxy
+    environment:
+      PHOTOPRISM_ADMIN_PASSWORD: "${PHOTOPRISM_ADMIN_PASSWORD}"
+      PHOTOPRISM_SITE_URL: "https://photos.${root_domain}/"
+      PHOTOPRISM_ORIGINALS_LIMIT: "5000" 
+      PHOTOPRISM_HTTP_COMPRESSION: "gzip"
+      PHOTOPRISM_PUBLIC: "true"
+      PHOTOPRISM_READONLY: "true"
+      PHOTOPRISM_DISABLE_CHOWN: "true"
+      PHOTOPRISM_DISABLE_WEBDAV: "true"
+      PHOTOPRISM_DISABLE_SETTINGS: "false"
+      PHOTOPRISM_DATABASE_DRIVER: "mysql"
+      PHOTOPRISM_DATABASE_SERVER: "photoprism-mariadb:3306"
+      PHOTOPRISM_DATABASE_NAME: "photoprism"
+      PHOTOPRISM_DATABASE_USER: "photoprism"
+      PHOTOPRISM_DATABASE_PASSWORD: "${PHOTOPRISM_DB_PASSWORD}"
+      HOME: "/photoprism"
+    volumes:
+      - ${docker_data_folder}/photoprism:/photoprism/storage
+      - ${data_folder}/pictures:/photoprism/originals:ro
+    labels:
+      <<: *traefik
+      traefik.docker.network: photoprism
+      traefik.http.routers.photoprism.rule: Host(`photos.${root_domain}`)
+      # service
+      traefik.http.services.photoprism.loadbalancer.server.port: "2342"
+      # Forward auth
+      traefik.http.routers.photoprism.middlewares: authelia@docker
+      
+
+  photoprism-mariadb:
+    image: mariadb:10.7
+    <<: *restart
+    <<: *logging
+    environment:
+      MARIADB_ROOT_PASSWORD: ${PHOTOPRISM_DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: photoprism
+      MARIADB_USER: photoprism
+      MARIADB_PASSWORD: "${PHOTOPRISM_DB_PASSWORD}"
+    networks:
+      - photoprism
+    volumes:
+      - "${docker_data_folder}/photoprism-mariadb:/var/lib/mysql"
+    command:
+      - mysqld
+      - --innodb-buffer-pool-size=128M
+      - --transaction-isolation=READ-COMMITTED
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=512
+      - --innodb-rollback-on-timeout=OFF
+      - --innodb-lock-wait-timeout=120
+
   samba:
     environment:
       SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
@@ -1043,6 +1107,13 @@ networks:
   authelia-proxy:
     driver: bridge
     name: authelia-proxy
+  photoprism:
+    driver: bridge
+    internal: true
+    name: photoprism
+  photoprism-proxy:
+    driver: bridge
+    name: photoprism-proxy
 
 
 volumes:
