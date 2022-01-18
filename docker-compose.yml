@@ -691,7 +691,7 @@ services:
 
   # Photo gallery
   photoprism:
-    image: photoprism/photoprism:20220107
+    image: photoprism/photoprism:20220118
     <<: *restart
     <<: *logging
     cpus: "4"
