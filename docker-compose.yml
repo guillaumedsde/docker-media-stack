@@ -191,15 +191,13 @@ services:
     tmpfs:
       - /tmp
     read_only: true
-    cpus: 2.0
+    cpus: 4.0
     mem_limit: 2g
     user: ${UID}:${GID}
     network_mode: service:wireguard
     image: guillaumedsde/qbittorrent-distroless:latest
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
-    healthcheck:
-      disable: true
 
   flood:
     <<: *restart
