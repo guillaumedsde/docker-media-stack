@@ -501,7 +501,7 @@ services:
       JELLYFIN_CACHE_DIR: /config/cache
     labels:
       <<: *traefik
-      traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`,`jellyfin.${old_root_domain}`)
+      traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
