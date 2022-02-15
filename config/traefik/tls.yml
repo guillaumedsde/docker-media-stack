@@ -2,6 +2,7 @@ tls:
   options:
     default:
       minVersion: VersionTLS12
+      sniStrict: true
       cipherSuites:
         - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
         - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
