@@ -18,7 +18,6 @@ notifier:
       minimum_version: TLS1.2
 
 authentication_backend:
-  disable_reset_password: true
   refresh_interval: 5m
   ldap:
     url: ldap://openldap
@@ -30,8 +29,8 @@ authentication_backend:
     display_name_attribute: displayName
 
 session:
-  expiration: 1h
-  inactivity: 5m
+  expiration: 12h
+  inactivity: 14d
   remember_me_duration: 1M
 
 storage:
@@ -39,3 +38,5 @@ storage:
     host: authelia-db
     database: authelia
     username: authelia
+
+theme: auto
