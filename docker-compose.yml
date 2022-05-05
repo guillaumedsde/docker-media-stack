@@ -952,7 +952,7 @@ services:
 
   # SSO
   authelia:
-    image: authelia/authelia:4.34
+    image: authelia/authelia:4.35
     environment:
       # Global configuration
       AUTHELIA_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
