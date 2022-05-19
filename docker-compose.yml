@@ -452,7 +452,7 @@ services:
   # homer is a homepage container
   homer:
     hostname: ${root_domain}
-    image: b4bz/homer:latest
+    image: b4bz/homer:22.02.1
     cpus: 1
     mem_limit: 100m
     read_only: true
