@@ -478,7 +478,7 @@ services:
     hostname: jellyfin.${root_domain}
     image: jellyfin/jellyfin:10.7.7
     user: ${UID}:${GID}
-    cpus: "16"
+    cpus: 10
     mem_limit: 4g
     <<: *restart
     <<: *logging
