@@ -101,7 +101,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 200m
-    cpus: "4"
+    cpus: 4
     ports:
       - 80:80
       - 443:443
@@ -114,7 +114,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 100m
-    cpus: "1"
+    cpus: 1
     read_only: true
     user: ${UID}:${docker_group_id}
     volumes:
@@ -204,7 +204,7 @@ services:
     <<: *logging
     image: jesec/flood:master-distroless
     hostname: flood.${root_domain}
-    cpus: "2"
+    cpus: 2
     mem_limit: 250M
     read_only: true
     user: ${UID}:${GID}
@@ -243,7 +243,7 @@ services:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
     read_only: true
-    cpus: "4"
+    cpus: 4
     mem_limit: 1g
     user: ${UID}:${GID}
     network_mode: service:wireguard
@@ -268,7 +268,7 @@ services:
         condition: service_started
     user: ${UID}:${GID}
     read_only: true
-    cpus: "1"
+    cpus: 1
     mem_limit: 100m
     networks:
       - traefik
@@ -289,7 +289,7 @@ services:
     image: ghcr.io/linuxserver/radarr:nightly
     <<: *restart
     <<: *logging
-    cpus: "4"
+    cpus: 4
     mem_limit: 2G
     depends_on:
       jackett:
@@ -317,7 +317,7 @@ services:
     image: ghcr.io/linuxserver/sonarr:latest
     <<: *restart
     <<: *logging
-    cpus: "4"
+    cpus: 4
     mem_limit: 2G
     depends_on:
       jackett:
@@ -345,7 +345,7 @@ services:
     image: ghcr.io/linuxserver/lidarr:latest
     <<: *restart
     <<: *logging
-    cpus: "4"
+    cpus: 4
     mem_limit: 1G
     depends_on:
       jackett:
@@ -384,7 +384,7 @@ services:
       traefik.http.services.bazarr.loadbalancer.server.port: "6767"
       # Forward auth
       traefik.http.routers.bazarr.middlewares: authelia@docker
-    cpus: "2"
+    cpus: 2
     mem_limit: 300M
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -403,7 +403,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 500M
-    cpus: "2"
+    cpus: 2
     depends_on:
       jackett:
         condition: service_healthy
@@ -430,7 +430,7 @@ services:
     image: golift/unpackerr
     user: ${UID}:${GID}
     read_only: true
-    cpus: "4"
+    cpus: 4
     mem_limit: 100m
     <<: *restart
     <<: *logging
@@ -453,7 +453,7 @@ services:
   homer:
     hostname: ${root_domain}
     image: b4bz/homer:latest
-    cpus: "1"
+    cpus: 1
     mem_limit: 100m
     read_only: true
     <<: *restart
@@ -512,7 +512,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 500m
-    cpus: "2"
+    cpus: 2
     depends_on:
       - "sonarr"
       - "radarr"
@@ -534,7 +534,7 @@ services:
   calibre-web:
     hostname: read.${root_domain}
     image: ghcr.io/linuxserver/calibre-web:latest
-    cpus: "4"
+    cpus: 4
     mem_limit: 300M
     <<: *restart
     <<: *logging
@@ -563,7 +563,7 @@ services:
     image: cuotos/gollum-alpine:latest
     <<: *restart
     <<: *logging
-    cpus: "2"
+    cpus: 2
     mem_limit: 250m
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -609,7 +609,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 250m
-    cpus: "2"
+    cpus: 2
     image: ghost:alpine
 
   # personal cloud
@@ -658,12 +658,12 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 1g
-    cpus: "8"
+    cpus: 8
     image: guillaumedsde/nextcloud-samba:23-apache
 
   # databse for nextcloud
   nextcloud-postgres:
-    cpus: "2"
+    cpus: 2
     mem_limit: 250m
     environment:
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
@@ -678,7 +678,7 @@ services:
 
   # cache for nextcloud
   nextcloud-redis:
-    cpus: "2"
+    cpus: 2
     mem_limit: 200m
     networks:
       - nextcloud
@@ -692,7 +692,7 @@ services:
     image: photoprism/photoprism:20220121
     <<: *restart
     <<: *logging
-    cpus: "4"
+    cpus: 4
     mem_limit: 4GB
     user: ${UID}:${GID}
     depends_on:
@@ -770,7 +770,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 250m
-    cpus: "2"
+    cpus: 2
     networks:
       - samba
       - ldap
@@ -796,7 +796,7 @@ services:
     <<: *restart
     <<: *logging
     mem_limit: 100m
-    cpus: "2"
+    cpus: 2
     networks:
       - ssh
       - ldap
@@ -809,7 +809,7 @@ services:
     user: ${UID}:${GID}
     read_only: true
     mem_limit: 100M
-    cpus: "1"
+    cpus: 1
     <<: *restart
     <<: *logging
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
@@ -819,7 +819,7 @@ services:
   gotify:
     hostname: gotify.${root_domain}
     mem_limit: 100M
-    cpus: "2"
+    cpus: 2
     environment:
       <<: *conf
     <<: *restart
@@ -841,7 +841,7 @@ services:
     image: nginx:alpine
     read_only: true
     mem_limit: 50M
-    cpus: "1"
+    cpus: 1
     volumes:
       - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./config/nginx/robots.txt:/usr/share/nginx/html/robots.txt:ro
@@ -889,7 +889,7 @@ services:
     security_opt:
       - apparmor:unconfined
     mem_limit: 500m
-    cpus: "2"
+    cpus: 2
 
   ##################################################################
   # Authentication
