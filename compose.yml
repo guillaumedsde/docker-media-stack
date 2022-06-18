@@ -142,11 +142,6 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      # also use built in docker DNS in order to be able to resolve other containers
-      - 127.0.0.1
     cpus: 2.0
     mem_limit: 100m
     sysctls:
@@ -156,11 +151,20 @@ services:
         aliases:
           - jackett
           - qbittorrent
+          - prowlarr
       flaresolverr:
     volumes:
       - ${docker_data_folder}/wireguard/wg0.conf:/etc/wireguard/wg0.conf:ro
     labels:
       <<: *traefik
+      # Prowlarr
+      # service
+      traefik.http.services.prowlarr.loadbalancer.server.port: "9696"
+      # Router
+      traefik.http.routers.prowlarr.rule: Host(`prowlarr.${root_domain}`)
+      traefik.http.routers.prowlarr.service: prowlarr
+      # Forward auth
+      traefik.http.routers.prowlarr.middlewares: authelia@docker
       # Jackett
       # service
       traefik.http.services.jackett.loadbalancer.server.port: "9117"
@@ -251,6 +255,26 @@ services:
     cpus: 4
     mem_limit: 1g
     user: ${UID}:${GID}
+    network_mode: service:wireguard
+    environment:
+      <<: *conf
+    labels:
+      com.centurylinklabs.watchtower.depends-on: wireguard
+
+  prowlarr:
+    image: ghcr.io/linuxserver/prowlarr:develop
+    <<: *restart
+    <<: *logging
+    depends_on:
+      - wireguard
+    volumes:
+      - ${docker_data_folder}/prowlarr:/config
+    tmpfs:
+      - "/var:rw,exec"
+      - "/tmp:rw,exec"
+    read_only: true
+    cpus: 4
+    mem_limit: 1g
     network_mode: service:wireguard
     environment:
       <<: *conf
