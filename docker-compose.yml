@@ -250,6 +250,25 @@ services:
       <<: *conf
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
+  
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:v2.2.4
+    <<: *restart
+    <<: *logging
+    user: ${UID}:${GID}
+    read_only: true
+    cpus: 2
+    mem_limit: 200m
+    volumes:
+      - ${docker_data_folder}/flaresolverr:/home/node
+    tmpfs:
+      - "/tmp:rw,exec"
+    # FIXME: find better way to expose flaresolverr to jackett
+    depends_on:
+      - wireguard
+    network_mode: service:wireguard
+    labels:
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
   jackett-sync-ts:
