@@ -255,7 +255,8 @@ services:
     image: ghcr.io/flaresolverr/flaresolverr:v2.2.4
     <<: *restart
     <<: *logging
-    user: ${UID}:${GID}
+    # NOTE: default image UID is 1000
+    user: 1000:1000
     read_only: true
     cpus: 2
     mem_limit: 200m
