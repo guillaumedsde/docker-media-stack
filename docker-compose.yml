@@ -658,7 +658,7 @@ services:
     <<: *logging
     mem_limit: 1g
     cpus: 8
-    image: guillaumedsde/nextcloud-samba:23-apache
+    image: guillaumedsde/nextcloud-samba:24-apache
 
   # databse for nextcloud
   nextcloud-postgres:
