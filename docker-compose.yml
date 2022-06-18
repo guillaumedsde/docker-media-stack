@@ -258,7 +258,7 @@ services:
     # NOTE: default image UID is 1000
     user: 1000:1000
     cpus: 2
-    mem_limit: 1g
+    mem_limit: 600m
     # FIXME: find better way to expose flaresolverr to jackett
     depends_on:
       - wireguard
