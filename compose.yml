@@ -157,6 +157,7 @@ services:
       - ${docker_data_folder}/wireguard/wg0.conf:/etc/wireguard/wg0.conf:ro
     labels:
       <<: *traefik
+      traefik.docker.network: traefik
       # Prowlarr
       # service
       traefik.http.services.prowlarr.loadbalancer.server.port: "9696"
