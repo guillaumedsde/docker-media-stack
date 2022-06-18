@@ -269,10 +269,6 @@ services:
       - wireguard
     volumes:
       - ${docker_data_folder}/prowlarr:/config
-    tmpfs:
-      - "/var:rw,exec"
-      - "/tmp:rw,exec"
-    read_only: true
     cpus: 4
     mem_limit: 1g
     network_mode: service:wireguard
