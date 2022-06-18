@@ -1,10 +1,13 @@
+%YAML 1.1
+---
+
 # THE MEDIA STACK #
 # this docker-compose file will get a selection of media downloading/management webapps
 # I've tried to simplify getting started as much as possible
 #   1. configure your desired variables in the .env file
 #   2. run `docker-compose up -d` from the folder with this docker-copose.yml folder
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
-version: "2.4"
+version: "3.9"
 
 # basic common configuration for most containers
 x-conf: &conf
