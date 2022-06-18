@@ -257,13 +257,8 @@ services:
     <<: *logging
     # NOTE: default image UID is 1000
     user: 1000:1000
-    read_only: true
     cpus: 2
-    mem_limit: 200m
-    volumes:
-      - ${docker_data_folder}/flaresolverr:/home/node
-    tmpfs:
-      - "/tmp:rw,exec"
+    mem_limit: 1g
     # FIXME: find better way to expose flaresolverr to jackett
     depends_on:
       - wireguard
