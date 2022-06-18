@@ -99,7 +99,7 @@ services:
       - photoprism-proxy
     <<: *restart
     <<: *logging
-    mem_limit: 200m
+    mem_limit: 500m
     cpus: 4
     ports:
       - 80:80
@@ -549,7 +549,7 @@ services:
     hostname: read.${root_domain}
     image: ghcr.io/linuxserver/calibre-web:latest
     cpus: 4
-    mem_limit: 300M
+    mem_limit: 500M
     <<: *restart
     <<: *logging
     volumes:
@@ -678,7 +678,7 @@ services:
   # databse for nextcloud
   nextcloud-postgres:
     cpus: 2
-    mem_limit: 250m
+    mem_limit: 500m
     environment:
       POSTGRES_PASSWORD: ${nextcloud_db_pass}
       POSTGRES_USER: nextcloud
