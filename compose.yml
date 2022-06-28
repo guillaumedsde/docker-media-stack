@@ -11,17 +11,20 @@
 version: "3.9"
 
 # basic common configuration for most containers
-x-conf: &conf
+x-conf:
+  &conf
   TZ: ${TZ}
   PGID: ${GID}
   PUID: ${UID}
 
 # container restart policy
-x-restart: &restart
+x-restart:
+  &restart
   restart: always
 
 # container logging policy
-x-logging: &logging
+x-logging:
+  &logging
   logging:
     driver: "json-file"
     options:
@@ -29,7 +32,8 @@ x-logging: &logging
       max-size: "10m"
 
 # Traefik
-x-traefik: &traefik
+x-traefik:
+  &traefik
   traefik.enable: "true"
 
 services:
@@ -133,7 +137,7 @@ services:
       - "--schedule"
       - "0 0 5 * * *"
 
-# Wireguard VPN client
+  # Wireguard VPN client
   wireguard:
     <<: *restart
     <<: *logging
@@ -277,7 +281,7 @@ services:
       <<: *conf
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
-  
+
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v2.2.4
     <<: *restart
@@ -566,6 +570,8 @@ services:
       traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
       # service
       traefik.http.services.ombi.loadbalancer.server.port: "3579"
+      # Forward auth
+      traefik.http.routers.ombi.middlewares: authelia@docker
 
   # calibre-web, for reading ebooks
   calibre-web:
@@ -740,7 +746,7 @@ services:
     environment:
       PHOTOPRISM_ADMIN_PASSWORD: "${PHOTOPRISM_ADMIN_PASSWORD}"
       PHOTOPRISM_SITE_URL: "https://photos.${root_domain}/"
-      PHOTOPRISM_ORIGINALS_LIMIT: "5000" 
+      PHOTOPRISM_ORIGINALS_LIMIT: "5000"
       PHOTOPRISM_HTTP_COMPRESSION: "gzip"
       PHOTOPRISM_PUBLIC: "true"
       PHOTOPRISM_READONLY: "true"
@@ -764,7 +770,6 @@ services:
       traefik.http.services.photoprism.loadbalancer.server.port: "2342"
       # Forward auth
       traefik.http.routers.photoprism.middlewares: authelia@docker
-      
 
   photoprism-mariadb:
     image: mariadb:10.7
@@ -1033,7 +1038,6 @@ services:
       traefik.http.middlewares.authelia.forwardauth.address: http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/'
       traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: "true"
       traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: Remote-User, Remote-Groups, Remote-Name, Remote-Email
-
 
   # DB for authelia
   authelia-db:
