@@ -43,7 +43,7 @@ services:
     user: ${UID}:${GID}
     depends_on:
       docker-socket-proxy:
-        condition: service_started
+        condition: service_healthy
     cap_add:
       - NET_BIND_SERVICE
     command:
@@ -96,7 +96,6 @@ services:
       - ${docker_data_folder}/traefik/logs:/var/log/traefik/
       - ${docker_data_folder}/traefik:/traefik
       - ./config/traefik:/config:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     tmpfs:
       - "/tmp"
     networks:
@@ -136,6 +135,17 @@ services:
       CONTAINERS: "1"
     networks:
       - docker-socket-proxy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - nc
+        - -z
+        - "127.0.0.1"
+        - "2371"
+      interval: 1m
+      timeout: 5s
+      retries: 5
+      start_period: 2s
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
