@@ -137,7 +137,7 @@ services:
       - docker-socket-proxy
     healthcheck:
       test:
-        - CMD-SHELL
+        - CMD
         - nc
         - -z
         - "127.0.0.1"
