@@ -143,9 +143,9 @@ services:
         - "127.0.0.1"
         - "2375"
       interval: 1m
-      timeout: 5s
+      timeout: 6s
       retries: 5
-      start_period: 2s
+      start_period: 5s
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
