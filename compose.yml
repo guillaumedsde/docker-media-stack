@@ -139,7 +139,6 @@ services:
         target: /run
         tmpfs:
           size: 10MB
-          mode: 777
     environment:
       CONTAINERS: "1"
     networks:
