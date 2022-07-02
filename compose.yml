@@ -139,6 +139,10 @@ services:
         target: /run
         tmpfs:
           size: 10MB
+      - type: tmpfs
+        target: /var/lib/haproxy
+        tmpfs:
+          size: 10MB
     environment:
       CONTAINERS: "1"
     networks:
