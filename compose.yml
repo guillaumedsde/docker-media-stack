@@ -634,7 +634,7 @@ services:
       mail__from: ghost@${root_domain}
       mail__options__service: SendGrid
       mail__options__host: smtp.sendgrid.net
-      mail__options__port: "465"
+      mail__options__port: "587"
       mail__options__secureConnection: "true"
       mail__options__auth__user: apikey
       mail__options__auth__pass: ${SENDGRID_PASS}
