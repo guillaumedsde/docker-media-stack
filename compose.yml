@@ -126,23 +126,12 @@ services:
     user: ${UID}:${docker_group_id}
     read_only: true
     tmpfs:
-      - /run
-      - /tmp
+      - /run:mode=770,size=1k,uid=${UID},gid=${docker_group_id}
+      - /var/lib/haproxy:mode=770,size=1k,uid=${UID},gid=${docker_group_id}
     <<: *restart
     <<: *logging
     volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        read_only: true
-      - type: tmpfs
-        target: /run
-        tmpfs:
-          size: 10MB
-      - type: tmpfs
-        target: /var/lib/haproxy
-        tmpfs:
-          size: 10MB
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       CONTAINERS: "1"
     networks:
