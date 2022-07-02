@@ -131,7 +131,15 @@ services:
     <<: *restart
     <<: *logging
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+      - type: tmpfs
+        target: /run
+        tmpfs:
+          size: 10MB
+          mode: 777
     environment:
       CONTAINERS: "1"
     networks:
