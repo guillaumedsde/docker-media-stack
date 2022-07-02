@@ -142,9 +142,9 @@ services:
         - -z
         - "127.0.0.1"
         - "2375"
-      interval: 1m
+      interval: 30s
       timeout: 6s
-      retries: 5
+      retries: 3
       start_period: 5s
 
   # watchtower container to update images
