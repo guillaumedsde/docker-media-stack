@@ -41,6 +41,9 @@ services:
   traefik:
     image: traefik:v2.8
     user: ${UID}:${GID}
+    depends_on:
+      docker-socket-proxy:
+        condition: service_started
     cap_add:
       - NET_BIND_SERVICE
     command:
@@ -121,6 +124,10 @@ services:
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     user: ${UID}:${docker_group_id}
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
     <<: *restart
     <<: *logging
     volumes:
