@@ -5,9 +5,10 @@ notifier:
   disable_startup_check: false
   smtp:
     host: smtp.sendgrid.net
-    port: 465
+    port: 587
     timeout: 5s
     username: apikey
+    sender: Authelia authelia@gauf.fr
     identifier: authelia
     subject: "[Authelia] {title}"
     disable_require_tls: false
