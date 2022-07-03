@@ -197,9 +197,21 @@ services:
       VPN_TYPE: wireguard
       WIREGUARD_PRIVATE_KEY: ${MULLVAD_WIREGUARD_PRIVATE_KEY}
       WIREGUARD_ADDRESSES: ${MULLVAD_WIREGUARD_ADDRESSES}
+      # Mullvad configuration
+      # https://github.com/qdm12/gluetun/wiki/Mullvad
       SERVER_COUNTRIES: ${MULLVAD_SERVER_COUNTRIES}
       OWNED_ONLY: "yes"
+      # Port forwarding configuration
+      # https://github.com/qdm12/gluetun/wiki/VPN-server-port-forwarding
       FIREWALL_VPN_INPUT_PORTS: ${MULLVAD_FIREWALL_VPN_INPUT_PORTS}
+      # DNS Configuration 
+      # https://github.com/qdm12/gluetun/wiki/DNS-options
+      DOT: "off"
+      BLOCK_MALICIOUS: "off"
+      BLOCK_SURVEILLANCE: "off"
+      BLOCK_ADS: "off"
+      DNS_KEEP_NAMESERVER: "off"
+
     labels:
       <<: *traefik
       traefik.docker.network: traefik
