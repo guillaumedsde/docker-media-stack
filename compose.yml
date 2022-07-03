@@ -133,7 +133,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       CONTAINERS: "1"
-      NETWORKS: "1"
     networks:
       - docker-socket-proxy
     healthcheck:
@@ -191,7 +190,9 @@ services:
           - jackett
           - qbittorrent
           - prowlarr
-      flaresolverr:
+      # FIXME: services can't connect to VPN protected containers when 
+      #        more than one network
+      # flaresolverr:
     environment:
       VPN_SERVICE_PROVIDER: mullvad
       VPN_TYPE: wireguard
@@ -214,7 +215,8 @@ services:
 
     labels:
       <<: *traefik
-      traefik.docker.network: traefik
+      # NOTE: See FIXME above
+      # traefik.docker.network: traefik
       # Prowlarr
       # service
       traefik.http.services.prowlarr.loadbalancer.server.port: "9696"
@@ -345,8 +347,12 @@ services:
     user: 1000:1000
     cpus: 2
     mem_limit: 600m
-    networks:
-      - flaresolverr
+    # NOTE: See FIXME above
+    # networks:
+    #   - flaresolverr
+    network_mode: service:wireguard
+    labels:
+      com.centurylinklabs.watchtower.depends-on: wireguard
 
   # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
   jackett-sync-ts:
