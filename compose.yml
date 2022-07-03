@@ -176,15 +176,15 @@ services:
   wireguard:
     <<: *restart
     <<: *logging
-    image: jordanpotter/wireguard:2.1.4
+    image: qmcgaw/gluetun:v3.29
+    # NOTE: hardcode container name in order for watchtower label:
+    #       com.centurylinklabs.watchtower.depends-on
+    #       to work as expected
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE
     cpus: 2
     mem_limit: 100m
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
     networks:
       traefik:
         aliases:
@@ -192,8 +192,14 @@ services:
           - qbittorrent
           - prowlarr
       flaresolverr:
-    volumes:
-      - ${docker_data_folder}/wireguard/wg0.conf:/etc/wireguard/wg0.conf:ro
+    environment:
+      VPN_SERVICE_PROVIDER: mullvad
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: ${MULLVAD_WIREGUARD_PRIVATE_KEY}
+      WIREGUARD_ADDRESSES: ${MULLVAD_WIREGUARD_ADDRESSES}
+      SERVER_COUNTRIES: ${MULLVAD_SERVER_COUNTRIES}
+      OWNED_ONLY: "yes"
+      FIREWALL_VPN_INPUT_PORTS: ${MULLVAD_FIREWALL_VPN_INPUT_PORTS}
     labels:
       <<: *traefik
       traefik.docker.network: traefik
@@ -243,6 +249,8 @@ services:
     cpus: 4
     mem_limit: 2g
     user: ${UID}:${GID}
+    # NOTE: use `services:` instead of `containers:` because the  
+    #       container is defined in the same compose file
     network_mode: service:wireguard
     image: guillaumedsde/qbittorrent-distroless:latest
     labels:
