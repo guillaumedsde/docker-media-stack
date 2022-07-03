@@ -175,7 +175,7 @@ services:
   wireguard:
     <<: *restart
     <<: *logging
-    image: qmcgaw/gluetun:v3.29
+    image: qmcgaw/gluetun:v3.30
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
