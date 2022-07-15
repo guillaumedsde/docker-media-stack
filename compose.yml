@@ -175,7 +175,7 @@ services:
   wireguard:
     <<: *restart
     <<: *logging
-    image: qmcgaw/gluetun:v3.29
+    image: qmcgaw/gluetun:v3.30
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
@@ -211,8 +211,7 @@ services:
       BLOCK_MALICIOUS: "off"
       BLOCK_SURVEILLANCE: "off"
       BLOCK_ADS: "off"
-      DNS_KEEP_NAMESERVER: "off"
-
+      DNS_KEEP_NAMESERVER: "on"
     labels:
       <<: *traefik
       # NOTE: See FIXME above
