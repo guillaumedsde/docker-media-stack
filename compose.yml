@@ -205,6 +205,8 @@ services:
       # Port forwarding configuration
       # https://github.com/qdm12/gluetun/wiki/VPN-server-port-forwarding
       FIREWALL_VPN_INPUT_PORTS: ${MULLVAD_FIREWALL_VPN_INPUT_PORTS}
+      # Allow LAN access to other containers
+      FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
       # DNS Configuration 
       # https://github.com/qdm12/gluetun/wiki/DNS-options
       DOT: "off"
