@@ -469,6 +469,32 @@ services:
       # Forward auth
       traefik.http.routers.lidarr.middlewares: authelia@docker
 
+  # readarr, webapp for downloading books through torrent client
+  readarr:
+    hostname: books.${root_domain}
+    image: ghcr.io/linuxserver/readarr:nightly
+    <<: *restart
+    <<: *logging
+    cpus: 4
+    mem_limit: 1G
+    depends_on:
+      jackett:
+        condition: service_healthy
+    volumes:
+      - ${docker_data_folder}/readarr:/config
+      - ${data_folder}:/data
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+    labels:
+      <<: *traefik
+      traefik.http.routers.readarr.rule: Host(`books.${root_domain}`)
+      # service
+      traefik.http.services.readarr.loadbalancer.server.port: "8686"
+      # Forward auth
+      traefik.http.routers.readarr.middlewares: authelia@docker
+
   # bazarr, webapp for downloading subtitles
   bazarr:
     hostname: subtitles.${root_domain}
