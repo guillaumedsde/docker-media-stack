@@ -491,7 +491,7 @@ services:
       <<: *traefik
       traefik.http.routers.readarr.rule: Host(`books.${root_domain}`)
       # service
-      traefik.http.services.readarr.loadbalancer.server.port: "8686"
+      traefik.http.services.readarr.loadbalancer.server.port: "8787"
       # Forward auth
       traefik.http.routers.readarr.middlewares: authelia@docker
 
