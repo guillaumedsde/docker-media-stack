@@ -524,36 +524,6 @@ services:
     networks:
       - traefik
 
-  # lazylibrarian, webapp for downloading books through torrent client
-  # queries are done with jackett
-  lazylibrarian:
-    hostname: books.${root_domain}
-    image: ghcr.io/linuxserver/lazylibrarian:latest
-    <<: *restart
-    <<: *logging
-    mem_limit: 500M
-    cpus: 2
-    depends_on:
-      jackett:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/lazylibrarian:/config
-      - ${data_folder}:/data
-      - torrent-blackhole:/blackhole
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-      DOCKER_MODS: linuxserver/calibre-web:calibre
-    labels:
-      <<: *traefik
-      traefik.http.routers.lazylibrarian.rule: Host(`books.${root_domain}`)
-      # service
-      traefik.http.services.lazylibrarian.loadbalancer.server.port: "5299"
-      # Forward auth
-      traefik.http.routers.lazylibrarian.middlewares: authelia@docker
-
   # automatically extract torrented archives
   unpackerr:
     image: golift/unpackerr
