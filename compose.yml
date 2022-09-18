@@ -715,6 +715,7 @@ services:
 
   # personal cloud
   nextcloud:
+    &nextcloud
     hostname: cloud.${root_domain}
     depends_on:
       - nextcloud-postgres
@@ -762,7 +763,13 @@ services:
     cpus: 8
     image: guillaumedsde/nextcloud-samba:24-apache
 
-  # databse for nextcloud
+  nextcloud-cron:
+    <<: *nextcloud
+    labels: {}
+    entrypoint:
+      - /cron.sh
+
+  # database for nextcloud
   nextcloud-postgres:
     cpus: 2
     mem_limit: 500m
