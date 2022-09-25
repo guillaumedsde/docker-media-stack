@@ -575,7 +575,7 @@ services:
   # jellyfin media server
   jellyfin:
     hostname: jellyfin.${root_domain}
-    image: jellyfin/jellyfin:10.8.4
+    image: jellyfin/jellyfin:10.8.5
     user: ${UID}:${GID}
     cpus: 10
     mem_limit: 4g
