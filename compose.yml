@@ -711,7 +711,7 @@ services:
     <<: *logging
     mem_limit: 250m
     cpus: 2
-    image: ghost:4-alpine
+    image: ghost:5-alpine
 
   # personal cloud
   nextcloud:
