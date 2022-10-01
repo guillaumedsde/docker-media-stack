@@ -551,15 +551,13 @@ services:
   # homer is a homepage container
   homer:
     hostname: ${root_domain}
-    image: b4bz/homer:22.02.1
-    cpus: 1
+    image: b4bz/homer:v22.08.1
+    user: ${UID}:${GID}
+    cpus: 2
     mem_limit: 100m
     read_only: true
     <<: *restart
     <<: *logging
-    environment:
-      UID: ${UID}
-      GID: ${GID}
     networks:
       - homer
     volumes:
