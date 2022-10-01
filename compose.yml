@@ -100,12 +100,8 @@ services:
       - "/tmp"
     networks:
       - traefik
-      - calibre-web
       - homer
-      - gollum
-      - ghost
       - nextcloud-proxy
-      - gotify
       - robots
       - netdata
       - lam
@@ -160,10 +156,6 @@ services:
     user: ${UID}:${docker_group_id}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      WATCHTOWER_NOTIFICATIONS: "gotify"
-      WATCHTOWER_NOTIFICATION_GOTIFY_URL: "${WATCHTOWER_NOTIFICATION_GOTIFY_URL}"
-      WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: "${WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN}"
     networks:
       - watchtower
     command:
@@ -629,88 +621,6 @@ services:
       # Forward auth
       traefik.http.routers.ombi.middlewares: authelia@docker
 
-  # calibre-web, for reading ebooks
-  calibre-web:
-    hostname: read.${root_domain}
-    image: ghcr.io/linuxserver/calibre-web:latest
-    cpus: 4
-    mem_limit: 500M
-    <<: *restart
-    <<: *logging
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/calibre-web:/config
-      - ${data_folder}/books:/books
-    networks:
-      - calibre-web
-      - ldap
-    environment:
-      <<: *conf
-      DOCKER_MODS: linuxserver/calibre-web:calibre
-    labels:
-      <<: *traefik
-      traefik.docker.network: calibre-web
-      traefik.http.routers.calibre-web.rule: Host(`read.${root_domain}`)
-      # service
-      traefik.http.services.calibre-web.loadbalancer.server.port: "8083"
-      # Forward auth
-      traefik.http.routers.calibre-web.middlewares: authelia@docker
-
-  # gollum for hosting documentation
-  gollum:
-    hostname: docs.${root_domain}
-    image: cuotos/gollum-alpine:latest
-    <<: *restart
-    <<: *logging
-    cpus: 2
-    mem_limit: 250m
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/gollum:/wiki
-    networks:
-      - gollum
-    environment:
-      <<: *conf
-      GOLLUMARGS: "--allow-uploads dir"
-    labels:
-      <<: *traefik
-      traefik.docker.network: gollum
-      traefik.http.routers.gollum.rule: Host(`docs.${root_domain}`)
-      # service
-      traefik.http.services.gollum.loadbalancer.server.port: "4567"
-      # Forward auth
-      traefik.http.routers.gollum.middlewares: authelia@docker
-
-  # JS CMS
-  ghost_guillaume:
-    environment:
-      <<: *conf
-      url: "https://blog.guillaume.${secondary_tld}"
-      mail__transport: SMTP
-      mail__from: ghost@${root_domain}
-      mail__options__service: SendGrid
-      mail__options__host: smtp.sendgrid.net
-      mail__options__port: "587"
-      mail__options__secureConnection: "true"
-      mail__options__auth__user: apikey
-      mail__options__auth__pass: ${SENDGRID_PASS}
-    labels:
-      <<: *traefik
-      traefik.docker.network: ghost
-      traefik.http.routers.blog-guillaume.rule: Host(`blog.guillaume.${secondary_tld}`)
-      # service
-      traefik.http.services.blog-guillaume.loadbalancer.server.port: "2368"
-    volumes:
-      - ${docker_data_folder}/ghost_guillaume:/var/lib/ghost/content
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - ghost
-    <<: *restart
-    <<: *logging
-    mem_limit: 250m
-    cpus: 2
-    image: ghost:4-alpine
-
   # personal cloud
   nextcloud:
     &nextcloud
@@ -919,28 +829,6 @@ services:
     <<: *logging
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
     image: guillaumedsde/wsdd:latest
-
-  # Push notification service
-  gotify:
-    hostname: gotify.${root_domain}
-    mem_limit: 100M
-    cpus: 2
-    environment:
-      <<: *conf
-    <<: *restart
-    <<: *logging
-    labels:
-      <<: *traefik
-      traefik.docker.network: gotify
-      traefik.http.routers.gotify.rule: Host(`gotify.${root_domain}`)
-      # service
-      traefik.http.services.gotify.loadbalancer.server.port: "80"
-    volumes:
-      - ${docker_data_folder}/gotify:/app/data
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - gotify
-    image: gotify/server:latest
 
   robots:
     image: nginx:alpine
@@ -1171,27 +1059,13 @@ networks:
   ssh:
     driver: bridge
     name: ssh
-  calibre-web:
-    driver: bridge
-    name: calibre-web
   homer:
     driver: bridge
     internal: true
     name: homer
-  gollum:
-    driver: bridge
-    internal: true
-    name: gollum
-  ghost:
-    driver: bridge
-    name: ghost
   nextcloud-proxy:
     driver: bridge
     name: nextcloud-proxy
-  gotify:
-    driver: bridge
-    internal: true
-    name: gotify
   robots:
     driver: bridge
     internal: true
