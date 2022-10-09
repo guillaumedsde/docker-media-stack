@@ -625,7 +625,7 @@ services:
     image: ghcr.io/linuxserver/ombi:latest
     <<: *restart
     <<: *logging
-    mem_limit: 750M
+    mem_limit: 2G
     cpus: 2
     depends_on:
       - "sonarr"
