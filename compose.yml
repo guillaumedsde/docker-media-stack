@@ -914,7 +914,6 @@ services:
     image: ghcr.io/analogj/scrutiny:v0.5.0-omnibus
     <<: *restart
     <<: *logging
-    user: ${UID}:${GID}
     mem_limit: 1G
     cpus: 2
     cap_add:
@@ -939,6 +938,8 @@ services:
       - ${docker_data_folder}/scrutiny/influxdb:/opt/scrutiny/influxdb
     networks:
       - scrutiny
+    environment:
+      <<: *conf
     labels:
       <<: *traefik
       traefik.docker.network: scrutiny
