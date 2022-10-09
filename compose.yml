@@ -176,7 +176,7 @@ services:
     cap_add:
       - NET_ADMIN
     cpus: 2
-    mem_limit: 100m
+    mem_limit: 150M
     networks:
       traefik:
         aliases:
@@ -523,7 +523,7 @@ services:
     user: ${UID}:${GID}
     read_only: true
     cpus: 4
-    mem_limit: 100m
+    mem_limit: 500M
     <<: *restart
     <<: *logging
     networks:
@@ -569,7 +569,7 @@ services:
     image: jellyfin/jellyfin:10.8.5
     user: ${UID}:${GID}
     cpus: 10
-    mem_limit: 4g
+    mem_limit: 8G
     <<: *restart
     <<: *logging
     depends_on:
@@ -625,7 +625,7 @@ services:
     image: ghcr.io/linuxserver/ombi:latest
     <<: *restart
     <<: *logging
-    mem_limit: 500m
+    mem_limit: 750M
     cpus: 2
     depends_on:
       - "sonarr"
@@ -881,6 +881,8 @@ services:
   # netdata, server monitoring
   netdata:
     hostname: status.${root_domain}
+    cpus: 2
+    mem_limit: 1G
     image: netdata/netdata:latest
     <<: *restart
     <<: *logging
@@ -906,15 +908,13 @@ services:
       - SYS_PTRACE
     security_opt:
       - apparmor:unconfined
-    mem_limit: 500m
-    cpus: 2
 
   scrutiny:
     hostname: scrutiny.${root_domain}
     image: ghcr.io/analogj/scrutiny:v0.5.0-omnibus
     <<: *restart
     <<: *logging
-    mem_limit: 1G
+    mem_limit: 500M
     cpus: 2
     cap_add:
       - SYS_RAWIO
