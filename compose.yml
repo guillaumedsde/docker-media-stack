@@ -908,6 +908,45 @@ services:
     mem_limit: 500m
     cpus: 2
 
+  scrutiny:
+    hostname: scrutiny.${root_domain}
+    image: ghcr.io/analogj/scrutiny:v0.5.0-omnibus
+    <<: *restart
+    <<: *logging
+    user: ${UID}:${GID}
+    mem_limit: 1G
+    cpus: 2
+    cap_add:
+      - SYS_RAWIO
+    # FIXME: make this dynamic
+    devices:
+      - /dev/sda
+      - /dev/sdb
+      - /dev/sdc
+      - /dev/sdd
+      - /dev/sde
+      - /dev/sdf
+      - /dev/sdg
+      - /dev/sdh
+      - /dev/sdi
+      - /dev/sdj
+      - /dev/sdk
+      - /dev/sdl
+    volumes:
+      - /run/udev:/run/udev:ro
+      - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
+      - ${docker_data_folder}/scrutiny/influxdb:/opt/scrutiny/influxdb
+    networks:
+      - scrutiny
+    labels:
+      <<: *traefik
+      traefik.docker.network: scrutiny
+      traefik.http.routers.scrutiny.rule: Host(`scrutiny.${root_domain}`)
+      # service
+      traefik.http.services.scrutiny.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.scrutiny.middlewares: authelia@docker
+
   ##################################################################
   # Authentication
 
