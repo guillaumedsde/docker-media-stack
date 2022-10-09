@@ -617,7 +617,7 @@ services:
       # service
       traefik.http.services.embystat.loadbalancer.server.port: "6555"
       # Forward auth
-      traefik.http.routers.ombi.middlewares: authelia@docker
+      traefik.http.routers.embystat.middlewares: authelia@docker
 
   # ombi, plex media requests
   ombi:
