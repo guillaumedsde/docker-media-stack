@@ -1141,7 +1141,6 @@ networks:
     name: netdata
   scrutiny:
     driver: bridge
-    internal: true
     name: scrutiny
   lam:
     driver: bridge
