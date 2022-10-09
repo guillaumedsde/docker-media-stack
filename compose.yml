@@ -104,6 +104,7 @@ services:
       - nextcloud-proxy
       - robots
       - netdata
+      - scrutiny
       - lam
       - authelia-proxy
       - photoprism-proxy
@@ -1137,6 +1138,10 @@ networks:
     driver: bridge
     internal: true
     name: netdata
+  scrutiny:
+    driver: bridge
+    internal: true
+    name: scrutiny
   lam:
     driver: bridge
     internal: true
@@ -1151,14 +1156,13 @@ networks:
   photoprism-proxy:
     driver: bridge
     name: photoprism-proxy
-
   flaresolverr:
     driver: bridge
     name: flaresolverr
-
   docker-socket-proxy:
     driver: bridge
     name: docker-socket-proxy
+
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
