@@ -37,6 +37,8 @@ session:
   expiration: 12h
   inactivity: 14d
   remember_me_duration: 1M
+  redis:
+    host: authelia-redis
 
 storage:
   postgres:
