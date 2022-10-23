@@ -1040,6 +1040,7 @@ services:
     mem_limit: 500m
     depends_on:
       - authelia-db
+      - authelia-redis
       - openldap
     volumes:
       - ./config/authelia:/config:ro
@@ -1061,6 +1062,7 @@ services:
   authelia-db:
     <<: *restart
     <<: *logging
+    cpus: 2
     mem_limit: 250m
     environment:
       POSTGRES_USER: authelia
@@ -1069,6 +1071,29 @@ services:
     volumes:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
+    networks:
+      - authelia
+  
+  authelia-redis:
+    <<: *restart
+    <<: *logging
+    cpus: 2
+    mem_limit: 250m
+    read_only: true
+    user: ${UID}:${GID}
+    image: redis:7-bullseye
+    command:
+      - redis-server
+      - --save
+      - "60"
+      - "1"
+    healthcheck:
+      test: 
+        - "CMD"
+        - "redis-cli"
+        - "ping"
+    volumes:
+      - ${docker_data_folder}/authelia-redis:/data
     networks:
       - authelia
 
