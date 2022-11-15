@@ -1012,9 +1012,7 @@ services:
 
   # SSO
   authelia:
-    # NOTE: 4.37 appears broken
-    #       https://github.com/authelia/authelia/issues/4248
-    image: authelia/authelia:4.36
+    image: authelia/authelia:4.37
     environment:
       # Global configuration
       AUTHELIA_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
