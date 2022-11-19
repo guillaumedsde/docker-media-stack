@@ -780,6 +780,7 @@ services:
       MARIADB_DATABASE: photoprism
       MARIADB_USER: photoprism
       MARIADB_PASSWORD: "${PHOTOPRISM_DB_PASSWORD}"
+      MARIADB_AUTO_UPGRADE: "true"
     networks:
       - photoprism
     volumes:
