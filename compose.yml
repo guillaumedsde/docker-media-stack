@@ -251,7 +251,7 @@ services:
     volumes:
       - ${docker_data_folder}/qbittorrent:/config
       - ${data_folder}:/data
-      - torrent-blackhole:/blackhole
+      - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
     tmpfs:
       - /tmp
@@ -305,7 +305,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
-      - torrent-blackhole:/blackhole
+      - ${docker_data_folder}/blackhole:/blackhole
     tmpfs:
       - "/var:rw,exec"
       - "/tmp:rw,exec"
@@ -1195,4 +1195,3 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
-  torrent-blackhole:
