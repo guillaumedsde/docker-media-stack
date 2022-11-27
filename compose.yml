@@ -327,6 +327,7 @@ services:
       - wireguard
     volumes:
       - ${docker_data_folder}/prowlarr:/config
+      - ${docker_data_folder}/blackhole:/blackhole
     cpus: 4
     mem_limit: 1g
     network_mode: service:wireguard
