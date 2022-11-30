@@ -351,36 +351,6 @@ services:
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
-  # Sync Jackett Indexers with Radarr, Sonarr and Lidarr
-  jackett-sync-ts:
-    image: allergicduck/jackett-sync
-    <<: *restart
-    <<: *logging
-    depends_on:
-      jackett:
-        condition: service_healthy
-      radarr:
-        condition: service_started
-      sonarr:
-        condition: service_started
-      lidarr:
-        condition: service_started
-    user: ${UID}:${GID}
-    read_only: true
-    cpus: 1
-    mem_limit: 100m
-    networks:
-      - traefik
-    environment:
-      LIDARR_URL: "http://lidarr:8686"
-      LIDARR_KEY: ${LIDARR_API_KEY}
-      RADARR_URL: "http://radarr:7878"
-      RADARR_KEY: ${RADARR_API_KEY}
-      # SONARR_URL: "http://sonarr:8989"
-      # SONARR_KEY: ${SONARR_API_KEY}
-      JACKETT_URL: "http://jackett:9117"
-      JACKETT_KEY: ${JACKETT_API_KEY}
-
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
