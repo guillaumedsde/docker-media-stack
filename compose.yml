@@ -870,6 +870,9 @@ services:
     environment:
       <<: *conf
       PGID: ${docker_group_id}
+      DISABLE_TELEMETRY: "1"
+      DO_NOT_TRACK: "1"
+      NETDATA_DISABLE_CLOUD: "1"
     labels:
       <<: *traefik
       traefik.docker.network: netdata
