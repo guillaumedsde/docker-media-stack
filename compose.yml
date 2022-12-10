@@ -143,6 +143,19 @@ services:
       timeout: 6s
       retries: 3
       start_period: 5s
+  
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.4.3
+    user: ${UID}:${GID}
+    read_only: true
+    cpus: 2
+    mem_limit: 250M
+    environment:
+      <<: *conf
+      COLLECTIONS: "crowdsecurity/nginx"
+    volumes:
+      - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
+      - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
