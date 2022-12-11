@@ -122,6 +122,8 @@ services:
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:0.1
     user: ${UID}:${docker_group_id}
+    cpus: 2
+    mem_limit: 100M
     read_only: true
     tmpfs:
       - /run:mode=770,size=1k,uid=${UID},gid=${docker_group_id}
@@ -788,8 +790,8 @@ services:
     image: photoprism/photoprism:20220121
     <<: *restart
     <<: *logging
-    cpus: 4
-    mem_limit: 4GB
+    cpus: 2
+    mem_limit: 2GB
     user: ${UID}:${GID}
     depends_on:
       - photoprism-mariadb
@@ -828,6 +830,9 @@ services:
     image: mariadb:10.10
     <<: *restart
     <<: *logging
+    cpus: 2
+    mem_limit: 2GB
+    user: ${UID}:${GID}
     environment:
       MARIADB_ROOT_PASSWORD: ${PHOTOPRISM_DB_ROOT_PASSWORD}
       MARIADB_DATABASE: photoprism
