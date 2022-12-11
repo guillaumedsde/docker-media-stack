@@ -156,6 +156,7 @@ services:
     environment:
       <<: *conf
       GID: ${GID}
+      CONFIG_FILE: /config.yml
       DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
       COLLECTIONS: >-
         crowdsecurity/base-http-scenarios
@@ -174,7 +175,7 @@ services:
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
-      - ./crowdsec/config/config.yaml.local:/etc/crowdsec/config.yaml.local:ro
+      - ./config/crowdsec/config.yml:/config.yml:ro
     networks:
       - crowdsec
   
