@@ -160,13 +160,29 @@ services:
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
+      - ./config/crowdsec/config.yml:/etc/crowdsec/config.yml:ro
+    networks:
+      - crowdsec
 
-  crowdsec-bouncer:
-    image: fbonalair/traefik-crowdsec-bouncer:0.5
-    user: ${UID}:${GID}
+  crowdsec-db:
+    image: postgres:15-bullseye
+    <<: *restart
+    <<: *logging
     cpus: 2
     mem_limit: 250M
+    user: ${UID}:${GID}
     read_only: true
+    environment:
+      POSTGRES_USER: crowdsec
+      POSTGRES_PASSWORD: ${CROWDSEC_DB_PASSWORD}
+    tmpfs:
+      - /run:mode=770,size=1k,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=1k,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/crowdsec-db:/var/lib/postgresql/data
+    networks:
+      - crowdsec
+
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
   # NOTE watchtower also updates itself
@@ -1093,7 +1109,6 @@ services:
     image: postgres:14-alpine
     volumes:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - authelia
   
@@ -1212,6 +1227,9 @@ networks:
   docker-socket-proxy:
     driver: bridge
     name: docker-socket-proxy
+  crowdsec:
+    driver: bridge
+    name: crowdsec
 
 volumes:
   robots-nginx-cache:
