@@ -156,11 +156,25 @@ services:
       COLLECTIONS: "crowdsecurity/nginx"
       DISABLE_ONLINE_API: "true"
       DISABLE_AGENT: "true"
+      # Bouncers
+      BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     tmpfs:
       - /tmp:mode=770,size=1M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
+    networks:
+      - crowdsec
+  
+  crowdsec-traefik-bouncer:
+    image: fbonalair/traefik-crowdsec-bouncer:0.5
+    cpus: 2
+    mem_limit: 250M
+    read_only: true
+    user: ${UID}:${GID}
+    environment:
+      CROWDSEC_AGENT_HOST: crowdsec:8083
+      CROWDSEC_BOUNCER_API_KEY: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     networks:
       - crowdsec
 
