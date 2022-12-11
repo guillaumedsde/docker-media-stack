@@ -1012,11 +1012,15 @@ services:
   
   # Metabase for Crowdsec data
   metabase:
+    <<: *restart
+    <<: *logging
     image: metabase/metabase:v0.45.1
     cpus: 2
     mem_limit: 500M
     user: ${UID}:${GID}
     read_only: true
+    volumes:
+      - ${docker_data_folder}/metabase/plugins:/plugins
     environment:
       JAVA_TIMEZONE: ${TZ}
       MB_DB_TYPE: postgres
