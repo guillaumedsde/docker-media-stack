@@ -173,7 +173,8 @@ services:
     read_only: true
     user: ${UID}:${GID}
     environment:
-      CROWDSEC_AGENT_HOST: crowdsec:8083
+      GIN_MODE: release
+      CROWDSEC_AGENT_HOST: crowdsec:8080
       CROWDSEC_BOUNCER_API_KEY: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     networks:
       - crowdsec
