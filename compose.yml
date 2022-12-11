@@ -166,6 +166,7 @@ services:
         LePresidente/authelia
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
+      DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
       # Bouncers
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     tmpfs:
@@ -173,6 +174,27 @@ services:
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
+      - ./crowdsec/config/config.yaml.local:/etc/crowdsec/config.yaml.local:ro
+    networks:
+      - crowdsec
+  
+  # DB for crowdsec
+  crowdsec-db:
+    <<: *restart
+    <<: *logging
+    image: postgres:15-bullseye
+    cpus: 2
+    mem_limit: 500M
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_USER: crowdsec
+      POSTGRES_PASSWORD: ${CROWDSEC_DB_PASSWORD}
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/crowdsec-db:/var/lib/postgresql/data
     networks:
       - crowdsec
   
