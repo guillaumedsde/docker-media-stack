@@ -155,6 +155,8 @@ services:
       COLLECTIONS: "crowdsecurity/nginx"
       DISABLE_ONLINE_API: "true"
       DISABLE_AGENT: "true"
+    tmpfs:
+      - /tmp:mode=770,size=1k,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
