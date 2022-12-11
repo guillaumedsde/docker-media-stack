@@ -1,8 +1,0 @@
-db_config:  
-  type: postgresql
-  user: crowdsec
-  password: ${DB_PASSWORD}
-  db_name: crowdsec
-  host: crowdsec-db
-  port: 5432
-  sslmode:  disable
