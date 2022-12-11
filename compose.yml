@@ -157,7 +157,13 @@ services:
       <<: *conf
       GID: ${GID}
       DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
-      COLLECTIONS: "crowdsecurity/nginx"
+      COLLECTIONS: >-
+        crowdsecurity/base-http-scenarios
+        crowdsecurity/traefik
+        crowdsecurity/nginx
+        crowdsecurity/http-cve
+        crowdsecurity/nextcloud
+        LePresidente/authelia
       DISABLE_ONLINE_API: "true"
       DISABLE_AGENT: "true"
       # Bouncers
