@@ -738,7 +738,7 @@ services:
   nextcloud-postgres:
     <<: *restart
     <<: *logging
-    image: postgres:12-alpine
+    image: postgres:12-bullseye
     cpus: 2
     mem_limit: 500M
     user: ${UID}:${GID}
@@ -1101,7 +1101,7 @@ services:
   authelia-db:
     <<: *restart
     <<: *logging
-    image: postgres:14-alpine
+    image: postgres:14-bullseye
     cpus: 2
     mem_limit: 500M
     user: ${UID}:${GID}
