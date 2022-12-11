@@ -44,6 +44,9 @@ services:
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
+      # NOTE: Crowdsec bouncer should be up and ready before adding it to entrypoints
+      crowdsec-traefik-bouncer:
+        condition: service_healthy
     cap_add:
       - NET_BIND_SERVICE
     command:
@@ -56,9 +59,9 @@ services:
       # entrypoints
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.middlewares=crowdsec-bouncer@docker"
+      - "--entrypoints.web.http.middlewares=crowdsec@docker"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.middlewares=crowdsec-bouncer@docker"
+      - "--entrypoints.websecure.http.middlewares=crowdsec@docker"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
@@ -182,7 +185,9 @@ services:
     networks:
       - crowdsec
     labels:
-      traefik.http.middlewares.crowdsec-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
+      <<: *traefik
+      traefik.docker.network: crowdsec
+      traefik.http.middlewares.crowdsec.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
