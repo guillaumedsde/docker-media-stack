@@ -164,8 +164,8 @@ services:
         crowdsecurity/http-cve
         crowdsecurity/nextcloud
         LePresidente/authelia
-      DISABLE_ONLINE_API: "true"
-      DISABLE_AGENT: "true"
+      DISABLE_ONLINE_API: "false"
+      DISABLE_AGENT: "false"
       # Bouncers
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     tmpfs:
