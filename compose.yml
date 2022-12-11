@@ -156,32 +156,11 @@ services:
       COLLECTIONS: "crowdsecurity/nginx"
       DISABLE_ONLINE_API: "true"
       DISABLE_AGENT: "true"
-      CONFIG_FILE: /config.yml
     tmpfs:
       - /tmp:mode=770,size=1M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
-      - ./config/crowdsec/config.yml:/config.yml:ro
-    networks:
-      - crowdsec
-
-  crowdsec-db:
-    image: postgres:15-bullseye
-    <<: *restart
-    <<: *logging
-    cpus: 2
-    mem_limit: 250M
-    user: ${UID}:${GID}
-    read_only: true
-    environment:
-      POSTGRES_USER: crowdsec
-      POSTGRES_PASSWORD: ${CROWDSEC_DB_PASSWORD}
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - ${docker_data_folder}/crowdsec-db:/var/lib/postgresql/data
     networks:
       - crowdsec
 
@@ -707,7 +686,7 @@ services:
       <<: *conf
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
-      POSTGRES_PASSWORD: ${nextcloud_db_pass}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
       POSTGRES_HOST: nextcloud-postgres
       REDIS_HOST: nextcloud-redis
       REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
@@ -743,18 +722,23 @@ services:
 
   # database for nextcloud
   nextcloud-postgres:
+    <<: *restart
+    <<: *logging
+    image: postgres:12-alpine
     cpus: 2
-    mem_limit: 500m
+    mem_limit: 500M
+    user: ${UID}:${GID}
+    read_only: true
     environment:
-      POSTGRES_PASSWORD: ${nextcloud_db_pass}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
       POSTGRES_USER: nextcloud
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
     networks:
       - nextcloud
-    <<: *restart
-    <<: *logging
-    image: postgres:12-alpine
 
   # cache for nextcloud
   nextcloud-redis:
@@ -1103,12 +1087,17 @@ services:
   authelia-db:
     <<: *restart
     <<: *logging
+    image: postgres:14-alpine
     cpus: 2
-    mem_limit: 250m
+    mem_limit: 500M
+    user: ${UID}:${GID}
+    read_only: true
     environment:
       POSTGRES_USER: authelia
       POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
-    image: postgres:14-alpine
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
     networks:
