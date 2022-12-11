@@ -102,7 +102,6 @@ services:
     networks:
       - traefik
       - crowdsec
-      - metabase
       - homer
       - nextcloud-proxy
       - robots
@@ -1009,56 +1008,6 @@ services:
       traefik.http.services.scrutiny.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.scrutiny.middlewares: authelia@docker
-  
-  # Metabase for Crowdsec data
-  metabase:
-    <<: *restart
-    <<: *logging
-    image: metabase/metabase:v0.45.1
-    cpus: 2
-    mem_limit: 500M
-    user: ${UID}:${GID}
-    read_only: true
-    environment:
-      JAVA_TIMEZONE: ${TZ}
-      MB_DB_TYPE: postgres
-      MB_DB_HOST: metabase-db
-      MB_DB_DBNAME: metabase
-      MB_DB_PORT: "5432"
-      MB_DB_USER: metabase
-      MB_DB_PASS: ${METABASE_DB_PASSWORD}
-    volumes:
-      - ${docker_data_folder}/metabase/plugins:/plugins
-    networks:
-      - metabase
-    labels:
-      <<: *traefik
-      traefik.docker.network: metabase
-      traefik.http.routers.metabase.rule: Host(`metabase.${root_domain}`)
-      # service
-      traefik.http.services.metabase.loadbalancer.server.port: "3000"
-      # Forward auth
-      traefik.http.routers.metabase.middlewares: authelia@docker
-
-  # DB for metabase
-  metabase-db:
-    <<: *restart
-    <<: *logging
-    image: postgres:15-bullseye
-    cpus: 2
-    mem_limit: 500M
-    user: ${UID}:${GID}
-    read_only: true
-    environment:
-      POSTGRES_USER: metabase
-      POSTGRES_PASSWORD: ${METABASE_DB_PASSWORD}
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - ${docker_data_folder}/metabase-db:/var/lib/postgresql/data
-    networks:
-      - metabase
 
   ##################################################################
   # Authentication
@@ -1305,9 +1254,6 @@ networks:
   crowdsec:
     driver: bridge
     name: crowdsec
-  metabase:
-    driver: bridge
-    name: metabase
 
 volumes:
   robots-nginx-cache:
