@@ -152,6 +152,7 @@ services:
     environment:
       <<: *conf
       GID: ${GID}
+      DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
       COLLECTIONS: "crowdsecurity/nginx"
       DISABLE_ONLINE_API: "true"
       DISABLE_AGENT: "true"
@@ -160,7 +161,7 @@ services:
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
-      - ./config/crowdsec/config.yml:/etc/crowdsec/config.yml:ro
+      - ./config/crowdsec/config.yaml:/etc/crowdsec/config.yaml:ro
     networks:
       - crowdsec
 
