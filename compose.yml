@@ -156,7 +156,7 @@ services:
       DISABLE_ONLINE_API: "true"
       DISABLE_AGENT: "true"
     tmpfs:
-      - /tmp:mode=770,size=1k,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=1M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data/
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec/
@@ -176,8 +176,8 @@ services:
       POSTGRES_USER: crowdsec
       POSTGRES_PASSWORD: ${CROWDSEC_DB_PASSWORD}
     tmpfs:
-      - /run:mode=770,size=1k,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=1k,uid=${UID},gid=${GID}
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/crowdsec-db:/var/lib/postgresql/data
     networks:
