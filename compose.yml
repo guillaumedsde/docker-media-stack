@@ -147,6 +147,8 @@ services:
       start_period: 5s
   
   crowdsec:
+    <<: *restart
+    <<: *logging
     image: crowdsecurity/crowdsec:v1.4.3
     cpus: 2
     mem_limit: 250M
@@ -169,6 +171,8 @@ services:
       - crowdsec
   
   crowdsec-traefik-bouncer:
+    <<: *restart
+    <<: *logging
     image: fbonalair/traefik-crowdsec-bouncer:0.5
     cpus: 2
     mem_limit: 250M
