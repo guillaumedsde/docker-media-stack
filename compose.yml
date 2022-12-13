@@ -80,8 +80,6 @@ services:
       - "--ping.manualrouting=true"
       # traefik access logs
       - "--accesslog=true"
-      - "--accesslog.filepath=/var/log/traefik/access.log"
-      - "--accesslog.bufferingsize=100"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
@@ -96,7 +94,6 @@ services:
       traefik.http.routers.ping.service: ping@internal
     read_only: true
     volumes:
-      - ${docker_data_folder}/traefik/logs:/var/log/traefik
       - ${docker_data_folder}/traefik:/traefik
       - ./config/traefik:/config:ro
     tmpfs:
@@ -114,7 +111,11 @@ services:
       - photoprism-proxy
       - docker-socket-proxy
     <<: *restart
-    <<: *logging
+    logging:
+      driver: syslog
+      options:
+        syslog-address: udp://localhost:4242
+        syslog-format: "rfc3164"
     mem_limit: 500m
     cpus: 4
     ports:
@@ -177,7 +178,9 @@ services:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-      - ${docker_data_folder}/traefik/logs/access.log:/var/log/traefik/access.log:ro
+    ports:
+      # traefik syslog port
+      - 4242:4242/udp
     networks:
       - crowdsec
   
