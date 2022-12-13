@@ -164,7 +164,6 @@ services:
       COLLECTIONS: >-
         crowdsecurity/base-http-scenarios
         crowdsecurity/traefik
-        crowdsecurity/nginx
         crowdsecurity/http-cve
         crowdsecurity/nextcloud
         LePresidente/authelia
@@ -178,9 +177,13 @@ services:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
     ports:
-      # traefik syslog port
-      - 4242:4242/udp
+      # syslog ports
+      # traefik
+      - 127.0.0.1:4242:4242/udp
+      # authelia
+      - 127.0.0.1:4243:4243/udp
     networks:
       - crowdsec
   
@@ -1104,7 +1107,11 @@ services:
       - --config
       - /config/config.yml
     <<: *restart
-    <<: *logging
+    logging:
+      driver: syslog
+      options:
+        syslog-address: udp://localhost:4243
+        syslog-format: "rfc3164"
     user: ${UID}:${GID}
     mem_limit: 500m
     depends_on:
