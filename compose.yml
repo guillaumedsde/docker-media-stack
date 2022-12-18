@@ -645,7 +645,7 @@ services:
       - ldap
     environment:
       <<: *conf
-      JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
+      JELLYFIN_PublishedServerUrl: jellyfin.${root_domain}
       #Uncomment forofficial Jellyfin image:
       JELLYFIN_DATA_DIR: /config/data
       JELLYFIN_CONFIG_DIR: /config
