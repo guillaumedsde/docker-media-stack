@@ -329,7 +329,7 @@ services:
       - /tmp
     read_only: true
     cpus: 4
-    mem_limit: 2g
+    mem_limit: 4G
     user: ${UID}:${GID}
     # NOTE: use `services:` instead of `containers:` because the  
     #       container is defined in the same compose file
@@ -631,7 +631,7 @@ services:
     image: jellyfin/jellyfin:10.8.8
     user: ${UID}:${GID}
     cpus: 15
-    mem_limit: 16G
+    mem_limit: 8G
     <<: *restart
     <<: *logging
     depends_on:
