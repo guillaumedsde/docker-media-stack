@@ -409,7 +409,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
   
   autobrr:
-    image: ghcr.io/autobrr/autobrr:v1.11.0
+    image: ghcr.io/autobrr/autobrr:v1.12.1
     <<: *restart
     <<: *logging
     user: ${UID}:${GID}
