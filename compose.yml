@@ -301,14 +301,6 @@ services:
       traefik.http.routers.qbittorrent.service: qbittorrent
       # Forward auth
       traefik.http.routers.qbittorrent.middlewares: authelia@docker
-      # autobrr
-      # service
-      traefik.http.services.autobrr.loadbalancer.server.port: "7474"
-      # router
-      traefik.http.routers.autobrr.rule: Host(`autobrr.${root_domain}`)
-      traefik.http.routers.autobrr.service: autobrr
-      # Forward auth
-      traefik.http.routers.autobrr.middlewares: authelia@docker
       # Disable watchtower for this container because of these issues
       # https://github.com/containrrr/watchtower/issues/188
       # https://github.com/containrrr/watchtower/issues/1013
@@ -402,23 +394,6 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
     cpus: 4
     mem_limit: 1g
-    network_mode: service:wireguard
-    environment:
-      <<: *conf
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
-  
-  autobrr:
-    image: ghcr.io/autobrr/autobrr:v1.11.0
-    <<: *restart
-    <<: *logging
-    user: ${UID}:${GID}
-    depends_on:
-      - wireguard
-    volumes:
-      - ${docker_data_folder}/autobrr:/config
-    cpus: 4
-    mem_limit: 500M
     network_mode: service:wireguard
     environment:
       <<: *conf
