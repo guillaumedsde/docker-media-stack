@@ -748,6 +748,8 @@ services:
       - nextcloud
     <<: *restart
     <<: *logging
+    volumes:
+      - ${docker_data_folder}/nextcloud-redis:/data
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
     healthcheck:
       test: 
