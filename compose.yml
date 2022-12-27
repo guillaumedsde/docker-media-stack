@@ -634,30 +634,6 @@ services:
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
-  # Statistics for jellyfin
-  embystat:
-    hostname: embystat.${root_domain}
-    image: lscr.io/linuxserver/embystat:0.2.0
-    cpu_count: 2
-    mem_limit: 1G
-    <<: *restart
-    <<: *logging
-    depends_on:
-      - jellyfin
-    volumes:
-      - ${docker_data_folder}/embystat:/config
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.embystat.rule: Host(`embystat.${root_domain}`)
-      # service
-      traefik.http.services.embystat.loadbalancer.server.port: "6555"
-      # Forward auth
-      traefik.http.routers.embystat.middlewares: authelia@docker
-
   # ombi, plex media requests
   ombi:
     hostname: ombi.${root_domain}
@@ -764,13 +740,20 @@ services:
   # cache for nextcloud
   nextcloud-redis:
     cpu_count: 2
-    mem_limit: 200m
+    mem_limit: 250m
+    read_only: true
+    user: ${UID}:${GID}
+    image: redis:7-bullseye
     networks:
       - nextcloud
     <<: *restart
     <<: *logging
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
-    image: redis:alpine
+    healthcheck:
+      test: 
+        - "CMD"
+        - "redis-cli"
+        - "ping"
 
   # Photo gallery
   photoprism:
@@ -862,7 +845,7 @@ services:
     networks:
       - samba
       - ldap
-    image: guillaumedsde/samba-ldap
+    image: guillaumedsde/samba-ldap:latest
 
   ssh:
     ports:
@@ -897,14 +880,14 @@ services:
     user: ${UID}:${GID}
     read_only: true
     mem_limit: 100M
-    cpu_count: 1
+    cpu_count: 2
     <<: *restart
     <<: *logging
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
     image: guillaumedsde/wsdd:latest
 
   robots:
-    image: nginx:alpine
+    image: nginx:1.23-alpine
     read_only: true
     mem_limit: 150M
     cpu_count: 2
