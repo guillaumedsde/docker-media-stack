@@ -204,8 +204,6 @@ services:
     labels:
       <<: *traefik
       traefik.docker.network: crowdsec
-      traefik.http.routers.crowdsec-traefik-bouncer.rule: Host(`bouncer.${root_domain}`)
-      traefik.http.services.crowdsec-traefik-bouncer.loadbalancer.server.port: "8080"
       traefik.http.middlewares.crowdsec-traefik-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
 
   # watchtower container to update images
@@ -1047,6 +1045,9 @@ services:
   # SSO
   authelia:
     image: authelia/authelia:4.37
+    cpu_count: 4
+    user: ${UID}:${GID}
+    mem_limit: 500m
     environment:
       # Global configuration
       AUTHELIA_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
@@ -1074,8 +1075,6 @@ services:
       options:
         syslog-address: udp://localhost:4243
         syslog-format: "rfc3164"
-    user: ${UID}:${GID}
-    mem_limit: 500m
     depends_on:
       - authelia-db
       - authelia-redis
@@ -1144,7 +1143,10 @@ services:
     image: thomseddon/traefik-forward-auth:2
     <<: *restart
     <<: *logging
+    cpu_count: 2
     mem_limit: 100m
+    read_only: true
+    user: ${UID}:${GID}
     environment:
       PROVIDERS_GOOGLE_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
       PROVIDERS_GOOGLE_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
