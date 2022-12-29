@@ -92,6 +92,8 @@ services:
       traefik.http.routers.dashboard.middlewares: traefik-forward-auth
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
+      traefik.http.middlewares.crowdsec-traefik-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
+      traefik.http.middlewares.crowdsec-bouncer.forwardauth.trustForwardHeader: "true"
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik:/traefik
@@ -201,10 +203,6 @@ services:
       CROWDSEC_BOUNCER_API_KEY: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     networks:
       - crowdsec
-    labels:
-      <<: *traefik
-      traefik.docker.network: crowdsec
-      traefik.http.middlewares.crowdsec-traefik-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
