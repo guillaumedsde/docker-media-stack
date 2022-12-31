@@ -588,13 +588,15 @@ services:
       - homer
     volumes:
       - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
-      - ${docker_data_folder}/homer/assets:/www/assets
+      - ${docker_data_folder}/homer/assets:/www/assets:ro
     labels:
       <<: *traefik
       traefik.docker.network: homer
       traefik.http.routers.homer.rule: Host(`home.${root_domain}`, `${root_domain}`)
       # service
       traefik.http.services.homer.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.homer.middlewares: authelia@docker
 
   # jellyfin media server
   jellyfin:
