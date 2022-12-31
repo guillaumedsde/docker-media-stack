@@ -117,7 +117,7 @@ services:
       driver: syslog
       options:
         syslog-address: udp://localhost:4242
-        syslog-format: "rfc3164"
+        syslog-format: "rfc5424"
     mem_limit: 500m
     cpu_count: 4
     ports:
@@ -1072,7 +1072,7 @@ services:
       driver: syslog
       options:
         syslog-address: udp://localhost:4243
-        syslog-format: "rfc3164"
+        syslog-format: "rfc5424"
     depends_on:
       - authelia-db
       - authelia-redis
