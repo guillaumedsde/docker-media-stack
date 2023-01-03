@@ -1,12 +1,15 @@
-source: syslog
-listen_addr: 0.0.0.0
-listen_port: 4242
+---
+source: docker
+docker_host: tcp://docker-socket-proxy:2375
+container_name:
+  - traefik
 labels:
   type: traefik
 ---
-source: syslog
-listen_addr: 0.0.0.0
-listen_port: 4243
+source: docker
+docker_host: tcp://docker-socket-proxy:2375
+container_name:
+  - authelia
 labels:
   type: authelia
 ---

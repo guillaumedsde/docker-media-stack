@@ -41,6 +41,8 @@ services:
   traefik:
     image: traefik:v2.9
     user: ${UID}:${GID}
+    # NOTE: used for logs acquisition by crowdsec
+    container_name: traefik
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
@@ -113,11 +115,7 @@ services:
       - photoprism-proxy
       - docker-socket-proxy
     <<: *restart
-    logging:
-      driver: syslog
-      options:
-        syslog-address: udp://localhost:4242
-        syslog-format: "rfc5424"
+    <<: *logging
     mem_limit: 500m
     cpu_count: 4
     ports:
@@ -180,14 +178,9 @@ services:
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
-    ports:
-      # syslog ports
-      # traefik
-      - 127.0.0.1:4242:4242/udp
-      # authelia
-      - 127.0.0.1:4243:4243/udp
     networks:
       - crowdsec
+      - docker-socket-proxy
   
   crowdsec-traefik-bouncer:
     <<: *restart
@@ -1045,6 +1038,8 @@ services:
   # SSO
   authelia:
     image: authelia/authelia:4.37
+    # NOTE: used for logs acquisition by crowdsec
+    container_name: authelia
     cpu_count: 4
     user: ${UID}:${GID}
     mem_limit: 500m
@@ -1070,11 +1065,7 @@ services:
       - --config
       - /config/config.yml
     <<: *restart
-    logging:
-      driver: syslog
-      options:
-        syslog-address: udp://localhost:4243
-        syslog-format: "rfc5424"
+    <<: *logging
     depends_on:
       - authelia-db
       - authelia-redis
