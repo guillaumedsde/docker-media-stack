@@ -159,6 +159,9 @@ services:
     cpu_count: 2
     mem_limit: 250M
     read_only: true
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
     environment:
       <<: *conf
       GID: ${GID}
