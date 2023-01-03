@@ -173,6 +173,7 @@ services:
         LePresidente/authelia
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
+      CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
       # Bouncers
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     tmpfs:
@@ -181,6 +182,7 @@ services:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ./config/crowdsec/discord.yaml:/etc/crowdsec/notifications/discord.yaml:ro
       - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
     networks:
       - crowdsec
