@@ -155,7 +155,7 @@ services:
   crowdsec:
     <<: *restart
     <<: *logging
-    image: crowdsecurity/crowdsec:v1.4.3
+    image: crowdsecurity/crowdsec:v1.4.4
     cpu_count: 2
     mem_limit: 250M
     read_only: true
@@ -173,7 +173,9 @@ services:
         LePresidente/authelia
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
+      USE_WAL: "true"
       CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
+      CUSTOM_HOSTNAME: ${root_domain}
       # Bouncers
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
     tmpfs:
