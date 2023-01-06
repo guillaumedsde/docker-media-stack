@@ -396,13 +396,15 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v2.2.10
+    image: ghcr.io/flaresolverr/flaresolverr:v3.0.1
     <<: *restart
     <<: *logging
     # NOTE: default image UID is 1000
     user: 1000:1000
     cpu_count: 2
-    mem_limit: 1G
+    mem_limit: 2G
+    environment:
+      <<: *conf
     # NOTE: See FIXME above
     # networks:
     #   - flaresolverr
