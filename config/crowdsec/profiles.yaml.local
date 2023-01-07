@@ -1,0 +1,6 @@
+decisions:
+    - type: ban
+      duration: 7d
+
+notifications:
+    - discord

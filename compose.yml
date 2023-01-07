@@ -162,9 +162,13 @@ services:
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
+      crowdsec-db:
+        condition: service_healthy
     environment:
       <<: *conf
       GID: ${GID}
+      CROWDSEC_DB_HOST: crowdsec-db
+      CROWDSEC_DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
       COLLECTIONS: >-
         crowdsecurity/base-http-scenarios
         crowdsecurity/traefik
@@ -183,12 +187,43 @@ services:
     volumes:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec
+      - ./config/crowdsec/config.yaml.local:/etc/crowdsec/config.yaml.local:ro
+      - ./config/crowdsec/profiles.yaml.local:/etc/crowdsec/profiles.yaml.local:ro
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./config/crowdsec/discord.yaml:/etc/crowdsec/notifications/discord.yaml:ro
       - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
     networks:
       - crowdsec
       - docker-socket-proxy
+  
+  crowdsec-db:
+    <<: *restart
+    <<: *logging
+    image: postgres:15-bullseye
+    cpu_count: 2
+    mem_limit: 500M
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_USER: crowdsec
+      POSTGRES_PASSWORD: ${CROWDSEC_DB_PASSWORD}
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/crowdsec-db:/var/lib/postgresql/data
+    networks:
+      - crowdsec
+    healthcheck:
+      test: 
+        - "CMD-SHELL"
+        - "pg_isready"
+        - "-d"
+        - "crowdsec"
+      start_period: 3s
+      interval: 5s
+      timeout: 3s
+      retries: 3
   
   crowdsec-traefik-bouncer:
     <<: *restart
@@ -667,10 +702,14 @@ services:
     &nextcloud
     hostname: cloud.${root_domain}
     depends_on:
-      - nextcloud-postgres
-      - nextcloud-redis
-      - samba
-      - openldap
+      nextcloud-postgres:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_healthy
+      samba:
+        condition: service_started
+      openldap:
+        condition: service_started
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
       - ${data_folder}:/data
@@ -737,6 +776,16 @@ services:
       - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
     networks:
       - nextcloud
+    healthcheck:
+      test: 
+        - "CMD-SHELL"
+        - "pg_isready"
+        - "-d"
+        - "nextcloud"
+      start_period: 3s
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   # cache for nextcloud
   nextcloud-redis:
@@ -1077,9 +1126,12 @@ services:
     <<: *restart
     <<: *logging
     depends_on:
-      - authelia-db
-      - authelia-redis
-      - openldap
+      authelia-db:
+        condition: service_healthy
+      authelia-redis:
+        condition: service_healthy
+      openldap:
+        condition: service_healthy
     volumes:
       - ./config/authelia:/config:ro
     networks:
@@ -1115,7 +1167,17 @@ services:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
     networks:
       - authelia
-  
+    healthcheck:
+      test: 
+        - "CMD-SHELL"
+        - "pg_isready"
+        - "-d"
+        - "authelia"
+      start_period: 3s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
   authelia-redis:
     <<: *restart
     <<: *logging
