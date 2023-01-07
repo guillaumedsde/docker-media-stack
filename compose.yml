@@ -366,7 +366,6 @@ services:
     <<: *restart
     <<: *logging
     image: jesec/flood:master-distroless
-    hostname: flood.${root_domain}
     cpu_count: 2
     mem_limit: 250M
     read_only: true
@@ -452,7 +451,6 @@ services:
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
-    hostname: movies.${root_domain}
     image: ghcr.io/linuxserver/radarr:nightly
     <<: *restart
     <<: *logging
@@ -480,7 +478,6 @@ services:
   # sonarr, webapp for downloading series through torrent client
   # queries are done with jackett
   sonarr:
-    hostname: series.${root_domain}
     image: ghcr.io/linuxserver/sonarr:latest
     <<: *restart
     <<: *logging
@@ -508,7 +505,6 @@ services:
   # lidarr, webapp for downloading music through torrent client
   # queries are done with jackett
   lidarr:
-    hostname: music.${root_domain}
     image: ghcr.io/linuxserver/lidarr:latest
     <<: *restart
     <<: *logging
@@ -535,7 +531,6 @@ services:
 
   # readarr, webapp for downloading books through torrent client
   readarr:
-    hostname: books.${root_domain}
     image: ghcr.io/linuxserver/readarr:nightly
     <<: *restart
     <<: *logging
@@ -561,7 +556,6 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
-    hostname: subtitles.${root_domain}
     image: hotio/bazarr:release
     <<: *restart
     <<: *logging
@@ -614,7 +608,6 @@ services:
 
   # homer is a homepage container
   homer:
-    hostname: ${root_domain}
     image: b4bz/homer:v22.11.2
     user: ${UID}:${GID}
     cpu_count: 2
@@ -638,7 +631,6 @@ services:
 
   # jellyfin media server
   jellyfin:
-    hostname: jellyfin.${root_domain}
     image: jellyfin/jellyfin:10.8.8
     user: ${UID}:${GID}
     cpu_count: 15
@@ -672,8 +664,7 @@ services:
 
   # ombi, plex media requests
   ombi:
-    hostname: ombi.${root_domain}
-    image: ghcr.io/linuxserver/ombi:latest
+    image: ghcr.io/linuxserver/ombi:4.22.5
     <<: *restart
     <<: *logging
     mem_limit: 2G
@@ -700,7 +691,6 @@ services:
   # personal cloud
   nextcloud:
     &nextcloud
-    hostname: cloud.${root_domain}
     depends_on:
       nextcloud-postgres:
         condition: service_healthy
@@ -875,7 +865,7 @@ services:
       - --innodb-lock-wait-timeout=120
   
   librespeed:
-    image: ghcr.io/linuxserver:5.2.5
+    image: ghcr.io/linuxserver/librespeed:5.2.5
     cpu_count: 2
     mem_limit: 500M
     read_only: true
@@ -982,7 +972,6 @@ services:
 
   # netdata, server monitoring
   netdata:
-    hostname: status.${root_domain}
     cpu_count: 2
     mem_limit: 1G
     image: netdata/netdata:v1.37
@@ -1015,7 +1004,6 @@ services:
       - apparmor:unconfined
 
   scrutiny:
-    hostname: scrutiny.${root_domain}
     image: ghcr.io/analogj/scrutiny:v0.5.0-omnibus
     <<: *restart
     <<: *logging
@@ -1059,7 +1047,6 @@ services:
 
   # LDAP server
   openldap:
-    hostname: ldap.${old_root_domain}
     image: osixia/openldap:1.5.0
     mem_limit: 500m
     environment:
