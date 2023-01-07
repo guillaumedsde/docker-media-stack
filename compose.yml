@@ -216,14 +216,13 @@ services:
       - crowdsec
     healthcheck:
       test: 
-        - "CMD-SHELL"
+        - "CMD"
         - "pg_isready"
-        - "-d"
-        - "crowdsec"
+        - "--username=crowdsec"
       start_period: 3s
       interval: 5s
       timeout: 3s
-      retries: 3
+      retries: 5
   
   crowdsec-traefik-bouncer:
     <<: *restart
@@ -778,14 +777,13 @@ services:
       - nextcloud
     healthcheck:
       test: 
-        - "CMD-SHELL"
+        - "CMD"
         - "pg_isready"
-        - "-d"
-        - "nextcloud"
+        - "--username=nextcloud"
       start_period: 3s
       interval: 5s
       timeout: 3s
-      retries: 3
+      retries: 5
 
   # cache for nextcloud
   nextcloud-redis:
@@ -1169,14 +1167,13 @@ services:
       - authelia
     healthcheck:
       test: 
-        - "CMD-SHELL"
+        - "CMD"
         - "pg_isready"
-        - "-d"
-        - "authelia"
+        - "--username=authelia"
       start_period: 3s
       interval: 5s
       timeout: 3s
-      retries: 3
+      retries: 5
 
   authelia-redis:
     <<: *restart
