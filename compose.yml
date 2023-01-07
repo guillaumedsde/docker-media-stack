@@ -1048,6 +1048,7 @@ services:
   # LDAP server
   openldap:
     image: osixia/openldap:1.5.0
+    hostname: ldap.${old_root_domain}
     mem_limit: 500m
     environment:
       HOSTNAME: ldap.${old_root_domain}
