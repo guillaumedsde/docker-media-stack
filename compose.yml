@@ -114,6 +114,7 @@ services:
       - authelia-proxy
       - photoprism-proxy
       - docker-socket-proxy
+      - librespeed
     <<: *restart
     <<: *logging
     mem_limit: 500m
@@ -872,6 +873,26 @@ services:
       - --max-connections=512
       - --innodb-rollback-on-timeout=OFF
       - --innodb-lock-wait-timeout=120
+  
+  librespeed:
+    image: ghcr.io/linuxserver:5.2.5
+    cpu_count: 2
+    mem_limit: 500M
+    read_only: true
+    <<: *restart
+    <<: *logging
+    environment:
+      <<: *conf
+    networks:
+      - librespeed
+    labels:
+      <<: *traefik
+      traefik.docker.network: librespeed
+      traefik.http.routers.librespeed.rule: Host(`librespeed.${root_domain}`)
+      # service
+      traefik.http.services.librespeed.loadbalancer.server.port: "80"
+      # Forward auth
+      traefik.http.routers.librespeed.middlewares: authelia@docker
 
   samba:
     environment:
@@ -1296,7 +1317,9 @@ networks:
   crowdsec:
     driver: bridge
     name: crowdsec
-
+  librespeed:
+    driver: bridge
+    name: librespeed
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
