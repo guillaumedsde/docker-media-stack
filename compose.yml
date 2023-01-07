@@ -868,11 +868,12 @@ services:
     image: ghcr.io/linuxserver/librespeed:5.2.5
     cpu_count: 2
     mem_limit: 500M
-    read_only: true
     <<: *restart
     <<: *logging
     environment:
       <<: *conf
+    volumes:
+      - "${docker_data_folder}/librespeed:/config"
     networks:
       - librespeed
     labels:
@@ -1308,6 +1309,7 @@ networks:
   librespeed:
     driver: bridge
     name: librespeed
+    
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
