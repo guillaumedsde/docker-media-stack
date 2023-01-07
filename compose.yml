@@ -661,8 +661,8 @@ services:
       JELLYFIN_CONFIG_DIR: /config
       JELLYFIN_LOG_DIR: /config/log
       JELLYFIN_CACHE_DIR: /config/cache
-      JELLYFIN_FFmpeg__probesize: "10000000"
-      JELLYFIN_FFmpeg__analyzeduration: "400000000"
+      JELLYFIN_FFmpeg__probesize: "20000000"
+      JELLYFIN_FFmpeg__analyzeduration: "800000000"
     labels:
       <<: *traefik
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
