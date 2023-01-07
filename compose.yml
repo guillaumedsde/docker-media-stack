@@ -1131,7 +1131,7 @@ services:
       authelia-redis:
         condition: service_healthy
       openldap:
-        condition: service_healthy
+        condition: service_started
     volumes:
       - ./config/authelia:/config:ro
     networks:
