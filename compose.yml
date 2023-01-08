@@ -184,7 +184,6 @@ services:
         crowdsecurity/http-crawl-non_statics
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
-      USE_WAL: "true"
       CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
       CUSTOM_HOSTNAME: ${root_domain}
       # Bouncers
