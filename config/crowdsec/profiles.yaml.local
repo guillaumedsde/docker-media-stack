@@ -1,7 +1,0 @@
-decisions:
-  - type: ban
-    # NOTE: Ban 7 days
-    duration: 168h
-
-notifications:
-  - discord

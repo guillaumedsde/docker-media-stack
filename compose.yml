@@ -189,7 +189,7 @@ services:
       - ${docker_data_folder}/crowdsec/data:/var/lib/crowdsec/data
       - ${docker_data_folder}/crowdsec/config:/etc/crowdsec
       - ./config/crowdsec/config.yaml.local:/etc/crowdsec/config.yaml.local:ro
-      - ./config/crowdsec/profiles.yaml.local:/etc/crowdsec/profiles.yaml.local:ro
+      - ./config/crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./config/crowdsec/discord.yaml:/etc/crowdsec/notifications/discord.yaml:ro
       - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
