@@ -7,5 +7,9 @@ db_config:
   password: ${CROWDSEC_DB_PASSWORD}
   sslmode: disable
 
+api:
+  client:
+    online_client: {}
+
 prometheus:
   enabled: false
