@@ -8,7 +8,7 @@ db_config:
   sslmode: disable
 
 api:
-  client:
+  server:
     online_client: {}
 
 prometheus:
