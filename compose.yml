@@ -107,8 +107,9 @@ services:
       traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.maxBodySize: "10485760"
     read_only: true
     volumes:
-      - ${docker_data_folder}/traefik:/traefik
+      - ${docker_data_folder}/traefik/data:/traefik
       - ./config/traefik:/config:ro
+      - ${docker_data_folder}/traefik/plugins-storage:/plugins-storage
     tmpfs:
       - "/tmp"
     networks:
