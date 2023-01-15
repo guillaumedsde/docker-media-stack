@@ -1015,7 +1015,17 @@ services:
       traefik.http.routers.robots.rule: HostRegexp(`${root_domain}`,`{subhost:[a-z]+}.${root_domain}`) && Path(`/robots.txt`)
       # service
       traefik.http.services.robots.loadbalancer.server.port: "8080"
-    healthcheck: *nginx-healthcheck
+    healthcheck:
+      test:
+        - "CMD"
+        - "nc"
+        - "-vz"
+        - "localhost"
+        - "8080"
+      start_period: 3s
+      interval: 1s
+      timeout: 1s
+      retries: 5
 
   ##################################################################
   # Monitoring
