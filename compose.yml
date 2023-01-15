@@ -179,6 +179,10 @@ services:
       - type: volume
         source: modsecurity-nginx-conf
         target: /etc/nginx/conf.d/
+      - type: volume
+        source: modsecurity-modsecurity-conf
+        target: /etc/nginx/modsecurity.d
+      
     networks:
       - traefik
     environment:
@@ -1377,3 +1381,4 @@ volumes:
   modsecurity-nginx-cache:
   modsecurity-nginx-run:
   modsecurity-nginx-conf:
+  modsecurity-modsecurity-conf:
