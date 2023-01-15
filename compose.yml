@@ -82,6 +82,9 @@ services:
       - "--ping.manualrouting=true"
       # traefik access logs
       - "--accesslog=true"
+      # Modsecurity plugin
+      - --experimental.plugins.traefik-modsecurity-plugin.modulename=github.com/acouvreur/traefik-modsecurity-plugin
+      - --experimental.plugins.traefik-modsecurity-plugin.version=v1.2.1
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
@@ -89,13 +92,19 @@ services:
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
     labels:
       <<: *traefik
+      # Dashboard
       traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`)
       traefik.http.routers.dashboard.service: api@internal
       traefik.http.routers.dashboard.middlewares: traefik-forward-auth
+      # Healthcheck
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
+      # Crowsec bouncer
       traefik.http.middlewares.crowdsec-traefik-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
       traefik.http.middlewares.crowdsec-bouncer.forwardauth.trustForwardHeader: "true"
+      # Modsecurity
+      traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.modSecurityUrl: http://modsecurity:8080
+      traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.maxBodySize: "10485760"
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik:/traefik
@@ -152,6 +161,51 @@ services:
       timeout: 6s
       retries: 3
       start_period: 5s
+  
+  modsecurity:
+    image: docker.io/owasp/modsecurity-crs:3.3-nginx-alpine
+    <<: *restart
+    <<: *logging
+    read_only: true
+    mem_limit: 250M
+    cpu_count: 2
+    volumes:
+      - type: volume
+        source: modsecurity-nginx-cache
+        target: /var/cache/nginx
+      - type: volume
+        source: modsecurity-nginx-run
+        target: /var/run
+      - type: volume
+        source: modsecurity-nginx-conf
+        target: /etc/nginx/conf.d/
+    networks:
+      - traefik
+    environment:
+      USER: ${UID}
+      GROUP: ${GID}
+      ALLOWED_METHODS: >-
+        GET
+        POST
+        PUT
+        PATCH
+        HEAD
+        OPTIONS
+      PORT: "8080"
+      MODSEC_RULE_ENGINE: DetectionOnly
+    healthcheck:
+      &nginx-healthcheck
+      test:
+        - "CMD"
+        - "nc"
+        - "-vz"
+        - "localhost"
+        - "80"
+      start_period: 3s
+      interval: 1s
+      timeout: 1s
+      retries: 5
+
   
   crowdsec:
     <<: *restart
@@ -972,6 +1026,7 @@ services:
       traefik.http.routers.robots.rule: HostRegexp(`${root_domain}`,`{subhost:[a-z]+}.${root_domain}`) && Path(`/robots.txt`)
       # service
       traefik.http.services.robots.loadbalancer.server.port: "8080"
+    healthcheck: *nginx-healthcheck
 
   ##################################################################
   # Monitoring
@@ -1319,3 +1374,6 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
+  modsecurity-nginx-cache:
+  modsecurity-nginx-run:
+  modsecurity-nginx-conf:
