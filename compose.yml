@@ -103,8 +103,8 @@ services:
       traefik.http.middlewares.crowdsec-traefik-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
       traefik.http.middlewares.crowdsec-bouncer.forwardauth.trustForwardHeader: "true"
       # Modsecurity
-      traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.modSecurityUrl: http://modsecurity:8080
-      traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.maxBodySize: "10485760"
+      # traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.modSecurityUrl: http://modsecurity:8080
+      # traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.maxBodySize: "10485760"
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
@@ -163,40 +163,39 @@ services:
       retries: 3
       start_period: 5s
   
-  modsecurity:
-    image: docker.io/owasp/modsecurity-crs:3.3-nginx-alpine
-    <<: *restart
-    <<: *logging
-    mem_limit: 250M
-    cpu_count: 2
-    networks:
-      - traefik
-    environment:
-      USER: ${UID}
-      GROUP: ${GID}
-      ALLOWED_METHODS: >-
-        GET
-        POST
-        PUT
-        PATCH
-        HEAD
-        OPTIONS
-      PORT: "8080"
-      MODSEC_RULE_ENGINE: DetectionOnly
-    healthcheck:
-      &nginx-healthcheck
-      test:
-        - "CMD"
-        - "nc"
-        - "-vz"
-        - "localhost"
-        - "8080"
-      start_period: 3s
-      interval: 1s
-      timeout: 1s
-      retries: 5
+  # modsecurity:
+  #   image: docker.io/owasp/modsecurity-crs:3.3-nginx-alpine
+  #   <<: *restart
+  #   <<: *logging
+  #   mem_limit: 250M
+  #   cpu_count: 2
+  #   networks:
+  #     - traefik
+  #   environment:
+  #     USER: ${UID}
+  #     GROUP: ${GID}
+  #     ALLOWED_METHODS: >-
+  #       GET
+  #       POST
+  #       PUT
+  #       PATCH
+  #       HEAD
+  #       OPTIONS
+  #     PORT: "8080"
+  #     MODSEC_RULE_ENGINE: DetectionOnly
+  #   healthcheck:
+  #     &nginx-healthcheck
+  #     test:
+  #       - "CMD"
+  #       - "nc"
+  #       - "-vz"
+  #       - "localhost"
+  #       - "8080"
+  #     start_period: 3s
+  #     interval: 1s
+  #     timeout: 1s
+  #     retries: 5
 
-  
   crowdsec:
     <<: *restart
     <<: *logging
