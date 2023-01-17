@@ -39,7 +39,7 @@ x-traefik:
 services:
   # reverse proxy
   traefik:
-    image: traefik:v2.9
+    image: traefik:v3.0
     user: ${UID}:${GID}
     # NOTE: used for logs acquisition by crowdsec
     container_name: traefik
