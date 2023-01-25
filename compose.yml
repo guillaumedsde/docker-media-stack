@@ -632,7 +632,7 @@ services:
 
   # automatically extract torrented archives
   unpackerr:
-    image: golift/unpackerr:0.10
+    image: golift/unpackerr:0.11
     user: ${UID}:${GID}
     read_only: true
     cpu_count: 4
