@@ -679,7 +679,7 @@ services:
 
   # jellyfin media server
   jellyfin:
-    image: jellyfin/jellyfin:10.8.8
+    image: jellyfin/jellyfin:10.8.9
     user: ${UID}:${GID}
     cpu_count: 15
     mem_limit: 4G
