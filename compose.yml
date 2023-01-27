@@ -219,10 +219,6 @@ services:
         crowdsecurity/http-cve
         crowdsecurity/nextcloud
         LePresidente/authelia
-      DISABLE_COLLECTIONS: >-
-        crowdsecurity/nginx
-        crowdsecurity/sshd
-        crowdsecurity/linux
       DISABLE_SCENARIOS: >-
         crowdsecurity/http-crawl-non_statics
       DISABLE_ONLINE_API: "false"
