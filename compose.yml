@@ -219,8 +219,6 @@ services:
         crowdsecurity/http-cve
         crowdsecurity/nextcloud
         LePresidente/authelia
-      DISABLE_SCENARIOS: >-
-        crowdsecurity/http-crawl-non_statics
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
       CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
@@ -236,6 +234,7 @@ services:
       - ./config/crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./config/crowdsec/discord.yaml:/etc/crowdsec/notifications/discord.yaml:ro
+      # NOTE: this might crash on first launch
       - ${docker_data_folder}/nextcloud/data/nextcloud.log:/var/log/nextcloud.log:ro
     networks:
       - crowdsec
