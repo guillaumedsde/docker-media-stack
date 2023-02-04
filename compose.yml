@@ -1033,14 +1033,17 @@ services:
     <<: *restart
     <<: *logging
     volumes:
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
     networks:
       - netdata
+      - docker-socket-proxy
     environment:
       <<: *conf
+      DOCKER_HOST: docker-socket-proxy:2375
       PGID: ${docker_group_id}
       DISABLE_TELEMETRY: "1"
       DO_NOT_TRACK: "1"
@@ -1055,6 +1058,7 @@ services:
       traefik.http.routers.netdata.middlewares: authelia@docker
     cap_add:
       - SYS_PTRACE
+      - SYS_ADMIN
     security_opt:
       - apparmor:unconfined
 
