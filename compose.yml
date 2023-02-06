@@ -1029,7 +1029,7 @@ services:
   netdata:
     cpu_count: 2
     mem_limit: 1G
-    image: netdata/netdata:v1.37
+    image: netdata/netdata:v1.38
     <<: *restart
     <<: *logging
     volumes:
