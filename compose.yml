@@ -199,7 +199,7 @@ services:
   crowdsec:
     <<: *restart
     <<: *logging
-    image: crowdsecurity/crowdsec:v1.4.5
+    image: crowdsecurity/crowdsec:v1.4.6
     cpu_count: 2
     mem_limit: 250M
     read_only: true
