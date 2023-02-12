@@ -1,7 +1,0 @@
-root: ./
-
-​structure:
-  readme: README.md
-
-redirects:
-  license: ./license.md
