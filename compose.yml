@@ -83,8 +83,8 @@ services:
       # traefik access logs
       - "--accesslog=true"
       # Modsecurity plugin
-      - --experimental.plugins.traefik-modsecurity-plugin.modulename=github.com/acouvreur/traefik-modsecurity-plugin
-      - --experimental.plugins.traefik-modsecurity-plugin.version=v1.2.1
+      # - --experimental.plugins.traefik-modsecurity-plugin.modulename=github.com/acouvreur/traefik-modsecurity-plugin
+      # - --experimental.plugins.traefik-modsecurity-plugin.version=v1.2.1
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
