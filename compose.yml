@@ -707,7 +707,7 @@ services:
 
   # ombi, plex media requests
   ombi:
-    image: ghcr.io/linuxserver/ombi:4.22.5
+    image: ghcr.io/linuxserver/ombi:4.35.10
     <<: *restart
     <<: *logging
     mem_limit: 2G
