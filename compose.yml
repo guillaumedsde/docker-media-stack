@@ -122,7 +122,8 @@ services:
       - docker-socket-proxy
       - librespeed
     <<: *common
-    mem_limit: 500m
+    mem_limit: 500M
+    memswap_limit: 750M
     cpu_count: 4
     ports:
       - 80:80
@@ -133,6 +134,7 @@ services:
     user: ${UID}:${docker_group_id}
     cpu_count: 2
     mem_limit: 100M
+    memswap_limit: 200M
     read_only: true
     tmpfs:
       - /run:mode=770,size=1k,uid=${UID},gid=${docker_group_id}
@@ -162,6 +164,7 @@ services:
     image: crowdsecurity/crowdsec:v1.4.5
     cpu_count: 2
     mem_limit: 250M
+    memswap_limit: 500M
     read_only: true
     depends_on:
       docker-socket-proxy:
@@ -205,6 +208,7 @@ services:
     image: postgres:15-bullseye
     cpu_count: 2
     mem_limit: 500M
+    memswap_limit: 750M
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -231,7 +235,8 @@ services:
     <<: *common
     image: fbonalair/traefik-crowdsec-bouncer:0.5
     cpu_count: 2
-    mem_limit: 250M
+    mem_limit: 200M
+    memswap_limit: 400M
     read_only: true
     user: ${UID}:${GID}
     environment:
@@ -248,6 +253,7 @@ services:
     image: containrrr/watchtower:latest
     <<: *common
     mem_limit: 100m
+    memswap_limit: 200M
     cpu_count: 1
     read_only: true
     user: ${UID}:${docker_group_id}
@@ -274,6 +280,7 @@ services:
       - net.ipv6.conf.all.disable_ipv6=0
     cpu_count: 2
     mem_limit: 150M
+    memswap_limit: 300M
     networks:
       traefik:
         aliases:
@@ -351,7 +358,8 @@ services:
       - /tmp
     read_only: true
     cpu_count: 4
-    mem_limit: 8G
+    mem_limit: 6G
+    memswap_limit: 7G
     user: ${UID}:${GID}
     # NOTE: use `services:` instead of `containers:` because the  
     #       container is defined in the same compose file
@@ -364,7 +372,8 @@ services:
     <<: *common
     image: jesec/flood:master-distroless
     cpu_count: 2
-    mem_limit: 250M
+    mem_limit: 200M
+    memswap_limit: 400M
     read_only: true
     user: ${UID}:${GID}
     volumes:
@@ -402,7 +411,8 @@ services:
       - "/tmp:rw,exec"
     read_only: true
     cpu_count: 4
-    mem_limit: 1g
+    mem_limit: 1000M
+    memswap_limit: 1250M
     user: ${UID}:${GID}
     network_mode: service:wireguard
     environment:
@@ -419,7 +429,8 @@ services:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
     cpu_count: 4
-    mem_limit: 1g
+    mem_limit: 1000M
+    memswap_limit: 1250M
     network_mode: service:wireguard
     environment:
       <<: *conf
@@ -432,7 +443,8 @@ services:
     # NOTE: default image UID is 1000
     user: 1000:1000
     cpu_count: 2
-    mem_limit: 2G
+    mem_limit: 1500M
+    memswap_limit: 1750M
     environment:
       <<: *conf
     # NOTE: See FIXME above
@@ -449,6 +461,7 @@ services:
     <<: *common
     cpu_count: 4
     mem_limit: 2G
+    memswap_limit: 2G
     depends_on:
       jackett:
         condition: service_healthy
@@ -475,6 +488,7 @@ services:
     <<: *common
     cpu_count: 4
     mem_limit: 2G
+    memswap_limit: 2G
     depends_on:
       jackett:
         condition: service_healthy
@@ -500,7 +514,8 @@ services:
     image: ghcr.io/linuxserver/lidarr:latest
     <<: *common
     cpu_count: 4
-    mem_limit: 1G
+    mem_limit: 2G
+    memswap_limit: 2G
     depends_on:
       jackett:
         condition: service_healthy
@@ -525,7 +540,8 @@ services:
     image: ghcr.io/linuxserver/readarr:nightly
     <<: *common
     cpu_count: 4
-    mem_limit: 1G
+    mem_limit: 2G
+    memswap_limit: 2G
     depends_on:
       jackett:
         condition: service_healthy
@@ -562,6 +578,7 @@ services:
       traefik.http.routers.bazarr.middlewares: authelia@docker
     cpu_count: 2
     mem_limit: 500M
+    memswap_limit: 750M
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/bazarr:/config
@@ -578,6 +595,7 @@ services:
     read_only: true
     cpu_count: 4
     mem_limit: 500M
+    memswap_limit: 500M
     <<: *common
     networks:
       - traefik
@@ -599,7 +617,8 @@ services:
     image: b4bz/homer:v22.11.2
     user: ${UID}:${GID}
     cpu_count: 2
-    mem_limit: 100m
+    mem_limit: 100M
+    memswap_limit: 200M
     read_only: true
     <<: *common
     networks:
@@ -622,6 +641,7 @@ services:
     user: ${UID}:${GID}
     cpu_count: 15
     mem_limit: 8G
+    memswap_limit: 8G
     <<: *common
     depends_on:
       - openldap
@@ -653,6 +673,7 @@ services:
     image: ghcr.io/linuxserver/ombi:4.35.10
     <<: *common
     mem_limit: 2G
+    memswap_limit: 2G
     cpu_count: 2
     depends_on:
       - "sonarr"
@@ -722,6 +743,7 @@ services:
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
     <<: *common
     mem_limit: 4G
+    memswap_limit: 4G
     cpu_count: 8
     image: guillaumedsde/nextcloud-samba:25-apache
 
@@ -737,6 +759,7 @@ services:
     image: postgres:12-bullseye
     cpu_count: 2
     mem_limit: 500M
+    memswap_limit: 750M
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -762,7 +785,8 @@ services:
   # cache for nextcloud
   nextcloud-redis:
     cpu_count: 2
-    mem_limit: 250m
+    mem_limit: 250M
+    memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
     image: redis:7-bullseye
@@ -784,6 +808,7 @@ services:
     <<: *common
     cpu_count: 2
     mem_limit: 2GB
+    memswap_limit: 2GB
     user: ${UID}:${GID}
     depends_on:
       - photoprism-mariadb
@@ -822,7 +847,8 @@ services:
     image: mariadb:10.10
     <<: *common
     cpu_count: 2
-    mem_limit: 2GB
+    mem_limit: 500M
+    memswap_limit: 750M
     user: ${UID}:${GID}
     environment:
       MARIADB_ROOT_PASSWORD: ${PHOTOPRISM_DB_ROOT_PASSWORD}
@@ -847,7 +873,8 @@ services:
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.2.5
     cpu_count: 2
-    mem_limit: 500M
+    mem_limit: 250M
+    memswap_limit: 500M
     <<: *common
     environment:
       <<: *conf
@@ -880,7 +907,8 @@ services:
     depends_on:
       - openldap
     <<: *common
-    mem_limit: 250m
+    mem_limit: 250M
+    memswap_limit: 250M
     cpu_count: 2
     networks:
       - samba
@@ -905,7 +933,8 @@ services:
     depends_on:
       - openldap
     <<: *common
-    mem_limit: 100m
+    mem_limit: 100MB
+    memswap_limit: 200MB
     cpu_count: 2
     networks:
       - ssh
@@ -919,6 +948,7 @@ services:
     user: ${UID}:${GID}
     read_only: true
     mem_limit: 100M
+    memswap_limit: 200M
     cpu_count: 2
     <<: *common
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
@@ -927,7 +957,8 @@ services:
   robots:
     image: nginx:1.23-alpine
     read_only: true
-    mem_limit: 150M
+    mem_limit: 200M
+    memswap_limit: 200M
     cpu_count: 2
     volumes:
       - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -962,6 +993,7 @@ services:
   netdata:
     cpu_count: 2
     mem_limit: 1G
+    memswap_limit: 1G
     image: netdata/netdata:v1.38
     <<: *common
     volumes:
@@ -998,6 +1030,7 @@ services:
     image: ghcr.io/analogj/scrutiny:v0.6.0-omnibus
     <<: *common
     mem_limit: 500M
+    memswap_limit: 500M
     cpu_count: 2
     cap_add:
       - SYS_RAWIO
@@ -1039,7 +1072,8 @@ services:
   openldap:
     image: osixia/openldap:1.5.0
     hostname: ldap.${old_root_domain}
-    mem_limit: 500m
+    mem_limit: 250M
+    memswap_limit: 250M
     environment:
       HOSTNAME: ldap.${old_root_domain}
       LDAP_DOMAIN: ${old_root_domain}
@@ -1079,7 +1113,8 @@ services:
     depends_on:
       - openldap
     <<: *common
-    mem_limit: 100m
+    mem_limit: 200M
+    memswap_limit: 200M
     labels:
       <<: *traefik
       traefik.docker.network: lam
@@ -1096,7 +1131,8 @@ services:
     container_name: authelia
     cpu_count: 4
     user: ${UID}:${GID}
-    mem_limit: 500m
+    mem_limit: 250M
+    memswap_limit: 250M
     environment:
       # Global configuration
       AUTHELIA_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
@@ -1147,7 +1183,8 @@ services:
     <<: *common
     image: postgres:14-bullseye
     cpu_count: 2
-    mem_limit: 500M
+    mem_limit: 250M
+    memswap_limit: 250M
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -1173,7 +1210,8 @@ services:
   authelia-redis:
     <<: *common
     cpu_count: 2
-    mem_limit: 250m
+    mem_limit: 250M
+    memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
     image: redis:7-bullseye
@@ -1197,7 +1235,8 @@ services:
     image: thomseddon/traefik-forward-auth:2
     <<: *common
     cpu_count: 2
-    mem_limit: 100m
+    mem_limit: 100M
+    memswap_limit: 100M
     read_only: true
     user: ${UID}:${GID}
     environment:
