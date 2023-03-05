@@ -640,8 +640,8 @@ services:
     image: jellyfin/jellyfin:10.8.9
     user: ${UID}:${GID}
     cpu_count: 15
-    mem_limit: 8G
-    memswap_limit: 8G
+    mem_limit: 10G
+    memswap_limit: 10G
     <<: *common
     depends_on:
       - openldap
