@@ -677,7 +677,7 @@ services:
     image: jellyfin/jellyfin:10.8.9
     user: ${UID}:${GID}
     cpu_count: 15
-    mem_limit: 4G
+    mem_limit: 8G
     <<: *restart
     <<: *logging
     depends_on:
@@ -780,7 +780,7 @@ services:
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
     <<: *restart
     <<: *logging
-    mem_limit: 1g
+    mem_limit: 4G
     cpu_count: 8
     image: guillaumedsde/nextcloud-samba:25-apache
 
