@@ -847,8 +847,8 @@ services:
     image: mariadb:10.10
     <<: *common
     cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 750M
+    mem_limit: 1G
+    memswap_limit: 1G
     user: ${UID}:${GID}
     environment:
       MARIADB_ROOT_PASSWORD: ${PHOTOPRISM_DB_ROOT_PASSWORD}
