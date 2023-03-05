@@ -21,7 +21,6 @@ x-conf:
 x-common:
   &common
   restart: always
-  memswap_limit: 250M
   logging:
     driver: "json-file"
     options:
