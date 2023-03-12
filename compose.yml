@@ -123,7 +123,7 @@ services:
       - librespeed
     <<: *common
     mem_limit: 500M
-    memswap_limit: 750M
+    memswap_limit: 500M
     cpu_count: 4
     ports:
       - 80:80
@@ -359,7 +359,7 @@ services:
     read_only: true
     cpu_count: 4
     mem_limit: 6G
-    memswap_limit: 7G
+    memswap_limit: 6G
     user: ${UID}:${GID}
     # NOTE: use `services:` instead of `containers:` because the  
     #       container is defined in the same compose file
@@ -372,7 +372,7 @@ services:
     <<: *common
     image: jesec/flood:master-distroless
     cpu_count: 2
-    mem_limit: 200M
+    mem_limit: 400M
     memswap_limit: 400M
     read_only: true
     user: ${UID}:${GID}
@@ -411,8 +411,8 @@ services:
       - "/tmp:rw,exec"
     read_only: true
     cpu_count: 4
-    mem_limit: 1000M
-    memswap_limit: 1250M
+    mem_limit: 1G
+    memswap_limit: 1G
     user: ${UID}:${GID}
     network_mode: service:wireguard
     environment:
@@ -429,8 +429,8 @@ services:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
     cpu_count: 4
-    mem_limit: 1000M
-    memswap_limit: 1250M
+    mem_limit: 1G
+    memswap_limit: 1G
     network_mode: service:wireguard
     environment:
       <<: *conf
@@ -444,7 +444,7 @@ services:
     user: 1000:1000
     cpu_count: 2
     mem_limit: 1500M
-    memswap_limit: 1750M
+    memswap_limit: 1500M
     environment:
       <<: *conf
     # NOTE: See FIXME above
@@ -578,7 +578,7 @@ services:
       traefik.http.routers.bazarr.middlewares: authelia@docker
     cpu_count: 2
     mem_limit: 500M
-    memswap_limit: 750M
+    memswap_limit: 500M
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/bazarr:/config
@@ -618,7 +618,7 @@ services:
     user: ${UID}:${GID}
     cpu_count: 2
     mem_limit: 100M
-    memswap_limit: 200M
+    memswap_limit: 100M
     read_only: true
     <<: *common
     networks:
@@ -640,8 +640,8 @@ services:
     image: jellyfin/jellyfin:10.8.9
     user: ${UID}:${GID}
     cpu_count: 15
-    mem_limit: 10G
-    memswap_limit: 10G
+    mem_limit: 8G
+    memswap_limit: 8G
     <<: *common
     depends_on:
       - openldap
@@ -873,7 +873,7 @@ services:
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.2.5
     cpu_count: 2
-    mem_limit: 250M
+    mem_limit: 500M
     memswap_limit: 500M
     <<: *common
     environment:
@@ -933,7 +933,7 @@ services:
     depends_on:
       - openldap
     <<: *common
-    mem_limit: 100MB
+    mem_limit: 200MB
     memswap_limit: 200MB
     cpu_count: 2
     networks:
@@ -947,8 +947,8 @@ services:
     network_mode: host
     user: ${UID}:${GID}
     read_only: true
-    mem_limit: 100M
-    memswap_limit: 200M
+    mem_limit: 150M
+    memswap_limit: 150M
     cpu_count: 2
     <<: *common
     command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
