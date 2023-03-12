@@ -1,9 +1,20 @@
 access_control:
   default_policy: one_factor
   rules:
+    # Allow *arr calendar access
     - domain_regex: '^(movies|series|music|books)\..+$'
       policy: bypass
-      resources: "^/feed/.+$"
+      resources: '^/feed(/v.)*/calendar/.+\.ics(\?.*)*$'
+      methods:
+        - GET
+    # Allow homer on LAN
+    - domain_regex: '^(home)\..+$'
+      networks:
+        - '192.168.0.0/24'
+      methods:
+        - GET
+        - HEAD
+      policy: bypass
 
 notifier:
   disable_startup_check: false
