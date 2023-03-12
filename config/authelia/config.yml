@@ -15,6 +15,12 @@ access_control:
         - GET
         - HEAD
       policy: bypass
+    # Content administrators
+    - domain_regex: '^(movies|series|music|books|prowlarr|subtitles|flood|qbittorrent)\..+$'
+      policy: two_factor
+    # Admin apps
+    - domain_regex: '^(scrutiny|netdata)\..+$'
+      policy: two_factor
 
 notifier:
   disable_startup_check: false
@@ -45,9 +51,9 @@ authentication_backend:
     display_name_attribute: displayName
 
 session:
-  expiration: 12h
-  inactivity: 14d
-  remember_me_duration: 1M
+  expiration: 24h
+  inactivity: 1M
+  remember_me_duration: 2M
   redis:
     host: authelia-redis
     port: 6379
