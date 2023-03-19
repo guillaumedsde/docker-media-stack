@@ -42,6 +42,8 @@ services:
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
+      traefik-crowdsec-bouncer-redis:
+        condition: service_healthy
     cap_add:
       - NET_BIND_SERVICE
     command:
@@ -55,7 +57,8 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.middlewares=crowdsec-traefik-bouncer@docker"
+      # NOTE: crowdsec middleware for filtering requests
+      - "--entrypoints.websecure.http.middlewares=crowdsec@docker"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
@@ -78,6 +81,9 @@ services:
       - "--ping.manualrouting=true"
       # traefik access logs
       - "--accesslog=true"
+      # Crowdsec bouncer
+      - --experimental.plugins.bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      - --experimental.plugins.bouncer.version=v1.1.11
       # Modsecurity plugin
       # - --experimental.plugins.traefik-modsecurity-plugin.modulename=github.com/acouvreur/traefik-modsecurity-plugin
       # - --experimental.plugins.traefik-modsecurity-plugin.version=v1.2.1
@@ -95,12 +101,14 @@ services:
       # Healthcheck
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
-      # Crowsec bouncer
-      traefik.http.middlewares.crowdsec-traefik-bouncer.forwardauth.address: http://crowdsec-traefik-bouncer:8080/api/v1/forwardAuth
-      traefik.http.middlewares.crowdsec-bouncer.forwardauth.trustForwardHeader: "true"
-      # Modsecurity
-      # traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.modSecurityUrl: http://modsecurity:8080
-      # traefik.http.middlewares.waf.plugin.traefik-modsecurity-plugin.maxBodySize: "10485760"
+      # Crowdsec
+      traefik.http.middlewares.crowdsec.plugin.bouncer.enabled: "true"
+      traefik.http.middlewares.crowdsec.plugin.bouncer.CrowdsecMode: "stream"
+      traefik.http.middlewares.crowdsec.plugin.bouncer.crowdsecLapiHost: "crowdsec:8080"
+      traefik.http.middlewares.crowdsec.plugin.bouncer.CrowdsecLapiKey: "${CROWDSEC_BOUNCER_KEY_TRAEFIK}"
+      traefik.http.middlewares.crowdsec.plugin.bouncer.RedisCacheEnabled: "true"
+      traefik.http.middlewares.crowdsec.plugin.bouncer.RedisCacheHost: "traefik-crowdsec-bouncer-redis:6379"
+      traefik.http.middlewares.crowdsec.plugin.bouncer.RedisCachePassword: "${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}"
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
@@ -158,6 +166,26 @@ services:
       timeout: 6s
       retries: 3
       start_period: 5s
+
+  # cache traefik crowdsec bouncer
+  traefik-crowdsec-bouncer-redis:
+    cpu_count: 2
+    mem_limit: 250M
+    memswap_limit: 250M
+    read_only: true
+    user: ${UID}:${GID}
+    image: redis:7-bullseye
+    networks:
+      - traefik
+    <<: *common
+    volumes:
+      - ${docker_data_folder}/traefik-crowdsec-bouncer-redis:/data
+    command: redis-server --requirepass ${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}
+    healthcheck:
+      test: 
+        - "CMD"
+        - "redis-cli"
+        - "ping"
 
   crowdsec:
     <<: *common
@@ -230,21 +258,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-  
-  crowdsec-traefik-bouncer:
-    <<: *common
-    image: fbonalair/traefik-crowdsec-bouncer:0.5
-    cpu_count: 2
-    mem_limit: 200M
-    memswap_limit: 400M
-    read_only: true
-    user: ${UID}:${GID}
-    environment:
-      GIN_MODE: release
-      CROWDSEC_AGENT_HOST: crowdsec:8080
-      CROWDSEC_BOUNCER_API_KEY: ${CROWDSEC_BOUNCER_KEY_TRAEFIK}
-    networks:
-      - crowdsec
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
