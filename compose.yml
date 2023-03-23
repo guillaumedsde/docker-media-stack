@@ -60,8 +60,7 @@ services:
       # NOTE: crowdsec middleware for filtering requests
       - "--entrypoints.websecure.http.middlewares=crowdsec@docker"
       - "--entrypoints.websecure.http.tls.certResolver=le"
-      - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
-      - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
+      - "--entrypoints.websecure.http.tls.domains[0].main=*.${root_domain}"
       # DNS challenge
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
