@@ -68,7 +68,7 @@ services:
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
       - "--certificatesresolvers.le.acme.dnschallenge=true"
-      - "--certificatesresolvers.le.acme.dnschallenge.delayBeforeCheck=240"
+      - "--certificatesresolvers.le.acme.dnschallenge.delayBeforeCheck=30"
       - "--certificatesresolvers.le.acme.dnschallenge.provider=ovh"
       - "--certificatesresolvers.le.acme.email=${letsencrypt_email}"
       - "--certificatesresolvers.le.acme.keytype=EC384"
@@ -94,7 +94,7 @@ services:
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
-      LEGO_DISABLE_CNAME_SUPPORT: "true"
+      LEGO_EXPERIMENTAL_CNAME_SUPPORT: "true"
     labels:
       <<: *traefik
       # Dashboard
