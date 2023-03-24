@@ -1,3 +1,6 @@
+common:
+  log_level: ${CROWDSEC_LOG_LEVEL}
+
 db_config:
   type: postgresql
   host: ${CROWDSEC_DB_HOST}

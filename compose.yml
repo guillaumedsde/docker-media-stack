@@ -209,6 +209,7 @@ services:
       GID: ${GID}
       CROWDSEC_DB_HOST: crowdsec-db
       CROWDSEC_DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
+      CROWDSEC_LOG_LEVEL: ${CROWDSEC_LOG_LEVEL:-info}
       COLLECTIONS: >-
         crowdsecurity/base-http-scenarios
         crowdsecurity/traefik
