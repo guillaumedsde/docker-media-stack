@@ -22,7 +22,7 @@ x-common:
   &common
   restart: always
   logging:
-    driver: "json-file"
+    driver: "local"
     options:
       max-file: "5"
       max-size: "10m"
