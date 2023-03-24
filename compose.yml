@@ -184,6 +184,8 @@ services:
     volumes:
       - ${docker_data_folder}/traefik-crowdsec-bouncer-redis:/data
     command: redis-server --requirepass ${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}
+    environment:
+      REDISCLI_AUTH: "${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}"
     healthcheck:
       test: 
         - "CMD"
@@ -811,6 +813,8 @@ services:
     <<: *common
     volumes:
       - ${docker_data_folder}/nextcloud-redis:/data
+    environment:
+      REDISCLI_AUTH: "${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}"
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
     healthcheck:
       test: 
