@@ -474,16 +474,14 @@ services:
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
-    image: ghcr.io/linuxserver/radarr:nightly
+    image: ghcr.io/guillaumedsde/radarr-distroless:4.3.2.6857
     <<: *common
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
-    depends_on:
-      jackett:
-        condition: service_healthy
+    read_only: true
+    user: ${UID}:${GID}
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/radarr:/config
       - ${data_folder}:/data
     networks:
