@@ -474,7 +474,7 @@ services:
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
-    image: ghcr.io/guillaumedsde/radarr-distroless:4.3.2.6857
+    image: ghcr.io/guillaumedsde/radarr-distroless:4.4.2.6956
     <<: *common
     cpu_count: 4
     mem_limit: 2G
