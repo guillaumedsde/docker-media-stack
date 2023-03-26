@@ -18,3 +18,10 @@ filenames:
   - /var/log/nextcloud.log
 labels:
   type: nextcloud
+---
+source: docker
+docker_host: tcp://docker-socket-proxy:2375
+container_name:
+  - jellyfin
+labels:
+  type: jellyfin

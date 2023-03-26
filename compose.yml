@@ -211,11 +211,10 @@ services:
       CROWDSEC_DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
       CROWDSEC_LOG_LEVEL: ${CROWDSEC_LOG_LEVEL:-info}
       COLLECTIONS: >-
-        crowdsecurity/base-http-scenarios
         crowdsecurity/traefik
-        crowdsecurity/http-cve
         crowdsecurity/nextcloud
         LePresidente/authelia
+        LePresidente/jellyfin
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
       CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
@@ -657,6 +656,8 @@ services:
   # jellyfin media server
   jellyfin:
     image: jellyfin/jellyfin:10.8.9
+    # NOTE: used for crowdsec log acquisition
+    container_name: jellyfin
     user: ${UID}:${GID}
     cpu_count: 15
     mem_limit: 8G
