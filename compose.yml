@@ -216,6 +216,7 @@ services:
         LePresidente/jellyfin
       DISABLE_SCENARIOS: >-
         crowdsecurity/http-probing
+        crowdsecurity/http-crawl-non_statics
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
       CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
