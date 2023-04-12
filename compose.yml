@@ -299,7 +299,7 @@ services:
   # Wireguard VPN client
   wireguard:
     <<: *common
-    image: qmcgaw/gluetun:v3.32
+    image: qmcgaw/gluetun:v3.33
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
