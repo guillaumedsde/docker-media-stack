@@ -1059,7 +1059,7 @@ services:
       - apparmor:unconfined
 
   scrutiny:
-    image: ghcr.io/analogj/scrutiny:v0.6.0-omnibus
+    image: ghcr.io/analogj/scrutiny:v0.7.1-omnibus
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
