@@ -665,7 +665,7 @@ services:
 
   # jellyfin media server
   jellyfin:
-    image: jellyfin/jellyfin:10.8.9
+    image: jellyfin/jellyfin:10.8.10
     # NOTE: used for crowdsec log acquisition
     container_name: jellyfin
     user: ${UID}:${GID}
