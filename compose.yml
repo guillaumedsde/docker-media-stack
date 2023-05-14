@@ -1026,7 +1026,7 @@ services:
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
-    image: netdata/netdata:v1.38
+    image: netdata/netdata:v1.39
     <<: *common
     volumes:
       - /etc/passwd:/host/etc/passwd:ro
