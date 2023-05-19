@@ -194,7 +194,7 @@ services:
 
   crowdsec:
     <<: *common
-    image: ghcr.io/crowdsecurity/crowdsec:v1.4.6
+    image: ghcr.io/crowdsecurity/crowdsec:v1.5.1
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 500M
