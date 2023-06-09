@@ -876,7 +876,7 @@ services:
       traefik.http.routers.photoprism.middlewares: authelia@docker
 
   photoprism-mariadb:
-    image: mariadb:10.11
+    image: mariadb:11.0
     <<: *common
     cpu_count: 2
     mem_limit: 1G
