@@ -893,7 +893,6 @@ services:
     volumes:
       - "${docker_data_folder}/photoprism-mariadb:/var/lib/mysql"
     command:
-      - mysqld
       - --innodb-buffer-pool-size=128M
       - --transaction-isolation=READ-COMMITTED
       - --character-set-server=utf8mb4
