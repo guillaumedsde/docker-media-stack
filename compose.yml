@@ -539,7 +539,7 @@ services:
   # lidarr, webapp for downloading music through torrent client
   # queries are done with jackett
   lidarr:
-    image: docker.io/linuxserver/lidarr:1.1.4
+    image: docker.io/linuxserver/lidarr:8.1.2135
     <<: *common
     cpu_count: 4
     mem_limit: 2G
