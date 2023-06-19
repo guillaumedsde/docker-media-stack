@@ -451,7 +451,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
   prowlarr:
-    image: ghcr.io/linuxserver/prowlarr:1.4.1
+    image: docker.io/linuxserver/prowlarr:1.5.2
     <<: *common
     depends_on:
       - wireguard
@@ -512,7 +512,7 @@ services:
   # sonarr, webapp for downloading series through torrent client
   # queries are done with jackett
   sonarr:
-    image: ghcr.io/linuxserver/sonarr:version-3.0.10.1567
+    image: docker.io/linuxserver/sonarr:3.0.10
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -539,7 +539,7 @@ services:
   # lidarr, webapp for downloading music through torrent client
   # queries are done with jackett
   lidarr:
-    image: ghcr.io/linuxserver/lidarr:version-1.0.2.2592
+    image: docker.io/linuxserver/lidarr:1.1.4
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -565,7 +565,7 @@ services:
 
   # readarr, webapp for downloading books through torrent client
   readarr:
-    image: ghcr.io/linuxserver/readarr:nightly-version-0.1.4.1596
+    image: docker.io/linuxserver/readarr:0.1.9-develop
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -590,7 +590,7 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
-    image: hotio/bazarr:release-1.2.0
+    image: hotio/bazarr:release-1.2.1
     <<: *common
     depends_on:
       - "radarr"
