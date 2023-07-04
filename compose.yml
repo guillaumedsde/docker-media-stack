@@ -299,7 +299,9 @@ services:
   # Wireguard VPN client
   wireguard:
     <<: *common
-    image: qmcgaw/gluetun:v3.35
+    # NOTE: pinning image SHA256 until 3.36 is released with ProtonVPN port forwarding, see:
+    #       https://github.com/qdm12/gluetun/issues/1488#issuecomment-1615007455
+    image: qmcgaw/gluetun@sha256:6b110ddff37713c294bba4282d4c6080d77859eb32f419076a657c6cebc49aba
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
