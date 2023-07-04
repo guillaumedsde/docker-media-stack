@@ -321,17 +321,12 @@ services:
       #        more than one network
       # flaresolverr:
     environment:
-      VPN_SERVICE_PROVIDER: mullvad
-      VPN_TYPE: wireguard
-      WIREGUARD_PRIVATE_KEY: ${MULLVAD_WIREGUARD_PRIVATE_KEY}
-      WIREGUARD_ADDRESSES: ${MULLVAD_WIREGUARD_ADDRESSES}
-      # Mullvad configuration
-      # https://github.com/qdm12/gluetun/wiki/Mullvad
-      SERVER_COUNTRIES: ${MULLVAD_SERVER_COUNTRIES}
-      OWNED_ONLY: "yes"
-      # Port forwarding configuration
-      # https://github.com/qdm12/gluetun/wiki/VPN-server-port-forwarding
-      FIREWALL_VPN_INPUT_PORTS: ${MULLVAD_FIREWALL_VPN_INPUT_PORTS}
+      VPN_SERVICE_PROVIDER: protonvpn
+      VPN_TYPE: openvpn
+      OPENVPN_USER: ${OPENVPN_USER}
+      OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
+      SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
+      VPN_PORT_FORWARDING: "on"
       # Allow LAN access to other containers
       FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
       # DNS Configuration 
