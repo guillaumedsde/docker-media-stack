@@ -1037,6 +1037,7 @@ services:
       <<: *conf
       DOCKER_HOST: docker-socket-proxy:2375
       PGID: ${docker_group_id}
+      NETDATA_DISABLE_TELEMETRY: "1"
       DISABLE_TELEMETRY: "1"
       DO_NOT_TRACK: "1"
       NETDATA_DISABLE_CLOUD: "1"
