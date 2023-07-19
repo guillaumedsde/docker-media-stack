@@ -1352,6 +1352,7 @@ networks:
     name: flaresolverr
   docker-socket-proxy:
     driver: bridge
+    internal: true
     name: docker-socket-proxy
   crowdsec:
     driver: bridge
