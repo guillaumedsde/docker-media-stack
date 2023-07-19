@@ -1113,7 +1113,7 @@ services:
       LDAP_TLS_CA_CRT_FILENAME: ca.cer
       LDAP_OPENLDAP_UID: ${UID}
       LDAP_OPENLDAP_GID: ${GID}
-    command: "--copy-service --loglevel debug"
+    command: "--copy-service"
     <<: *common
     networks:
       - ldap
