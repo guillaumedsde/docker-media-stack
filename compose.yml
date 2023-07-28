@@ -323,12 +323,15 @@ services:
       #        more than one network
       # flaresolverr:
     environment:
-      VPN_SERVICE_PROVIDER: protonvpn
-      VPN_TYPE: openvpn
-      OPENVPN_USER: ${OPENVPN_USER}
-      OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
-      VPN_PORT_FORWARDING: "on"
+      VPN_SERVICE_PROVIDER: custom
+      VPN_TYPE: wireguard
+      VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
+      VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
+      WIREGUARD_PUBLIC_KEY: ${WIREGUARD_PUBLIC_KEY}
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+      WIREGUARD_PRESHARED_KEY: ${WIREGUARD_PRESHARED_KEY}
+      WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
+      # VPN_PORT_FORWARDING: "on"
       # Allow LAN access to other containers
       FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
       # DNS Configuration 
