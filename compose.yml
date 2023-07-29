@@ -11,15 +11,13 @@
 version: "3.9"
 
 # basic common configuration for most containers
-x-conf:
-  &conf
+x-conf: &conf
   TZ: ${TZ}
   PGID: ${GID}
   PUID: ${UID}
 
 # container restart policy
-x-common:
-  &common
+x-common: &common
   restart: always
   logging:
     driver: "local"
@@ -28,8 +26,7 @@ x-common:
       max-size: "10m"
 
 # Traefik
-x-traefik:
-  &traefik
+x-traefik: &traefik
   traefik.enable: "true"
 
 services:
@@ -187,7 +184,7 @@ services:
     environment:
       REDISCLI_AUTH: "${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}"
     healthcheck:
-      test: 
+      test:
         - "CMD"
         - "redis-cli"
         - "ping"
@@ -210,23 +207,11 @@ services:
       CROWDSEC_DB_PASSWORD: ${CROWDSEC_DB_PASSWORD}
       CROWDSEC_LOG_LEVEL: ${CROWDSEC_LOG_LEVEL:-info}
       COLLECTIONS: >-
-        crowdsecurity/http-cve
-        crowdsecurity/nextcloud
-        LePresidente/authelia
-        LePresidente/jellyfin
+        crowdsecurity/http-cve crowdsecurity/nextcloud LePresidente/authelia LePresidente/jellyfin
       SCENARIOS: >-
-        crowdsecurity/http-bad-user-agent
-        crowdsecurity/http-path-traversal-probing
-        crowdsecurity/http-sensitive-files
-        crowdsecurity/http-sqli-probing
-        crowdsecurity/http-xss-probing
-        crowdsecurity/http-backdoors-attempts
-        ltsich/http-w00tw00t
-        crowdsecurity/http-generic-bf
-        crowdsecurity/http-open-proxy
+        crowdsecurity/http-bad-user-agent crowdsecurity/http-path-traversal-probing crowdsecurity/http-sensitive-files crowdsecurity/http-sqli-probing crowdsecurity/http-xss-probing crowdsecurity/http-backdoors-attempts ltsich/http-w00tw00t crowdsecurity/http-generic-bf crowdsecurity/http-open-proxy
       PARSERS: >-
-        crowdsecurity/http-logs
-        crowdsecurity/traefik-logs
+        crowdsecurity/http-logs crowdsecurity/traefik-logs
       DISABLE_ONLINE_API: "false"
       DISABLE_AGENT: "false"
       CROWDSEC_DISCORD_WEBHOOK_URL: ${CROWDSEC_DISCORD_WEBHOOK_URL}
@@ -247,7 +232,7 @@ services:
     networks:
       - crowdsec
       - docker-socket-proxy
-  
+
   crowdsec-db:
     <<: *common
     image: postgres:15-bullseye
@@ -267,7 +252,7 @@ services:
     networks:
       - crowdsec
     healthcheck:
-      test: 
+      test:
         - "CMD"
         - "pg_isready"
         - "--username=crowdsec"
@@ -451,7 +436,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
   prowlarr:
-    image: docker.io/linuxserver/prowlarr:version-1.6.3.3608
+    image: docker.io/linuxserver/prowlarr:1.6.3.3608-ls25
     <<: *common
     depends_on:
       - wireguard
@@ -725,8 +710,7 @@ services:
       traefik.http.routers.ombi.middlewares: authelia@docker
 
   # personal cloud
-  nextcloud:
-    &nextcloud
+  nextcloud: &nextcloud
     depends_on:
       nextcloud-postgres:
         condition: service_healthy
@@ -803,7 +787,7 @@ services:
     networks:
       - nextcloud
     healthcheck:
-      test: 
+      test:
         - "CMD"
         - "pg_isready"
         - "--username=nextcloud"
@@ -829,7 +813,7 @@ services:
       REDISCLI_AUTH: "${TRAEFIK_CROWDSEC_BOUNCER_REDIS_PASSWORD}"
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
     healthcheck:
-      test: 
+      test:
         - "CMD"
         - "redis-cli"
         - "ping"
@@ -900,7 +884,7 @@ services:
       - --max-connections=512
       - --innodb-rollback-on-timeout=OFF
       - --innodb-lock-wait-timeout=120
-  
+
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.2.5
     cpu_count: 2
@@ -1230,7 +1214,7 @@ services:
     networks:
       - authelia
     healthcheck:
-      test: 
+      test:
         - "CMD"
         - "pg_isready"
         - "--username=authelia"
@@ -1253,7 +1237,7 @@ services:
       - "60"
       - "1"
     healthcheck:
-      test: 
+      test:
         - "CMD"
         - "redis-cli"
         - "ping"
@@ -1364,7 +1348,7 @@ networks:
   librespeed:
     driver: bridge
     name: librespeed
-    
+
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
