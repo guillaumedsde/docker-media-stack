@@ -436,7 +436,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
   prowlarr:
-    image: docker.io/linuxserver/prowlarr:1.6.3.3608-ls25
+    image: docker.io/linuxserver/prowlarr:1.6.3
     <<: *common
     depends_on:
       - wireguard
@@ -603,7 +603,7 @@ services:
 
   # automatically extract torrented archives
   unpackerr:
-    image: golift/unpackerr:0.11
+    image: docker.io/golift/unpackerr:0.11
     user: ${UID}:${GID}
     read_only: true
     cpu_count: 4
@@ -627,7 +627,7 @@ services:
 
   # homer is a homepage container
   homer:
-    image: b4bz/homer:v22.11.2
+    image: docker.io/b4bz/homer:v23.05.1
     user: ${UID}:${GID}
     cpu_count: 2
     mem_limit: 100M
@@ -650,7 +650,7 @@ services:
 
   # jellyfin media server
   jellyfin:
-    image: jellyfin/jellyfin:10.8.10
+    image: docker.io/jellyfin/jellyfin:10.8.10
     # NOTE: used for crowdsec log acquisition
     container_name: jellyfin
     user: ${UID}:${GID}
@@ -770,7 +770,7 @@ services:
   # database for nextcloud
   nextcloud-postgres:
     <<: *common
-    image: postgres:12-bullseye
+    image: docker.io/postgres:12-bullseye
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
@@ -820,7 +820,7 @@ services:
 
   # Photo gallery
   photoprism:
-    image: photoprism/photoprism:20220121
+    image: docker.io/photoprism/photoprism:230719
     <<: *common
     cpu_count: 2
     mem_limit: 2GB
@@ -860,7 +860,7 @@ services:
       traefik.http.routers.photoprism.middlewares: authelia@docker
 
   photoprism-mariadb:
-    image: mariadb:11.0
+    image: docker.io/mariadb:11.0
     <<: *common
     cpu_count: 2
     mem_limit: 1G
@@ -928,7 +928,7 @@ services:
     networks:
       - samba
       - ldap
-    image: guillaumedsde/samba-ldap:latest
+    image: docker.io/guillaumedsde/samba-ldap:latest
 
   ssh:
     ports:
@@ -954,7 +954,7 @@ services:
     networks:
       - ssh
       - ldap
-    image: guillaumedsde/ssh-ldap
+    image: docker.io/guillaumedsde/ssh-ldap
 
   # Web Service Discovery host daemon
   # see https://github.com/christgau/wsdd
@@ -970,7 +970,7 @@ services:
     image: docker.io/guillaumedsde/wsdd-distroless:v0.7.1
 
   robots:
-    image: nginx:1.25-alpine
+    image: docker.io/nginx:1.25-alpine
     read_only: true
     mem_limit: 200M
     memswap_limit: 200M
@@ -1009,7 +1009,7 @@ services:
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
-    image: netdata/netdata:v1.41
+    image: docker.io/netdata/netdata:v1.41
     <<: *common
     volumes:
       - /etc/passwd:/host/etc/passwd:ro
@@ -1086,7 +1086,7 @@ services:
 
   # LDAP server
   openldap:
-    image: osixia/openldap:1.5.0
+    image: docker.io/osixia/openldap:1.5.0
     hostname: ldap.${old_root_domain}
     mem_limit: 250M
     memswap_limit: 250M
@@ -1117,7 +1117,7 @@ services:
 
   # LDAP Server management web GUI
   lam:
-    image: ldapaccountmanager/lam:stable
+    image: docker.io/ldapaccountmanager/lam:stable
     volumes:
       - ${docker_data_folder}/lam/config.cfg:/etc/ldap-account-manager/config.cfg
       - ${docker_data_folder}/lam/lam.conf:/var/lib/ldap-account-manager/config/lam.conf
@@ -1142,7 +1142,7 @@ services:
 
   # SSO
   authelia:
-    image: authelia/authelia:4.37
+    image: docker.io/authelia/authelia:4.37
     # NOTE: used for logs acquisition by crowdsec
     container_name: authelia
     cpu_count: 4
@@ -1197,7 +1197,7 @@ services:
   # DB for authelia
   authelia-db:
     <<: *common
-    image: postgres:14-bullseye
+    image: docker.io/postgres:14-bullseye
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -1230,7 +1230,7 @@ services:
     memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
-    image: redis:7-bullseye
+    image: docker.io/redis:7-bullseye
     command:
       - redis-server
       - --save
@@ -1248,7 +1248,7 @@ services:
 
   # OIDC forward authentication for traefik
   traefik-forward-auth:
-    image: thomseddon/traefik-forward-auth:2
+    image: docker.io/thomseddon/traefik-forward-auth:2
     <<: *common
     cpu_count: 2
     mem_limit: 100M
