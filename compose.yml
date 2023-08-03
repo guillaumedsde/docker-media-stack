@@ -82,7 +82,7 @@ services:
       - "--accesslog=true"
       # Crowdsec bouncer
       - --experimental.plugins.bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
-      - --experimental.plugins.bouncer.version=v1.1.11
+      - --experimental.plugins.bouncer.version=v1.1.13
       # Modsecurity plugin
       # - --experimental.plugins.traefik-modsecurity-plugin.modulename=github.com/acouvreur/traefik-modsecurity-plugin
       # - --experimental.plugins.traefik-modsecurity-plugin.version=v1.2.1
