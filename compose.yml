@@ -453,7 +453,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.2.2
+    image: ghcr.io/flaresolverr/flaresolverr:v3.3.2
     <<: *common
     # NOTE: default image UID is 1000
     user: 1000:1000
