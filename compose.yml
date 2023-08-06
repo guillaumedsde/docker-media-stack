@@ -171,16 +171,16 @@ services:
     <<: *common
     # NOTE: pinning image SHA256 until 3.36 is released with ProtonVPN port forwarding, see:
     #       https://github.com/qdm12/gluetun/issues/1488#issuecomment-1615007455
-    image: qmcgaw/gluetun@sha256:6b110ddff37713c294bba4282d4c6080d77859eb32f419076a657c6cebc49aba
+    image: qmcgaw/gluetun@sha256:efd5a5157398766884f2054b1d0413701c7e488c017d88f84e1e285c4f0a4805
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-    cpu_count: 2
-    mem_limit: 150M
-    memswap_limit: 150M
+    cpu_count: 4
+    mem_limit: 200M
+    memswap_limit: 200M
     volumes:
       - type: volume
         source: gluetun
@@ -191,9 +191,6 @@ services:
           - jackett
           - qbittorrent
           - prowlarr
-      # FIXME: services can't connect to VPN protected containers when 
-      #        more than one network
-      # flaresolverr:
     environment:
       LOG_LEVEL: debug
       VPN_SERVICE_PROVIDER: custom
