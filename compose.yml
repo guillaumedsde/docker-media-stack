@@ -197,7 +197,17 @@ services:
       VPN_TYPE: openvpn
       OPENVPN_USER: ${OPENVPN_USER}
       OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      SERVER_HOSTNAMES: node-fr-16.protonvpn.net,node-fr-17.protonvpn.net,node-fr-18.protonvpn.net,node-fr-19.protonvpn.net,node-fr-20.protonvpn.net,node-fr-21.protonvpn.net,node-fr-22.protonvpn.net
+      SERVER_HOSTNAMES: >-
+        node-fr-16.protonvpn.net,
+        node-fr-17.protonvpn.net,
+        node-fr-18.protonvpn.net,
+        node-fr-19.protonvpn.net,
+        node-fr-20.protonvpn.net,
+        node-fr-21.protonvpn.net,
+        node-fr-22.protonvpn.net
+
+
+
       # VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
       # VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
       # WIREGUARD_PUBLIC_KEY: ${WIREGUARD_PUBLIC_KEY}
