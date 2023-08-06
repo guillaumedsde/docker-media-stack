@@ -182,7 +182,11 @@ services:
       - net.ipv6.conf.all.disable_ipv6=0
     cpu_count: 2
     mem_limit: 150M
-    memswap_limit: 300M
+    memswap_limit: 150M
+    volumes:
+      - type: volume
+        source: gluetun
+        target: /tmp/gluetun
     networks:
       traefik:
         aliases:
@@ -244,6 +248,28 @@ services:
       # https://github.com/containrrr/watchtower/issues/188
       # https://github.com/containrrr/watchtower/issues/1013
       com.centurylinklabs.watchtower.enable: "false"
+
+  
+  gluetun-qbittorrent-port-manager:
+    image: docker.io/snoringdragon/gluetun-qbittorrent-port-manager@sha256:5394a74784cc6b1d1140ed9e313fe9c5ba62d3076693027bb6a855eb4117d1fe
+    <<: *common
+    user: ${UID}:${GID}
+    read_only: true
+    cpu_count: 2
+    mem_limit: 50M
+    memswap_limit: 50M
+    volumes:
+      - type: volume
+        source: gluetun
+        target: /tmp/gluetun
+    network_mode: service:wireguard
+    environment:
+      QBITTORRENT_SERVER: localhost
+      QBITTORRENT_PORT: 8080
+      QBITTORRENT_USER: ${QBT_USER}
+      QBITTORRENT_PASS: ${QBT_PASS}
+      PORT_FORWARDED: /tmp/gluetun/forwarded_port
+
 
   # Torrent client
   qbittorrent:
@@ -1232,3 +1258,4 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
+  gluetun:
