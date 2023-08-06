@@ -178,8 +178,6 @@ services:
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-    sysctls:
-      - net.ipv6.conf.all.disable_ipv6=0
     cpu_count: 2
     mem_limit: 150M
     memswap_limit: 150M
@@ -197,6 +195,7 @@ services:
       #        more than one network
       # flaresolverr:
     environment:
+      LOG_LEVEL: debug
       VPN_SERVICE_PROVIDER: custom
       VPN_TYPE: wireguard
       VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
