@@ -256,6 +256,8 @@ services:
     depends_on:
       wireguard:
         condition: service_healthy
+      qbittorrent:
+        condition: service_healthy
     # TODO: rewrite this container to be able to use any UID
     # user: ${UID}:${GID}
     read_only: true
