@@ -422,9 +422,6 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
-    depends_on:
-      jackett:
-        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/sonarr:/config
@@ -449,9 +446,6 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
-    depends_on:
-      jackett:
-        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lidarr:/config
@@ -475,9 +469,6 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
-    depends_on:
-      jackett:
-        condition: service_healthy
     volumes:
       - ${docker_data_folder}/readarr:/config
       - ${data_folder}:/data
