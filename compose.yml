@@ -253,7 +253,11 @@ services:
   gluetun-qbittorrent-port-manager:
     image: docker.io/snoringdragon/gluetun-qbittorrent-port-manager@sha256:5394a74784cc6b1d1140ed9e313fe9c5ba62d3076693027bb6a855eb4117d1fe
     <<: *common
-    user: ${UID}:${GID}
+    depends_on:
+      wireguard:
+        condition: service_healthy
+    # TODO: rewrite this container to be able to use any UID
+    # user: ${UID}:${GID}
     read_only: true
     cpu_count: 2
     mem_limit: 50M
@@ -275,7 +279,8 @@ services:
   qbittorrent:
     <<: *common
     depends_on:
-      - wireguard
+      wireguard:
+        condition: service_healthy
     volumes:
       - ${docker_data_folder}/qbittorrent:/config
       - ${data_folder}:/data
@@ -328,7 +333,8 @@ services:
     image: guillaumedsde/jackett-distroless:latest
     <<: *common
     depends_on:
-      - wireguard
+      wireguard:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/jackett:/config
@@ -351,7 +357,8 @@ services:
     image: docker.io/linuxserver/prowlarr:1.7.4
     <<: *common
     depends_on:
-      - wireguard
+      wireguard:
+        condition: service_healthy
     volumes:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
