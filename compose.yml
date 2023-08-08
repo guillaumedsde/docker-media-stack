@@ -192,12 +192,12 @@ services:
           - qbittorrent
           - prowlarr
     environment:
-      LOG_LEVEL: debug
+      LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
       VPN_SERVICE_PROVIDER: protonvpn
       VPN_TYPE: openvpn
       OPENVPN_USER: ${OPENVPN_USER}
       OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      SERVER_CITIES: Zurich
+      SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
       # VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
       # VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
       # WIREGUARD_PUBLIC_KEY: ${WIREGUARD_PUBLIC_KEY}
