@@ -171,7 +171,7 @@ services:
     <<: *common
     # NOTE: pinning image SHA256 until 3.36 is released with ProtonVPN port forwarding, see:
     #       https://github.com/qdm12/gluetun/issues/1488#issuecomment-1615007455
-    image: qmcgaw/gluetun@sha256:efd5a5157398766884f2054b1d0413701c7e488c017d88f84e1e285c4f0a4805
+    image: qmcgaw/gluetun@sha256:8eb8499c778e7b13ef5b23278e80390264cbeda8bfcc3d8b21fc07e0710f2fbb
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
