@@ -599,7 +599,7 @@ services:
 
   # ombi, plex media requests
   ombi:
-    image: ghcr.io/linuxserver/ombi:4.39.1
+    image: ghcr.io/linuxserver/ombi:4.43.5
     <<: *common
     mem_limit: 2G
     memswap_limit: 2G
