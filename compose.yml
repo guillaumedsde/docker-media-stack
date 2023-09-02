@@ -181,6 +181,11 @@ services:
     cpu_count: 4
     mem_limit: 200M
     memswap_limit: 200M
+    dns:
+      - "1.1.1.1"
+      - "1.0.0.1"
+      # NOTE: fallback to embedded docker DNS
+      - "127.0.0.11"
     volumes:
       - type: volume
         source: gluetun
@@ -213,12 +218,6 @@ services:
       VPN_PORT_FORWARDING_PROVIDER: protonvpn
       # Allow LAN access to other containers
       FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
-      # DNS Configuration 
-      # https://github.com/qdm12/gluetun/wiki/DNS-options
-      DOT: "off"
-      BLOCK_MALICIOUS: "off"
-      BLOCK_SURVEILLANCE: "off"
-      BLOCK_ADS: "off"
       DNS_KEEP_NAMESERVER: "on"
     labels:
       <<: *traefik
