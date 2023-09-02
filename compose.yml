@@ -216,7 +216,7 @@ services:
       # Allow LAN access to other containers
       FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
       DNS_KEEP_NAMESERVER: "on"
-      HEALTH_TARGET_ADDRESS: "google.com:443"
+      HEALTH_TARGET_ADDRESS: "1.1.1.1:443"
     labels:
       <<: *traefik
       # NOTE: See FIXME above
