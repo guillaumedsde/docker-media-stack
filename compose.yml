@@ -169,9 +169,8 @@ services:
   # Wireguard VPN client
   wireguard:
     <<: *common
-    # NOTE: pinning image SHA256 until 3.36 is released with ProtonVPN port forwarding, see:
-    #       https://github.com/qdm12/gluetun/issues/1488#issuecomment-1615007455
-    image: qmcgaw/gluetun@sha256:8eb8499c778e7b13ef5b23278e80390264cbeda8bfcc3d8b21fc07e0710f2fbb
+    image: ghcr.io/tprasadtp/protonwire:7.2.1
+    init: true
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
@@ -181,48 +180,30 @@ services:
     cpu_count: 4
     mem_limit: 200M
     memswap_limit: 200M
-    dns:
-      - "1.1.1.1"
-      - "1.0.0.1"
-      # NOTE: fallback to embedded docker DNS
-      - "127.0.0.11"
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    volumes:
-      - type: bind
-        source: ${docker_data_folder}/gluetun
-        target: /gluetun
+    sysctls:
+      net.ipv4.conf.all.rp_filter: 2
+      net.ipv6.conf.all.disable_ipv6: 1
     networks:
       traefik:
         aliases:
           - jackett
           - qbittorrent
           - prowlarr
+    volumes:
+      - type: tmpfs
+        target: /tmp
+      - type: bind
+        source: private.key
+        target: /etc/protonwire/private-key
+        read_only: true
     environment:
-      <<: *conf
-      LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
-      VPN_SERVICE_PROVIDER: protonvpn
-      VPN_TYPE: openvpn
-      OPENVPN_PROTOCOL: "udp"
-      OPENVPN_VERSION: "2.6"
-      OPENVPN_USER: ${OPENVPN_USER}
-      OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
-      # SERVER_HOSTNAMES: node-nl-01.protonvpn.net,node-nl-13.protonvpn.net,node-nl-47.protonvpn.net
-      # VPN_TYPE: wireguard
-      # VPN_SERVICE_PROVIDER: custom
-      # VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
-      # VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
-      # WIREGUARD_PUBLIC_KEY: ${WIREGUARD_PUBLIC_KEY}
-      # WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
-      # WIREGUARD_PRESHARED_KEY: ${WIREGUARD_PRESHARED_KEY}
-      # WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
-      VPN_PORT_FORWARDING: "on"
-      VPN_PORT_FORWARDING_PROVIDER: protonvpn
-      # Allow LAN access to other containers
-      FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
-      DNS_KEEP_NAMESERVER: "on"
-      VERSION_INFORMATION: "off"
+      PROTONVPN_SERVER: node-ch-06.protonvpn.net
+      DEBUG: "0"
+      KILL_SWITCH: "1"
+      WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
+      SKIP_DNS_CONFIG: "1"
+    command:
+      - "--p2p"
     labels:
       <<: *traefik
       # NOTE: See FIXME above
