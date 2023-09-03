@@ -198,6 +198,7 @@ services:
       KILL_SWITCH: "1"
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       SKIP_DNS_CONFIG: "1"
+      IPCHECK_URL: "https://api.ipify.org"
     healthcheck:
       test:
         - "CMD"
