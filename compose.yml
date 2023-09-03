@@ -205,7 +205,6 @@ services:
       VPN_TYPE: openvpn
       OPENVPN_PROTOCOL: "udp"
       OPENVPN_VERSION: "2.6"
-      OPENVPN_VERBOSITY: "6"
       OPENVPN_USER: ${OPENVPN_USER}
       OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
       SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
@@ -218,8 +217,8 @@ services:
       # WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
       # WIREGUARD_PRESHARED_KEY: ${WIREGUARD_PRESHARED_KEY}
       # WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
-      # VPN_PORT_FORWARDING: "on"
-      # VPN_PORT_FORWARDING_PROVIDER: protonvpn
+      VPN_PORT_FORWARDING: "on"
+      VPN_PORT_FORWARDING_PROVIDER: protonvpn
       # Allow LAN access to other containers
       FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
       DNS_KEEP_NAMESERVER: "on"
