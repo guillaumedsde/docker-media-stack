@@ -198,8 +198,17 @@ services:
       KILL_SWITCH: "1"
       WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
       SKIP_DNS_CONFIG: "1"
-    command:
-      - "--p2p"
+    healthcheck:
+      test:
+        - "CMD"
+        - "protonwire"
+        - "healthcheck"
+        - "--silent"
+        - "--container"
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
     labels:
       <<: *traefik
       # NOTE: See FIXME above
