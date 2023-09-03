@@ -192,10 +192,6 @@ services:
     volumes:
       - type: tmpfs
         target: /tmp
-      - type: bind
-        source: private.key
-        target: /etc/protonwire/private-key
-        read_only: true
     environment:
       PROTONVPN_SERVER: node-ch-06.protonvpn.net
       DEBUG: "0"
