@@ -254,27 +254,27 @@ services:
       com.centurylinklabs.watchtower.enable: "false"
 
   
-  qbittorrent-gluetun-port-update:
-    image: docker.io/technosam/qbittorrent-gluetun-port-update@sha256:70dc81a34748b4140d57af5310657be29387d2a7f6ffb8fd03f37874708a24a5
-    <<: *common
-    depends_on:
-      wireguard:
-        condition: service_healthy
-      qbittorrent:
-        condition: service_healthy
-    user: ${UID}:${GID}
-    read_only: true
-    cpu_count: 2
-    mem_limit: 50M
-    memswap_limit: 50M
-    network_mode: service:wireguard
-    environment:
-      QBITTORRENT_WEBUI_HOST: localhost
-      QBITTORRENT_WEBUI_PORT: 8080
-      QBITTORRENT_WEBUI_USERNAME: ${QBT_USER}
-      QBITTORRENT_WEBUI_PASSWORD: ${QBT_PASS}
-      GLUETUN_CONTROL_HOST: localhost
-      GLUETUN_CONTROL_PORT: "8000"
+  # qbittorrent-gluetun-port-update:
+  #   image: docker.io/technosam/qbittorrent-gluetun-port-update@sha256:70dc81a34748b4140d57af5310657be29387d2a7f6ffb8fd03f37874708a24a5
+  #   <<: *common
+  #   depends_on:
+  #     wireguard:
+  #       condition: service_healthy
+  #     qbittorrent:
+  #       condition: service_healthy
+  #   user: ${UID}:${GID}
+  #   read_only: true
+  #   cpu_count: 2
+  #   mem_limit: 50M
+  #   memswap_limit: 50M
+  #   network_mode: service:wireguard
+  #   environment:
+  #     QBITTORRENT_WEBUI_HOST: localhost
+  #     QBITTORRENT_WEBUI_PORT: 8080
+  #     QBITTORRENT_WEBUI_USERNAME: ${QBT_USER}
+  #     QBITTORRENT_WEBUI_PASSWORD: ${QBT_PASS}
+  #     GLUETUN_CONTROL_HOST: localhost
+  #     GLUETUN_CONTROL_PORT: "8000"
 
   # Torrent client
   qbittorrent:
@@ -291,8 +291,8 @@ services:
       - /tmp
     read_only: true
     cpu_count: 4
-    mem_limit: 6G
-    memswap_limit: 6G
+    mem_limit: 8G
+    memswap_limit: 8G
     user: ${UID}:${GID}
     # NOTE: use `services:` instead of `containers:` because the  
     #       container is defined in the same compose file
