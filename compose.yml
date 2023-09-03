@@ -186,6 +186,8 @@ services:
       - "1.0.0.1"
       # NOTE: fallback to embedded docker DNS
       - "127.0.0.11"
+    devices:
+      - /dev/net/tun:/dev/net/tun
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -202,8 +204,8 @@ services:
       VPN_TYPE: openvpn
       OPENVPN_USER: ${OPENVPN_USER}
       OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
-      # SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
-      SERVER_HOSTNAMES: node-nl-01.protonvpn.net,node-nl-13.protonvpn.net,node-nl-47.protonvpn.net
+      SERVER_HOSTNAMES: node-ch-05.protonvpn.net,node-ch-06.protonvpn.net,node-ch-07.protonvpn.net,node-ch-08.protonvpn.net
+      # SERVER_HOSTNAMES: node-nl-01.protonvpn.net,node-nl-13.protonvpn.net,node-nl-47.protonvpn.net
       # VPN_TYPE: wireguard
       # VPN_SERVICE_PROVIDER: custom
       # VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
