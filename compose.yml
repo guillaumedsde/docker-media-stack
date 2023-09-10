@@ -73,7 +73,7 @@ services:
       - "--ping=true"
       - "--ping.manualrouting=true"
       # traefik access logs
-      - "--accesslog=true"
+      # - "--accesslog=true"
     environment:
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
