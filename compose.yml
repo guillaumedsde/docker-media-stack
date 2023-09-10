@@ -339,6 +339,18 @@ services:
       <<: *conf
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
+    healthcheck:
+      test:
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:9696
+      interval: 1m
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v3.3.4
@@ -367,6 +379,11 @@ services:
     memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
+      prowlarr:
+        condition: service_healthy
     volumes:
       - ${docker_data_folder}/radarr:/config
       - ${data_folder}:/data
@@ -390,6 +407,11 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
+      prowlarr:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/sonarr:/config
@@ -414,6 +436,11 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
+      prowlarr:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lidarr:/config
@@ -437,6 +464,11 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    depends_on:
+      qbittorrent:
+        condition: service_healthy
+      prowlarr:
+        condition: service_healthy
     volumes:
       - ${docker_data_folder}/readarr:/config
       - ${data_folder}:/data
