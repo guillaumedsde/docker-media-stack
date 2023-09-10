@@ -348,10 +348,10 @@ services:
         - --tries=1
         - --spider
         - http://localhost:9696
-      interval: 1m
+      interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 5s
+      retries: 8
+      start_period: 15s
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v3.3.4
