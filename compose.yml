@@ -169,47 +169,48 @@ services:
   # Wireguard VPN client
   wireguard:
     <<: *common
-    image: ghcr.io/tprasadtp/protonwire:7.2.1
-    init: true
+    # NOTE: pinning image SHA256 until 3.36 is released with untouched DNS settings
+    image: qmcgaw/gluetun@sha256:8eb8499c778e7b13ef5b23278e80390264cbeda8bfcc3d8b21fc07e0710f2fbb
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-    cpu_count: 4
-    mem_limit: 200M
-    memswap_limit: 200M
+    cpu_count: 2
+    mem_limit: 100M
+    memswap_limit: 100M
     sysctls:
-      net.ipv4.conf.all.rp_filter: 2
-      net.ipv6.conf.all.disable_ipv6: 1
+      net.ipv6.conf.all.disable_ipv6: 0
+    dns:
+      - "1.1.1.1"
+      - "1.0.0.1"
+      # NOTE: fallback to embedded docker DNS
+      - "127.0.0.11"
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/gluetun
+        target: /gluetun
     networks:
       traefik:
         aliases:
           - jackett
           - qbittorrent
           - prowlarr
-    volumes:
-      - type: tmpfs
-        target: /tmp
     environment:
-      PROTONVPN_SERVER: node-ch-06.protonvpn.net
-      DEBUG: "0"
-      KILL_SWITCH: "1"
-      WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}"
-      SKIP_DNS_CONFIG: "1"
-      IPCHECK_URL: "https://api.ipify.org"
-    healthcheck:
-      test:
-        - "CMD"
-        - "protonwire"
-        - "healthcheck"
-        - "--silent"
-        - "--container"
-      start_period: 5s
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      <<: *conf
+      LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
+      VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
+      VPN_TYPE: wireguard
+      SERVER_COUNTRIES: ${VPN_SERVER_COUNTRIES}
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+      WIREGUARD_PRESHARED_KEY: ${WIREGUARD_PRESHARED_KEY}
+      WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
+      FIREWALL_VPN_INPUT_PORTS: ${FIREWALL_VPN_INPUT_PORTS}
+      # Allow LAN access to other containers
+      FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
+      DNS_KEEP_NAMESERVER: "on"
+      VERSION_INFORMATION: "off"
     labels:
       <<: *traefik
       # NOTE: See FIXME above
@@ -242,29 +243,6 @@ services:
       # https://github.com/containrrr/watchtower/issues/188
       # https://github.com/containrrr/watchtower/issues/1013
       com.centurylinklabs.watchtower.enable: "false"
-
-  
-  # qbittorrent-gluetun-port-update:
-  #   image: docker.io/technosam/qbittorrent-gluetun-port-update@sha256:70dc81a34748b4140d57af5310657be29387d2a7f6ffb8fd03f37874708a24a5
-  #   <<: *common
-  #   depends_on:
-  #     wireguard:
-  #       condition: service_healthy
-  #     qbittorrent:
-  #       condition: service_healthy
-  #   user: ${UID}:${GID}
-  #   read_only: true
-  #   cpu_count: 2
-  #   mem_limit: 50M
-  #   memswap_limit: 50M
-  #   network_mode: service:wireguard
-  #   environment:
-  #     QBITTORRENT_WEBUI_HOST: localhost
-  #     QBITTORRENT_WEBUI_PORT: 8080
-  #     QBITTORRENT_WEBUI_USERNAME: ${QBT_USER}
-  #     QBITTORRENT_WEBUI_PASSWORD: ${QBT_PASS}
-  #     GLUETUN_CONTROL_HOST: localhost
-  #     GLUETUN_CONTROL_PORT: "8000"
 
   # Torrent client
   qbittorrent:
