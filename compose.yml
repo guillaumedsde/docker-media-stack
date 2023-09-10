@@ -341,6 +341,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
     healthcheck:
       test:
+        - CMD
         - wget
         - --quiet
         - --timeout=3
