@@ -538,7 +538,7 @@ services:
       UN_LIDARR_0_PATH: /data/download/music
 
   recyclarr:
-    image: docker.io/recyclarr/recyclarr:5.3
+    image: docker.io/recyclarr/recyclarr:5.4
     user: 1000:1000
     cpu_count: 2
     mem_limit: 200M
