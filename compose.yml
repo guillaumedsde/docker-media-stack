@@ -1129,7 +1129,7 @@ services:
   # DB for authelia
   authelia-db:
     <<: *common
-    image: docker.io/postgres:14-bullseye
+    image: docker.io/postgres:15-bullseye
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
