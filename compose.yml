@@ -183,9 +183,9 @@ services:
     sysctls:
       net.ipv6.conf.all.disable_ipv6: 0
     dns:
-      - "1.1.1.1"
-      - "1.0.0.1"
-      # NOTE: fallback to embedded docker DNS
+      - "${WIREGUARD_MAIN_DNS:-1.1.1.1}"
+      # NOTE: fallback to embedded docker DNS to be able to resolve
+      #       other container hostnames
       - "127.0.0.11"
     volumes:
       - type: bind
@@ -197,6 +197,7 @@ services:
           - jackett
           - qbittorrent
           - prowlarr
+      flaresolverr:
     environment:
       <<: *conf
       LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
@@ -208,7 +209,7 @@ services:
       WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
       FIREWALL_VPN_INPUT_PORTS: ${FIREWALL_VPN_INPUT_PORTS}
       # Allow LAN access to other containers
-      FIREWALL_OUTBOUND_SUBNETS: 172.16.0.0/12
+      FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS} 172.16.0.0/12
       DNS_KEEP_NAMESERVER: "on"
       VERSION_INFORMATION: "off"
     labels:
@@ -363,12 +364,8 @@ services:
     memswap_limit: 2G
     environment:
       <<: *conf
-    # NOTE: See FIXME above
-    # networks:
-    #   - flaresolverr
-    network_mode: service:wireguard
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
+    networks:
+      - flaresolverr
 
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
