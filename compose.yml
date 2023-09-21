@@ -484,7 +484,7 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
-    image: docker.io/linuxserver/bazarr:1.2.4
+    image: docker.io/linuxserver/bazarr:1.3.0
     <<: *common
     depends_on:
       - "radarr"
