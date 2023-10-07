@@ -177,9 +177,9 @@ services:
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-    cpu_count: 2
-    mem_limit: 100M
-    memswap_limit: 100M
+    cpu_count: 4
+    mem_limit: 250M
+    memswap_limit: 250M
     sysctls:
       net.ipv6.conf.all.disable_ipv6: 0
     dns:
