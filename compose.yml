@@ -180,8 +180,9 @@ services:
     cpu_count: 4
     mem_limit: 250M
     memswap_limit: 250M
-    sysctls:
-      net.ipv6.conf.all.disable_ipv6: 0
+    # NOTE: disable IPv6 until docker daemon is configured
+    # sysctls:
+    #   net.ipv6.conf.all.disable_ipv6: 0
     dns:
       - "${WIREGUARD_MAIN_DNS:-1.1.1.1}"
       # NOTE: fallback to embedded docker DNS to be able to resolve
