@@ -459,7 +459,7 @@ services:
 
   # readarr, webapp for downloading books through torrent client
   readarr:
-    image: docker.io/linuxserver/readarr:0.3.6-develop
+    image: docker.io/linuxserver/readarr:0.3.7-develop
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -486,7 +486,7 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
-    image: docker.io/linuxserver/bazarr:1.3.0
+    image: docker.io/linuxserver/bazarr:1.3.1
     <<: *common
     depends_on:
       - "radarr"
