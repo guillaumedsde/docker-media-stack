@@ -213,6 +213,7 @@ services:
       FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS}
       DNS_KEEP_NAMESERVER: "on"
       VERSION_INFORMATION: "off"
+      HEALTH_SUCCESS_WAIT_DURATION: "5m"
     labels:
       <<: *traefik
       # NOTE: See FIXME above
