@@ -180,9 +180,8 @@ services:
     cpu_count: 4
     mem_limit: 250M
     memswap_limit: 250M
-    # NOTE: disable IPv6 until docker daemon is configured
-    # sysctls:
-    #   net.ipv6.conf.all.disable_ipv6: 0
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -208,7 +207,7 @@ services:
       FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS}
       DNS_KEEP_NAMESERVER: "on"
       VERSION_INFORMATION: "off"
-      HEALTH_SUCCESS_WAIT_DURATION: "5m"
+      HEALTH_SUCCESS_WAIT_DURATION: "10m"
     labels:
       <<: *traefik
       # NOTE: See FIXME above
