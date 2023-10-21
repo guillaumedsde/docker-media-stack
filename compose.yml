@@ -961,8 +961,10 @@ services:
       traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
+      # CSP HTTP header middleware
+      traefik.http.middlewares.netdataCSP.headers.customresponseheaders.Content-Security-Policy: "default-src 'self'"
       # Forward auth
-      traefik.http.routers.netdata.middlewares: authelia@docker
+      traefik.http.routers.netdata.middlewares: authelia@docker,netdataCSP@docker
     cap_add:
       - SYS_PTRACE
       - SYS_ADMIN
