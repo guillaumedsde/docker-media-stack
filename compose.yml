@@ -962,7 +962,10 @@ services:
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
       # CSP HTTP header middleware
-      traefik.http.middlewares.netdataCSP.headers.customresponseheaders.Content-Security-Policy: "default-src 'self'"
+      traefik.http.middlewares.netdataCSP.headers.customresponseheaders.Content-Security-Policy: >-
+        Content-Security-Policy:
+        base-uri 'self';
+        default-src 'self' 'unsafe-inline' 'unsafe-eval';
       # Forward auth
       traefik.http.routers.netdata.middlewares: authelia@docker,netdataCSP@docker
     cap_add:
