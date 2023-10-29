@@ -329,8 +329,8 @@ services:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
     cpu_count: 4
-    mem_limit: 1G
-    memswap_limit: 1G
+    mem_limit: 3G
+    memswap_limit: 3G
     network_mode: service:wireguard
     environment:
       <<: *conf
