@@ -171,7 +171,7 @@ services:
   wireguard:
     <<: *common
     # NOTE: pinning image SHA256 until 3.36 is released with untouched DNS settings
-    image: qmcgaw/gluetun@sha256:8bb0ea2f18624dcf86bd5b13c0e781d2e72a6b0a3f32fbc0198d5663df65295f
+    image: qmcgaw/gluetun@sha256:5f9ef355aa7e5e010fdf916b65141310d23e99560c6e4b8f13ff274027d9cbbf
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
