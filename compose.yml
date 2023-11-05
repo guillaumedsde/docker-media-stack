@@ -579,7 +579,7 @@ services:
 
   # jellyfin media server
   jellyfin:
-    image: docker.io/jellyfin/jellyfin:10.8.11
+    image: docker.io/jellyfin/jellyfin:10.8.12
     user: ${UID}:${GID}
     cpu_count: 15
     mem_limit: 8G
