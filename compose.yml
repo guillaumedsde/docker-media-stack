@@ -351,7 +351,7 @@ services:
       start_period: 15s
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.3.7
+    image: ghcr.io/flaresolverr/flaresolverr:v3.3.10
     <<: *common
     # NOTE: default image UID is 1000
     user: 1000:1000
