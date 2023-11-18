@@ -579,12 +579,13 @@ services:
 
   # jellyfin media server
   jellyfin:
+    <<: *common
     image: docker.io/jellyfin/jellyfin:10.8.12
     user: ${UID}:${GID}
     cpu_count: 15
     mem_limit: 8G
     memswap_limit: 8G
-    <<: *common
+    read_only: true
     depends_on:
       - openldap
     volumes:
@@ -612,6 +613,9 @@ services:
       - ldap
     environment:
       <<: *conf
+      # NOTE: required for read only root filesystem, see:
+      #       https://github.com/dotnet/docs/issues/10217#issuecomment-462323277
+      COMPlus_EnableDiagnostics: "0"
       JELLYFIN_PublishedServerUrl: jellyfin.${root_domain}
       #Uncomment forofficial Jellyfin image:
       JELLYFIN_DATA_DIR: /config/data
