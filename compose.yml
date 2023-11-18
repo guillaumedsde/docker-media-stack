@@ -588,9 +588,25 @@ services:
     depends_on:
       - openldap
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/jellyfin:/config
-      - ${data_folder}:/data:ro
+      - type: bind
+        source: ${docker_data_folder}/jellyfin
+        target: /config
+      - type: bind
+        source: ${data_folder}/movies
+        target: /data/movies
+        read_only: true
+      - type: bind
+        source: ${data_folder}/series
+        target: /data/series
+        read_only: true
+      - type: bind
+        source: ${data_folder}/music
+        target: /data/music
+        read_only: true
+      - type: bind
+        source: ${data_folder}/pictures
+        target: /data/pictures
+        read_only: true
     networks:
       - traefik
       - ldap
