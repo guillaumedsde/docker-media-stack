@@ -833,7 +833,7 @@ services:
       - --innodb-lock-wait-timeout=120
 
   librespeed:
-    image: ghcr.io/linuxserver/librespeed:5.2.5
+    image: ghcr.io/linuxserver/librespeed:5.3.0
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
