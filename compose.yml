@@ -480,7 +480,7 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
-    image: docker.io/linuxserver/bazarr:1.3.1
+    image: docker.io/linuxserver/bazarr:1.4.0
     <<: *common
     depends_on:
       - "radarr"
