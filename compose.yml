@@ -170,7 +170,7 @@ services:
   # Wireguard VPN client
   wireguard:
     <<: *common
-    image: docker.io/qmcgaw/gluetun:v3.36.0
+    image: docker.io/qmcgaw/gluetun:v3.37.0
     # NOTE: hardcode container name in order for watchtower label:
     #       com.centurylinklabs.watchtower.depends-on
     #       to work as expected
