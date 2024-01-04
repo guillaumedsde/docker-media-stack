@@ -32,7 +32,7 @@ x-traefik: &traefik
 services:
   # reverse proxy
   traefik:
-    image: traefik:v2.10
+    image: traefik:v2.11
     user: ${UID}:${GID}
     depends_on:
       docker-socket-proxy:
