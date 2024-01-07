@@ -1,6 +1,5 @@
 %YAML 1.1
 ---
-
 # THE MEDIA STACK #
 # this docker-compose file will get a selection of media downloading/management webapps
 # I've tried to simplify getting started as much as possible
@@ -259,7 +258,7 @@ services:
     mem_limit: 8G
     memswap_limit: 8G
     user: ${UID}:${GID}
-    # NOTE: use `services:` instead of `containers:` because the  
+    # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
     network_mode: service:wireguard
     image: guillaumedsde/qbittorrent-distroless:latest
@@ -366,7 +365,7 @@ services:
   # radarr, webapp for downloading movies through torrent client
   # queries are done with jackett
   radarr:
-    image: docker.io/guillaumedsde/radarr-distroless:4.7.5.7809
+    image: docker.io/guillaumedsde/radarr-distroless:5.2.6.8376
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -1004,7 +1003,8 @@ services:
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
       # CSP HTTP header middleware
-      traefik.http.middlewares.netdataCSP.headers.customresponseheaders.Content-Security-Policy: >-
+      traefik.http.middlewares.netdataCSP.headers.customresponseheaders.Content-Security-Policy:
+        >-
         Content-Security-Policy:
         base-uri 'self';
         default-src 'self' 'unsafe-inline' 'unsafe-eval';
