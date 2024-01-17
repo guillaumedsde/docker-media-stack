@@ -985,6 +985,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
+      - ${docker_data_folder}/netdata/cache:/var/cache/netdata
     networks:
       - netdata
       - docker-socket-proxy
