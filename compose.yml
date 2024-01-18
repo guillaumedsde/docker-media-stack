@@ -507,7 +507,7 @@ services:
 
   # automatically extract torrented archives
   unpackerr:
-    image: docker.io/golift/unpackerr:0.12
+    image: docker.io/golift/unpackerr:0.13
     user: ${UID}:${GID}
     read_only: true
     cpu_count: 4
