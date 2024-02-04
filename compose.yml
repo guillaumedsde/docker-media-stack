@@ -662,7 +662,7 @@ services:
         condition: service_healthy
       nextcloud-redis:
         condition: service_healthy
-      samba:
+      ssh:
         condition: service_started
       openldap:
         condition: service_started
@@ -674,7 +674,7 @@ services:
       - nextcloud
       - nextcloud-proxy
       - ldap
-      - samba
+      - ssh
     environment:
       <<: *conf
       POSTGRES_DB: nextcloud
