@@ -15,11 +15,7 @@ access_control:
         - GET
         - HEAD
       policy: bypass
-    # Content administrators
-    - domain_regex: '^(movies|series|music|books|prowlarr|subtitles|flood|qbittorrent)\..+$'
-      policy: two_factor
-    # Admin apps
-    - domain_regex: '^(scrutiny|netdata)\..+$'
+    - domain_regex: '^(scrutiny|netdata|prowlarr)\..+$'
       policy: two_factor
 
 notifier:
