@@ -1117,7 +1117,7 @@ services:
 
   # SSO
   authelia:
-    image: docker.io/authelia/authelia:4.37
+    image: docker.io/authelia/authelia:4.38
     cpu_count: 4
     user: ${UID}:${GID}
     mem_limit: 250M
