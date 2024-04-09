@@ -117,7 +117,7 @@ services:
       - 443:443
 
   docker-socket-proxy:
-    image: tecnativa/docker-socket-proxy:0.1
+    image: tecnativa/docker-socket-proxy:0.1.1
     user: ${UID}:${docker_group_id}
     cpu_count: 2
     mem_limit: 100M
