@@ -962,7 +962,7 @@ services:
         - "CMD"
         - "nc"
         - "-vz"
-        - "localhost"
+        - "127.0.0.1"
         - "8080"
       start_period: 3s
       interval: 1s
