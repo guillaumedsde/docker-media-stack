@@ -46,12 +46,16 @@ services:
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
+      # HTTP
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.middlewares=nocrawl@docker"
+      # HTTPS
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
+      - "--entryPoints.websecure.http.middlewares=nocrawl@docker"
       # DNS challenge
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
@@ -86,6 +90,9 @@ services:
       # Healthcheck
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
+      # No crawl headers:
+      traefik.http.middlewares.nocrawl.headers.customresponseheaders.X-Robots-Tag: "noindex, nofollow"
+
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
