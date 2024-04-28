@@ -49,13 +49,13 @@ services:
       # HTTP
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entryPoints.web.http.middlewares=nocrawl@docker"
+      - "--entryPoints.web.http.middlewares=securityheaders@docker"
       # HTTPS
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
-      - "--entryPoints.websecure.http.middlewares=nocrawl@docker"
+      - "--entryPoints.websecure.http.middlewares=securityheaders@docker"
       # DNS challenge
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
@@ -90,9 +90,15 @@ services:
       # Healthcheck
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
-      # No crawl headers:
-      traefik.http.middlewares.nocrawl.headers.customresponseheaders.X-Robots-Tag: "noindex, nofollow"
-
+      # Security headers
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-Robots-Tag: "noindex, nofollow"
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-Frame-Options: DENY
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.Permissions-Policy: interest-cohort=()
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.Server:
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-Powered-By:
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-AspNet-Version:
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-AspNetMvc-Version:
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
