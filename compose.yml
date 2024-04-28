@@ -938,6 +938,7 @@ services:
     image: docker.io/guillaumedsde/wsdd-distroless:v0.7.1
 
   robots:
+    <<: *common
     image: docker.io/nginx:1.26-alpine
     read_only: true
     mem_limit: 200M
