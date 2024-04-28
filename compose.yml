@@ -319,7 +319,7 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
 
   prowlarr:
-    image: docker.io/linuxserver/prowlarr:1.15.0
+    image: docker.io/linuxserver/prowlarr:1.16.2
     <<: *common
     depends_on:
       wireguard:
