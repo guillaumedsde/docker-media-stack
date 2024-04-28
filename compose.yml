@@ -7,8 +7,6 @@
 #   2. run `docker compose up -d` from the folder with this docker-copose.yml folder
 # NOTE this process is not fully automated and individual configuration of webapps is still required after docker compose
 
-version: "3.9"
-
 # basic common configuration for most containers
 x-conf: &conf
   TZ: ${TZ}
