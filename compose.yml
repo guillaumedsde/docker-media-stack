@@ -92,7 +92,7 @@ services:
       traefik.http.routers.ping.service: ping@internal
       # Security headers
       traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-Robots-Tag: "noindex, nofollow"
-      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-Frame-Options: DENY
+      traefik.http.middlewares.securityheaders.headers.customresponseheaders.X-Frame-Options: SAMEORIGIN
       traefik.http.middlewares.securityheaders.headers.customresponseheaders.Permissions-Policy: interest-cohort=()
       traefik.http.middlewares.securityheaders.headers.customresponseheaders.Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
       traefik.http.middlewares.securityheaders.headers.customresponseheaders.Server:
