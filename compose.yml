@@ -162,7 +162,7 @@ services:
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
   # NOTE watchtower also updates itself
   watchtower:
-    image: containrrr/watchtower:latest
+    image: containrrr/watchtower:1.7.1
     <<: *common
     mem_limit: 100m
     memswap_limit: 200M
@@ -170,7 +170,10 @@ services:
     read_only: true
     user: ${UID}:${docker_group_id}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
     networks:
       - watchtower
     command:
@@ -1006,7 +1009,6 @@ services:
     environment:
       <<: *conf
       DOCKER_HOST: docker-socket-proxy:2375
-      PGID: ${docker_group_id}
       NETDATA_DISABLE_TELEMETRY: "1"
       DISABLE_TELEMETRY: "1"
       DO_NOT_TRACK: "1"
