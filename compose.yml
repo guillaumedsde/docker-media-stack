@@ -128,18 +128,19 @@ services:
       - 443:443
 
   docker-socket-proxy:
-    image: docker.io/tecnativa/docker-socket-proxy:0.1.1
-    user: ${UID}:${docker_group_id}
+    image: lscr.io/linuxserver/socket-proxy:1.24.0-r16-ls8
     cpu_count: 2
     mem_limit: 100M
     memswap_limit: 200M
     read_only: true
     tmpfs:
-      - /run:mode=770,size=1k,uid=${UID},gid=${docker_group_id}
-      - /var/lib/haproxy:mode=770,size=1k,uid=${UID},gid=${docker_group_id}
+      - /run
     <<: *common
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
     environment:
       CONTAINERS: "1"
       INFO: "1"
