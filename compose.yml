@@ -932,6 +932,7 @@ services:
       POSTGRES_USER: tandoor
       POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
       POSTGRES_DB: tandoor
+      REMOTE_USER_AUTH: "1"
     volumes:
       - "${docker_data_folder}/tandoor/staticfiles:/opt/recipes/staticfiles"
       - "${docker_data_folder}/tandoor/mediafiles:/opt/recipes/mediafiles"
