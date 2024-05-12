@@ -631,14 +631,14 @@ services:
       # NOTE: required for read only root filesystem, see:
       #       https://github.com/dotnet/docs/issues/10217#issuecomment-462323277
       COMPlus_EnableDiagnostics: "0"
-      JELLYFIN_PublishedServerUrl: jellyfin.${root_domain}
       #Uncomment forofficial Jellyfin image:
       JELLYFIN_DATA_DIR: /config/data
       JELLYFIN_CONFIG_DIR: /config
       JELLYFIN_LOG_DIR: /config/log
       JELLYFIN_CACHE_DIR: /config/cache
-      JELLYFIN_FFmpeg__probesize: "20000000"
-      JELLYFIN_FFmpeg__analyzeduration: "800000000"
+      JELLYFIN_FFmpeg__probesize: "2G"
+      JELLYFIN_FFmpeg__analyzeduration: "800M"
+      JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
     labels:
       <<: *traefik
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
