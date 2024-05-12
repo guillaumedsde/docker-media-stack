@@ -271,8 +271,8 @@ services:
       - /tmp
     read_only: true
     cpu_count: 4
-    mem_limit: 8G
-    memswap_limit: 8G
+    mem_limit: 4G
+    memswap_limit: 4G
     user: ${UID}:${GID}
     # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
