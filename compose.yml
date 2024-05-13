@@ -280,6 +280,8 @@ services:
     image: guillaumedsde/qbittorrent-distroless:latest
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
+    healthcheck:
+      start_period: 15s
 
   flood:
     <<: *common
