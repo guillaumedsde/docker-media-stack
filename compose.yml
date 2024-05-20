@@ -660,20 +660,44 @@ services:
       - "sonarr"
       - "radarr"
       - "lidarr"
+      - "ombi-mariadb"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/ombi:/config
     networks:
       - traefik
+      - ombi
     environment:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.docker.network: traefik
       traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
       # service
       traefik.http.services.ombi.loadbalancer.server.port: "3579"
       # Forward auth
       traefik.http.routers.ombi.middlewares: authelia@docker
+  
+  ombi-mariadb:
+    image: docker.io/mariadb:11.3
+    <<: *common
+    cpu_count: 2
+    mem_limit: 1G
+    memswap_limit: 1G
+    user: ${UID}:${GID}
+    environment:
+      MARIADB_ROOT_PASSWORD: ${OMBI_DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ombi
+      MARIADB_USER: ombi
+      MARIADB_PASSWORD: "${PHOTOPRISM_DB_PASSWORD}"
+      MARIADB_AUTO_UPGRADE: "true"
+    networks:
+      - ombi
+    volumes:
+      - "${docker_data_folder}/ombi-mariadb:/var/lib/mysql"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
 
   # personal cloud
   nextcloud: &nextcloud
@@ -1405,6 +1429,9 @@ networks:
   tandoor:
     driver: bridge
     name: tandoor
+  ombi:
+    driver: bridge
+    name: ombi
 
 volumes:
   robots-nginx-cache:
