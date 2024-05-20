@@ -689,7 +689,7 @@ services:
       MARIADB_ROOT_PASSWORD: ${OMBI_DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ombi
       MARIADB_USER: ombi
-      MARIADB_PASSWORD: "${PHOTOPRISM_DB_PASSWORD}"
+      MARIADB_PASSWORD: "${OMBI_DB_PASSWORD}"
       MARIADB_AUTO_UPGRADE: "true"
     networks:
       - ombi
