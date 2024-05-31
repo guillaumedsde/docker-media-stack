@@ -679,7 +679,7 @@ services:
       traefik.http.routers.ombi.middlewares: authelia@docker
   
   ombi-mariadb:
-    image: docker.io/mariadb:11.3
+    image: docker.io/mariadb:11.4
     <<: *common
     cpu_count: 2
     mem_limit: 1G
@@ -850,7 +850,7 @@ services:
       traefik.http.routers.photoprism.middlewares: authelia@docker
 
   photoprism-mariadb:
-    image: docker.io/mariadb:11.3
+    image: docker.io/mariadb:11.4
     <<: *common
     cpu_count: 2
     mem_limit: 1G
