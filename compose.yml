@@ -1043,7 +1043,7 @@ services:
 
   robots:
     <<: *common
-    image: docker.io/nginx:1.26-alpine
+    image: docker.io/nginx:1.27-alpine
     read_only: true
     mem_limit: 200M
     memswap_limit: 200M
