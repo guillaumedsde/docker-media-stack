@@ -1,0 +1,13 @@
+http:
+  middlewares:
+    securityHeaders:
+      headers:
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow"
+          X-Frame-Options: "SAMEORIGIN"
+          Permissions-Policy: "interest-cohort=()"
+          Strict-Transport-Security: "max-age=63072000; includeSubDomains; preload"
+          Server:
+          X-Powered-By:
+          X-AspNet-Version:
+          X-AspNetMvc-Version:
