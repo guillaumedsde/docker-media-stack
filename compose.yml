@@ -29,7 +29,7 @@ x-traefik: &traefik
 services:
   # reverse proxy
   traefik:
-    image: traefik:v2.11
+    image: traefik:3.0.1
     user: ${UID}:${GID}
     depends_on:
       docker-socket-proxy:
@@ -37,6 +37,8 @@ services:
     cap_add:
       - NET_BIND_SERVICE
     command:
+      # TODO: remove this once migration is complete
+      - "--core.defaultrulesyntax=v2"
       - "--global.checknewversion=false"
       - "--global.sendanonymoususage=false"
       - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
@@ -677,7 +679,7 @@ services:
       traefik.http.services.ombi.loadbalancer.server.port: "3579"
       # Forward auth
       traefik.http.routers.ombi.middlewares: authelia@docker
-  
+
   ombi-mariadb:
     image: docker.io/mariadb:11.4
     <<: *common
@@ -917,7 +919,7 @@ services:
       traefik.http.services.smokeping.loadbalancer.server.port: "80"
       # Forward auth
       traefik.http.routers.smokeping.middlewares: authelia@docker
-  
+
   tandoor-db:
     <<: *common
     image: docker.io/postgres:16-bullseye
