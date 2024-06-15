@@ -195,7 +195,6 @@ services:
     networks:
       traefik:
         aliases:
-          - jackett
           - qbittorrent
           - prowlarr
       flaresolverr:
@@ -226,14 +225,6 @@ services:
       traefik.http.routers.prowlarr.service: prowlarr
       # Forward auth
       traefik.http.routers.prowlarr.middlewares: authelia@docker
-      # Jackett
-      # service
-      traefik.http.services.jackett.loadbalancer.server.port: "9117"
-      # Router
-      traefik.http.routers.jackett.rule: Host(`jackett.${root_domain}`)
-      traefik.http.routers.jackett.service: jackett
-      # Forward auth
-      traefik.http.routers.jackett.middlewares: authelia@docker
       # qBittorrent
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
@@ -273,59 +264,6 @@ services:
       com.centurylinklabs.watchtower.depends-on: wireguard
     healthcheck:
       start_period: 15s
-
-  flood:
-    <<: *common
-    image: jesec/flood:master-distroless
-    cpu_count: 2
-    mem_limit: 400M
-    memswap_limit: 400M
-    read_only: true
-    user: ${UID}:${GID}
-    volumes:
-      - ${docker_data_folder}/flood:/config
-      - ${data_folder}:/data:ro
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - traefik
-    command:
-      - --auth=none
-      - --qburl=http://qbittorrent:8080
-      - --qbuser=${QBT_USER}
-      - --qbpass=${QBT_PASS}
-      - --rundir=/config
-    labels:
-      <<: *traefik
-      traefik.http.routers.flood.rule: Host(`flood.${root_domain}`)
-      # service
-      traefik.http.services.flood.loadbalancer.server.port: "3000"
-      # Forward auth
-      traefik.http.routers.flood.middlewares: authelia@docker
-
-  # jackett tracker site scraper with API
-  jackett:
-    image: guillaumedsde/jackett-distroless:latest
-    <<: *common
-    depends_on:
-      wireguard:
-        condition: service_healthy
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/jackett:/config
-      - ${docker_data_folder}/blackhole:/blackhole
-    tmpfs:
-      - "/var:rw,exec"
-      - "/tmp:rw,exec"
-    read_only: true
-    cpu_count: 4
-    mem_limit: 1G
-    memswap_limit: 1G
-    user: ${UID}:${GID}
-    network_mode: service:wireguard
-    environment:
-      <<: *conf
-    labels:
-      com.centurylinklabs.watchtower.depends-on: wireguard
 
   prowlarr:
     image: docker.io/linuxserver/prowlarr:1.18.0
@@ -372,7 +310,6 @@ services:
       - flaresolverr
 
   # radarr, webapp for downloading movies through torrent client
-  # queries are done with jackett
   radarr:
     image: docker.io/guillaumedsde/radarr-distroless:5.6.0.8846
     <<: *common
@@ -402,7 +339,6 @@ services:
       traefik.http.routers.radarr.middlewares: authelia@docker
 
   # sonarr, webapp for downloading series through torrent client
-  # queries are done with jackett
   sonarr:
     image: docker.io/linuxserver/sonarr:4.0.5
     <<: *common
@@ -431,7 +367,6 @@ services:
       traefik.http.routers.sonarr.middlewares: authelia@docker
 
   # lidarr, webapp for downloading music through torrent client
-  # queries are done with jackett
   lidarr:
     image: docker.io/linuxserver/lidarr:1.4.5
     <<: *common
