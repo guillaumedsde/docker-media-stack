@@ -859,7 +859,7 @@ services:
       - samba
       - ldap
     image: docker.io/guillaumedsde/samba-ldap:latest
-    
+
   sftp:
     image: docker.io/drakkan/sftpgo:v2.6-plugins
     ports:
@@ -869,7 +869,11 @@ services:
         source: /data/users
         target: /srv/sftpgo/data
         read_only: true
+      - type: bind
+        source: ${docker_data_folder}/sftpgo
+        target: /var/lib/sftpgo    
     environment:
+      SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
       SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://openldap:389"
       SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "dc=desusanne,dc=com"
       SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "cn=admin,dc=olloix,dc=desusanne,dc=com"
