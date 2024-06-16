@@ -871,7 +871,9 @@ services:
         read_only: true
       - type: bind
         source: ${docker_data_folder}/sftpgo
-        target: /var/lib/sftpgo    
+        target: /var/lib/sftpgo
+    networks:
+      - ldap
     environment:
       SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
       SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://openldap:389"
