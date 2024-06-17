@@ -864,7 +864,8 @@ services:
     image: docker.io/drakkan/sftpgo:v2.6-plugins
     ports:
       - target: 2022
-        published: 127.0.0.1:2022
+        host_ip: "127.0.0.1"
+        published: 2022
         protocol: tcp
     volumes:
       - type: bind
