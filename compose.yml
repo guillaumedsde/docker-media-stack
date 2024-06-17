@@ -881,7 +881,7 @@ services:
     environment:
       SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
       SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://openldap:389"
-      SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "dc=desusanne,dc=com"
+      SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "dc=olloix,dc=desusanne,dc=com"
       SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "cn=admin,dc=olloix,dc=desusanne,dc=com"
       SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${LDAP_ADMIN_PASSWORD}"
       SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=posixAccount)(uid=%username%))'
