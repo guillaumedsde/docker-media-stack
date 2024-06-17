@@ -896,7 +896,7 @@ services:
       traefik.docker.network: traefik
       traefik.http.routers.sftp.rule: Host(`sftp.${root_domain}`)
       # service
-      traefik.http.services.sftp.loadbalancer.server.port: "80"
+      traefik.http.services.sftp.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.sftp.middlewares: authelia@docker
   
