@@ -863,7 +863,9 @@ services:
   sftp:
     image: docker.io/drakkan/sftpgo:v2.6-plugins
     ports:
-      - "1999:2022"
+      - target: 2022
+        published: 127.0.0.1:2022
+        protocol: tcp
     volumes:
       - type: bind
         source: /data/users
