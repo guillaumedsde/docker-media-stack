@@ -1058,7 +1058,7 @@ services:
 
   # LDAP Server management web GUI
   lam:
-    image: docker.io/ldapaccountmanager/lam:stable
+    image: ghcr.io/ldapaccountmanager/lam:8.7
     volumes:
       - ${docker_data_folder}/lam/config.cfg:/etc/ldap-account-manager/config.cfg
       - ${docker_data_folder}/lam/lam.conf:/var/lib/ldap-account-manager/config/lam.conf
