@@ -197,6 +197,8 @@ services:
           - qbittorrent
           - prowlarr
       flaresolverr:
+    healthcheck:
+      retries: 10
     environment:
       <<: *conf
       LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
