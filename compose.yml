@@ -271,7 +271,8 @@ services:
     labels:
       com.centurylinklabs.watchtower.depends-on: wireguard
     healthcheck:
-      start_period: 15s
+      start_period: 30s
+      retries: 10
 
   prowlarr:
     image: docker.io/linuxserver/prowlarr:1.18.0
