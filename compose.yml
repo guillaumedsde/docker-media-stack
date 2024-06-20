@@ -15,10 +15,7 @@ x-conf: &conf
   # NOTE: this umask env var is mostly used by lsio containers
   #       docker does not have an option to set umask, see:
   #       https://github.com/moby/moby/issues/19189
-  #       leaving this to the default (not ideally secured) umask
-  #       to avoid having different permission management between
-  #       lsio and other containers.
-  UMASK: "022"
+  UMASK: "077"
 
 # container restart policy
 x-common: &common
