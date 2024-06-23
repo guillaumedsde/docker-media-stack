@@ -272,7 +272,7 @@ services:
       retries: 10
 
   prowlarr:
-    image: docker.io/linuxserver/prowlarr:1.18.0
+    image: docker.io/linuxserver/prowlarr:1.19.0
     <<: *common
     depends_on:
       wireguard:
