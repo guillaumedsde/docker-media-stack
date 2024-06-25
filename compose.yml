@@ -1073,6 +1073,10 @@ services:
     memswap_limit: 250M
     user: ${UID}:${GID}
     read_only: true
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/lldap
+        target: /data
     networks:
       - lldap
       - lldap-postgres
