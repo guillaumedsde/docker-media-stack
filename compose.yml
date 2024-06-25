@@ -1082,7 +1082,6 @@ services:
       - lldap-postgres
     environment:
       <<: *conf
-      LLDAP_JWT_VERBOSE: "true"
       LLDAP_JWT_SECRET: "${LLDAP_JWT_SECRET}"
       LLDAP_KEY_SEED: "${LLDAP_KEY_SEED}"
       LLDAP_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
