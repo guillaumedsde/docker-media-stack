@@ -1064,6 +1064,9 @@ services:
 
   lldap:
     <<: *common
+    depends_on:
+      lldap-postgres:
+        condition: service_healthy
     image: docker.io/lldap/lldap:2024-06-16-alpine-rootless
     cpu_count: 2
     mem_limit: 250M
@@ -1110,7 +1113,7 @@ services:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
       - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
-      - ${docker_data_folder}/lldap-db:/var/lib/postgresql/data
+      - ${docker_data_folder}/lldap-postgres:/var/lib/postgresql/data
     networks:
       - lldap-postgres
     healthcheck:
