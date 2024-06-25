@@ -318,7 +318,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
-    image: docker.io/guillaumedsde/radarr-distroless:5.7.0.8882
+    image: docker.io/guillaumedsde/radarr-distroless:5.6.0.8846
     <<: *common
     cpu_count: 4
     mem_limit: 2G
