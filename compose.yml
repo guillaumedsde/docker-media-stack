@@ -1366,7 +1366,6 @@ networks:
     name: ombi
   lldap:
     driver: bridge
-    internal: true
     name: lldap
   lldap-postgres:
     driver: bridge
