@@ -1078,8 +1078,10 @@ services:
         source: ${docker_data_folder}/lldap
         target: /data
     networks:
-      - lldap
-      - lldap-postgres
+      lldap:
+        priority: 2
+      lldap-postgres:
+        priority: 1
     environment:
       <<: *conf
       LLDAP_JWT_VERBOSE: "true"
