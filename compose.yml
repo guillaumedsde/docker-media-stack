@@ -866,6 +866,47 @@ services:
       - samba
       - ldap
     image: docker.io/guillaumedsde/samba-ldap:latest
+
+  sftp:
+    image: docker.io/drakkan/sftpgo:v2.6-plugins
+    ports:
+      - target: 2022
+        host_ip: "127.0.0.1"
+        published: 2022
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /data/users
+        target: /srv/sftpgo/data
+        read_only: true
+      - type: bind
+        source: ${docker_data_folder}/sftpgo
+        target: /var/lib/sftpgo
+    networks:
+      - ldap
+      - traefik
+    environment:
+      SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
+      SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://openldap:389"
+      SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "dc=olloix,dc=desusanne,dc=com"
+      SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "cn=admin,dc=olloix,dc=desusanne,dc=com"
+      SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${LDAP_ADMIN_PASSWORD}"
+      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=posixAccount)(uid=%username%))'
+      SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
+      SFTPGO_PLUGINS__0__TYPE: "auth"
+      SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
+      SFTPGO_PLUGINS__0__CMD: "/usr/local/bin/sftpgo-plugin-auth"
+      SFTPGO_PLUGINS__0__ARGS: "serve"
+      SFTPGO_PLUGINS__0__AUTO_MTLS: "1"
+    labels:
+      <<: *traefik
+      traefik.docker.network: traefik
+      traefik.http.routers.sftp.rule: Host(`sftp.${root_domain}`)
+      # service
+      traefik.http.services.sftp.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.sftp.middlewares: authelia@docker
+  
   
   ssh:
     ports:
