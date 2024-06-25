@@ -1371,7 +1371,6 @@ networks:
     name: lldap
   lldap-postgres:
     driver: bridge
-    internal: true
     name: lldap-postgres
 
 
