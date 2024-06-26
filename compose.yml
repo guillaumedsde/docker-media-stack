@@ -121,6 +121,27 @@ services:
     ports:
       - 80:80
       - 443:443
+  
+  traefik-certs-dumper:
+    <<: *common
+    image: 'docker.io/ldez/traefik-certs-dumper:v2.8.3'
+    user: '${UID}:${GID}'
+    read_only: true
+    mem_limit: '50M'
+    memswap_limit: '50M'
+    cpu_count: 2
+    volumes:
+      - type: 'bind'
+        source: '${docker_data_folder}/traefik/data/acme.json'
+        target: '/traefik/acme.json'
+        read_only: true
+      - type: 'bind'
+        source: '${docker_data_folder}/traefik-certs-dumper'
+        target: /data
+    command:
+      - 'file'
+      - '--source=/traefik/acme.json'
+      - '--dest=/data'
 
   docker-socket-proxy:
     image: lscr.io/linuxserver/socket-proxy:1.24.0-r16-ls8
