@@ -1061,7 +1061,7 @@ services:
 
   kanidm:
     <<: *common
-    image: 'docker.io/kanidm/server:1.2.2'
+    image: 'docker.io/guillaumedsde/kanidm:1.2.3'
     cpu_count: 4
     user: '${UID}:${GID}'
     read_only: true
