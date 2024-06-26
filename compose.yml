@@ -1058,6 +1058,41 @@ services:
   ##################################################################
   # Authentication
 
+  kanidm:
+    <<: *common
+    image: 'docker.io/kanidm/server:1.2.2'
+    cpu_count: 4
+    user: '${UID}:${GID}'
+    read_only: true
+    mem_limit: '250M'
+    memswap_limit: '250M'
+    networks:
+      - kanidm
+    volumes:
+      - type: 'bind'
+        source: '${docker_data_folder}/kanidm'
+        target: '/data'
+      - type: 'bind'
+        source: '${docker_data_folder}/traefik-certs-dumper'
+        target: '/certificates'
+        read_only: true
+    environment:
+      KANIDM_TLS_CHAIN: '/certificates/certs/${root_domain}.crt'
+      KANIDM_TLS_KEY: '/certificates/private/${root_domain}.key'
+      KANIDM_DOMAIN: 'kanidm.${root_domain}'
+      KANIDM_ORIGIN: 'https://kanidm.${root_domain}'
+      KANIDM_TRUST_X_FORWARD_FOR: 'true'
+      KANIDM_DB_FS_TYPE: '${KANIDM_DB_FS_TYPE:-zfs}'
+    labels:
+      <<: *traefik
+      traefik.docker.network: kanidm
+      traefik.http.routers.kanidm.rule: Host(`kanidm.${root_domain}`)
+      # service
+      traefik.http.services.kanidm.loadbalancer.server.port: "8443"
+      # Forward auth
+      traefik.http.routers.kanidm.middlewares: authelia@docker
+
+
   # LDAP server
   openldap:
     image: docker.io/osixia/openldap:1.5.0
@@ -1319,7 +1354,10 @@ networks:
   ombi:
     driver: bridge
     name: ombi
-
+  kanidm:
+    driver: bridge
+    internal: true
+    name: kanidm
 
 volumes:
   robots-nginx-cache:
