@@ -1077,6 +1077,7 @@ services:
         target: '/certificates'
         read_only: true
     environment:
+      KANIDM_DB_PATH: '/data/kanidm.db'
       KANIDM_TLS_CHAIN: '/certificates/certs/${root_domain}.crt'
       KANIDM_TLS_KEY: '/certificates/private/${root_domain}.key'
       KANIDM_DOMAIN: 'kanidm.${root_domain}'
