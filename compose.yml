@@ -49,6 +49,8 @@ services:
       - "--providers.docker.endpoint=tcp://docker-socket-proxy:2375"
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
+      # NOTE: allow invalid TLS certificates on backend services served over HTTPS
+      - '--providers.docker.tls.insecureSkipVerify=true'
       # entrypoints
       # HTTP
       - "--entrypoints.web.address=:80"
@@ -1089,12 +1091,13 @@ services:
       KANIDM_DB_FS_TYPE: '${KANIDM_DB_FS_TYPE:-zfs}'
     labels:
       <<: *traefik
-      traefik.docker.network: kanidm
-      traefik.http.routers.kanidm.rule: Host(`kanidm.${root_domain}`)
+      traefik.docker.network: 'kanidm'
+      traefik.http.routers.kanidm.rule: 'Host(`kanidm.${root_domain}`)'
       # service
-      traefik.http.services.kanidm.loadbalancer.server.port: "8443"
+      traefik.http.services.kanidm.loadbalancer.server.port: '8443'
+      traefik.http.services.kanidm.loadbalancer.server.scheme: 'https'
       # Forward auth
-      traefik.http.routers.kanidm.middlewares: authelia@docker
+      traefik.http.routers.kanidm.middlewares: 'authelia@docker'
 
 
   # LDAP server
