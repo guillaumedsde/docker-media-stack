@@ -148,6 +148,7 @@ services:
       - '--dest=/data'
       - '--watch'
       - '--clean'
+      - '--version=v2'
 
   docker-socket-proxy:
     image: lscr.io/linuxserver/socket-proxy:1.24.0-r16-ls8
