@@ -3,10 +3,11 @@ http:
     securityHeaders:
       headers:
         customResponseHeaders:
-          X-Robots-Tag: "noindex, nofollow"
-          X-Frame-Options: "SAMEORIGIN"
-          Permissions-Policy: "interest-cohort=()"
-          Strict-Transport-Security: "max-age=63072000; includeSubDomains; preload"
+          X-Robots-Tag: 'noindex, nofollow'
+          X-Frame-Options: 'SAMEORIGIN'
+          Permissions-Policy: 'interest-cohort=()'
+          X-Content-Type-Options: 'nosniff'
+          Strict-Transport-Security: 'max-age=63072000; includeSubDomains; preload'
           Server:
           X-Powered-By:
           X-AspNet-Version:
