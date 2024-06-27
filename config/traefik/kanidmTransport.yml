@@ -1,4 +1,0 @@
-http:
-  serversTransports:
-    kanidmTransport:
-      insecureSkipVerify: true
