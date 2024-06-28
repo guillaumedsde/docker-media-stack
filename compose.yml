@@ -114,6 +114,7 @@ services:
       - librespeed
       - smokeping
       - tandoor
+      - lldap
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1397,6 +1398,13 @@ networks:
   ombi:
     driver: bridge
     name: ombi
+  lldap:
+    driver: bridge
+    name: lldap
+  lldap-postgres:
+    driver: bridge
+    internal: true
+    name: lldap-postgres
 
 volumes:
   robots-nginx-cache:
