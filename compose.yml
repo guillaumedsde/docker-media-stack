@@ -1107,8 +1107,6 @@ services:
       traefik.http.routers.lldap.rule: 'Host(`lldap.${root_domain}`)'
       # service
       traefik.http.services.lldap.loadbalancer.server.port: '17170'
-      # Forward auth
-      traefik.http.routers.lldap.middlewares: 'authelia@docker'
 
   lldap-postgres:
     <<: *common
