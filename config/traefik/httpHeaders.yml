@@ -6,6 +6,7 @@ http:
           X-Robots-Tag: 'noindex, nofollow'
           X-Frame-Options: 'SAMEORIGIN'
           Permissions-Policy: 'interest-cohort=()'
+          Referrer-Policy: 'strict-origin-when-cross-origin'
           X-Content-Type-Options: 'nosniff'
           Strict-Transport-Security: 'max-age=63072000; includeSubDomains; preload'
           Server:
