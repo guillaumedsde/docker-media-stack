@@ -507,30 +507,6 @@ services:
       UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
       UN_LIDARR_0_PATH: /data/download/music
 
-  recyclarr:
-    image: docker.io/recyclarr/recyclarr:7.1
-    user: 1000:1000
-    cpu_count: 2
-    mem_limit: 200M
-    <<: *common
-    environment:
-      <<: *conf
-      SONARR_API_KEY: ${SONARR_API_KEY}
-      RADARR_API_KEY: ${RADARR_API_KEY}
-    depends_on:
-      radarr:
-        condition: service_healthy
-      sonarr:
-        # FIXME: switch to service healthy once healthcheck is implemented for sonarr
-        condition: service_started
-    networks:
-      - traefik
-    volumes:
-      - ${docker_data_folder}/recyclarr:/config
-      - type: bind
-        source: ./config/recyclarr/recyclarr.yml
-        target: /config/recyclarr.yml
-
   # homer is a homepage container
   homer:
     image: docker.io/b4bz/homer:v24.05.1
