@@ -1233,81 +1233,37 @@ services:
 
 networks:
   watchtower:
-    driver: bridge
-    name: watchtower
   traefik:
-    driver: bridge
-    name: traefik
   ldap:
-    driver: bridge
     internal: true
-    name: ldap
   authelia:
-    driver: bridge
     internal: true
-    name: authelia
   nextcloud:
-    driver: bridge
     internal: true
-    name: nextcloud
   samba:
-    driver: bridge
-    name: samba
   ssh:
-    driver: bridge
-    name: ssh
   homer:
-    driver: bridge
     internal: true
-    name: homer
   nextcloud-proxy:
-    driver: bridge
-    name: nextcloud-proxy
   robots:
-    driver: bridge
     internal: true
-    name: robots
   netdata:
-    driver: bridge
     internal: true
-    name: netdata
   scrutiny:
-    driver: bridge
-    name: scrutiny
   lam:
-    driver: bridge
     internal: true
-    name: lam
   authelia-proxy:
-    driver: bridge
-    name: authelia-proxy
   flaresolverr:
-    driver: bridge
-    name: flaresolverr
   traefik-socket-proxy:
-    driver: bridge
     internal: true
-    name: traefik-socket-proxy
   watchtower-socket-proxy:
-    driver: bridge
     internal: true
-    name: watchtower-socket-proxy
   netdata-socket-proxy:
-    driver: bridge
     internal: true
-    name: netdata-socket-proxy
   librespeed:
-    driver: bridge
-    name: librespeed
   smokeping:
-    driver: bridge
-    name: smokeping
   tandoor:
-    driver: bridge
-    name: tandoor
   ombi:
-    driver: bridge
-    name: ombi
 
 volumes:
   robots-nginx-cache:
