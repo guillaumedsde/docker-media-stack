@@ -709,11 +709,12 @@ services:
     healthcheck: &postgres-healthcheck
       test:
         - "CMD-SHELL"
-        - "pg_isready"
-        - "--host=localhost"
-        - "--port=5432"
-        - "--username=$$POSTGRES_USER"
-        - "--dbname=$$POSTGRES_USER"
+        - >-
+          pg_isready
+          --username=$${POSTGRES_USER}
+          --dbname=$${POSTGRES_USER}
+          --host=localhost
+          --port=5432
       start_period: 5s
       interval: 5s
       timeout: 4s
