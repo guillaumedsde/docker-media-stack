@@ -100,7 +100,7 @@ services:
       - ./config/traefik:/config:ro
       - ${docker_data_folder}/traefik/plugins-storage:/plugins-storage
     tmpfs:
-      - "/tmp"
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     networks:
       - traefik-socket-proxy
       - traefik
@@ -275,7 +275,7 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
     tmpfs:
-      - /tmp
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     read_only: true
     cpu_count: 4
     mem_limit: 6G
