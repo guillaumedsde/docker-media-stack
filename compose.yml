@@ -991,8 +991,9 @@ services:
     <<: *socket-proxy
     command:
       - "-allowfrom=netdata"
-      - "-loglevel=debug"
-      - "-allowGET=.*"
+      - '-allowGET=/v1\..{2}/(containers/.*|images/.*|info)'
+      # NOTE: for some reason netdata accesses non-versionned docker endpoints
+      - "-allowGET=/containers/.*"
     networks:
       - netdata-socket-proxy
 
