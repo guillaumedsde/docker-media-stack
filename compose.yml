@@ -36,7 +36,7 @@ services:
     image: traefik:v3.1
     user: ${UID}:${GID}
     depends_on:
-      docker-socket-proxy:
+      traefik-socket-proxy:
         condition: service_healthy
     cap_add:
       - NET_BIND_SERVICE
@@ -46,7 +46,7 @@ services:
       - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
       # docker configuration
       - "--providers.docker=true"
-      - "--providers.docker.endpoint=tcp://docker-socket-proxy:2375"
+      - "--providers.docker.endpoint=tcp://traefik-socket-proxy:2375"
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
@@ -102,6 +102,7 @@ services:
     tmpfs:
       - "/tmp"
     networks:
+      - traefik-socket-proxy
       - traefik
       - homer
       - nextcloud-proxy
@@ -110,7 +111,6 @@ services:
       - scrutiny
       - lam
       - authelia-proxy
-      - docker-socket-proxy
       - librespeed
       - smokeping
       - tandoor
@@ -122,12 +122,12 @@ services:
       - 80:80
       - 443:443
 
-  docker-socket-proxy:
+  traefik-socket-proxy: &socket-proxy
     <<: *common
     image: docker.io/wollomatic/socket-proxy:1.3.3
     cpu_count: 2
-    mem_limit: 100M
-    memswap_limit: 100M
+    mem_limit: 50M
+    memswap_limit: 50M
     user: ${UID}:${docker_group_id}
     read_only: true
     cap_drop:
@@ -139,17 +139,20 @@ services:
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         read_only: true
-    command:
+    entrypoint:
+      - "/socket-proxy"
       - "-loglevel=info"
       - "-listenip=0.0.0.0"
-      - "-allowfrom=traefik,netdata"
-      - '-allowGET=/v1\..{1,2}/(version|info|containers/.*|events.*)'
       - "-shutdowngracetime=5"
       - "-watchdoginterval=600"
       - "-stoponwatchdog"
       - "-allowhealthcheck"
+    command:
+      - "-allowfrom=traefik"
+      # NOTE: https://github.com/wollomatic/traefik-hardened/blob/b2bfcad2a1bf727f2fea33d3d68d3eca9bb1f8da/docker-compose.yaml#L12
+      - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
     networks:
-      - docker-socket-proxy
+      - traefik-socket-proxy
     healthcheck:
       test:
         - "CMD"
@@ -164,22 +167,34 @@ services:
   watchtower:
     image: containrrr/watchtower:1.7.1
     <<: *common
-    mem_limit: 100m
-    memswap_limit: 200M
-    cpu_count: 1
+    mem_limit: 50M
+    memswap_limit: 50M
+    cpu_count: 2
     read_only: true
-    user: ${UID}:${docker_group_id}
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        read_only: true
+    user: ${UID}:${GID}
+    environment:
+      DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
+    depends_on:
+      watchtower-socket-proxy:
+        condition: service_healthy
     networks:
       - watchtower
+      - watchtower-socket-proxy
     command:
       - "--cleanup"
       - "--schedule"
       - "0 0 5 * * *"
+
+  watchtower-socket-proxy:
+    <<: *socket-proxy
+    command:
+      - "-allowfrom=watchtower"
+      # NOTE: https://github.com/wollomatic/socket-proxy/blob/6ba2fa6112fb9a115e99de0634b15f1fbe1fb513/examples/docker-compose/watchtower/compose.yaml#L9-L12
+      - '-allowGET=/v1\..{2}/(containers/.*|images/.*)'
+      - '-allowPOST=/v1\..{2}/(containers/.*|images/.*|networks/.*)'
+      - '-allowDELETE=/v1\..{2}/(containers/.*|images/.*)'
+    networks:
+      - watchtower-socket-proxy
 
   # Wireguard VPN client
   wireguard:
@@ -940,14 +955,14 @@ services:
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
       - ${docker_data_folder}/netdata/cache:/var/cache/netdata
     depends_on:
-      docker-socket-proxy:
+      netdata-socket-proxy:
         condition: service_healthy
     networks:
       - netdata
-      - docker-socket-proxy
+      - netdata-socket-proxy
     environment:
       <<: *conf
-      DOCKER_HOST: docker-socket-proxy:2375
+      DOCKER_HOST: netdata-socket-proxy:2375
       NETDATA_DISABLE_TELEMETRY: "1"
       DISABLE_TELEMETRY: "1"
       DO_NOT_TRACK: "1"
@@ -971,6 +986,15 @@ services:
       - SYS_ADMIN
     security_opt:
       - apparmor:unconfined
+
+  netdata-socket-proxy:
+    <<: *socket-proxy
+    command:
+      - "-allowfrom=netdata"
+      - "-loglevel=debug"
+      - "-allowGET=.*"
+    networks:
+      - netdata-socket-proxy
 
   scrutiny:
     image: ghcr.io/analogj/scrutiny:v0.8.1-omnibus
@@ -1259,10 +1283,18 @@ networks:
   flaresolverr:
     driver: bridge
     name: flaresolverr
-  docker-socket-proxy:
+  traefik-socket-proxy:
     driver: bridge
     internal: true
-    name: docker-socket-proxy
+    name: traefik-socket-proxy
+  watchtower-socket-proxy:
+    driver: bridge
+    internal: true
+    name: watchtower-socket-proxy
+  netdata-socket-proxy:
+    driver: bridge
+    internal: true
+    name: netdata-socket-proxy
   librespeed:
     driver: bridge
     name: librespeed
