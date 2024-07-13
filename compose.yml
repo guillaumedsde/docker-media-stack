@@ -729,7 +729,7 @@ services:
     environment:
       REDISCLI_AUTH: "${NEXTCLOUD_REDIS_PASS}"
     command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
-    healthcheck:
+    healthcheck: &redis-healthcheck
       test:
         - "CMD"
         - "redis-cli"
@@ -1172,11 +1172,7 @@ services:
       - --save
       - "60"
       - "1"
-    healthcheck:
-      test:
-        - "CMD"
-        - "redis-cli"
-        - "ping"
+    healthcheck: *redis-healthcheck
     volumes:
       - ${docker_data_folder}/authelia-redis:/data
     networks:
