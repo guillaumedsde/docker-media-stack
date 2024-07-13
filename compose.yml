@@ -121,65 +121,69 @@ services:
     ports:
       - 80:80
       - 443:443
-  
+
   traefik-certs-dumper:
     <<: *common
     depends_on:
       traefik:
         # TODO: proper healthcheck on traefik service
         condition: service_started
-    image: 'docker.io/ldez/traefik-certs-dumper:v2.8.3'
-    user: '${UID}:${GID}'
+    image: "docker.io/ldez/traefik-certs-dumper:v2.8.3"
+    user: "${UID}:${GID}"
     read_only: true
-    mem_limit: '50M'
-    memswap_limit: '50M'
+    mem_limit: "50M"
+    memswap_limit: "50M"
     cpu_count: 2
     volumes:
-      - type: 'bind'
-        source: '${docker_data_folder}/traefik/data/acme.json'
-        target: '/traefik/acme.json'
+      - type: "bind"
+        source: "${docker_data_folder}/traefik/data/acme.json"
+        target: "/traefik/acme.json"
         read_only: true
-      - type: 'bind'
-        source: '${docker_data_folder}/traefik-certs-dumper'
+      - type: "bind"
+        source: "${docker_data_folder}/traefik-certs-dumper"
         target: /data
     command:
-      - 'file'
-      - '--source=/traefik/acme.json'
-      - '--dest=/data'
-      - '--watch'
-      - '--clean'
-      - '--version=v2'
+      - "file"
+      - "--source=/traefik/acme.json"
+      - "--dest=/data"
+      - "--watch"
+      - "--clean"
+      - "--version=v2"
 
   docker-socket-proxy:
-    image: lscr.io/linuxserver/socket-proxy:1.24.0-r16-ls8
+    <<: *common
+    image: docker.io/wollomatic/socket-proxy:1.3.3
     cpu_count: 2
     mem_limit: 100M
-    memswap_limit: 200M
+    memswap_limit: 100M
+    user: ${UID}:${docker_group_id}
     read_only: true
-    tmpfs:
-      - /run
-    <<: *common
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
     volumes:
       - type: bind
         source: /var/run/docker.sock
         target: /var/run/docker.sock
         read_only: true
-    environment:
-      CONTAINERS: "1"
-      INFO: "1"
+    command:
+      - "-loglevel=info"
+      - "-listenip=0.0.0.0"
+      - '-allowGET=/v1\..{1,2}/(version|info|containers/.*|events.*)'
+      - "-shutdowngracetime=5"
+      - "-watchdoginterval=600"
+      - "-stoponwatchdog"
+      - "-allowhealthcheck"
     networks:
       - docker-socket-proxy
     healthcheck:
       test:
-        - CMD
-        - nc
-        - -z
-        - "127.0.0.1"
-        - "2375"
-      interval: 30s
-      timeout: 6s
-      retries: 3
-      start_period: 5s
+        - "CMD"
+        - "./healthcheck"
+      interval: 10s
+      timeout: 5s
+      retries: 2
 
   # watchtower container to update images
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
@@ -950,11 +954,11 @@ services:
 
   # netdata, server monitoring
   netdata:
+    <<: *common
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
     image: docker.io/netdata/netdata:v1.46
-    <<: *common
     volumes:
       - /etc/passwd:/host/etc/passwd:ro
       - /etc/group:/host/etc/group:ro
@@ -962,6 +966,9 @@ services:
       - /sys:/host/sys:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
       - ${docker_data_folder}/netdata/cache:/var/cache/netdata
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
     networks:
       - netdata
       - docker-socket-proxy
