@@ -1220,26 +1220,37 @@ services:
 networks:
   watchtower:
   traefik:
+    name: traefik
   ldap:
     internal: true
   authelia:
     internal: true
+    name: authelia
   nextcloud:
     internal: true
+    name: nextcloud
   samba:
   ssh:
   homer:
     internal: true
+    name: homer
   nextcloud-proxy:
+    name: nextcloud-proxy
   robots:
     internal: true
+    name: robots
   netdata:
     internal: true
+    name: netdata
   scrutiny:
+    name: scrutiny
   lam:
     internal: true
+    name: lam
   authelia-proxy:
+    name: authelia-proxy
   flaresolverr:
+    name: flaresolverr
   traefik-socket-proxy:
     internal: true
   watchtower-socket-proxy:
@@ -1247,9 +1258,13 @@ networks:
   netdata-socket-proxy:
     internal: true
   librespeed:
+    name: librespeed
   smokeping:
+    name: smokeping
   tandoor:
+    name: tandoor
   ombi:
+    name: ombi
 
 volumes:
   robots-nginx-cache:
