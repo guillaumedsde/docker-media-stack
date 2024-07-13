@@ -704,11 +704,10 @@ services:
       - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
     networks:
       - nextcloud
-    healthcheck:
+    healthcheck: &postgres-healthcheck
       test:
-        - "CMD"
+        - "CMD-SHELL"
         - "pg_isready"
-        - "--username=nextcloud"
       start_period: 3s
       interval: 5s
       timeout: 3s
@@ -797,15 +796,7 @@ services:
       - ${docker_data_folder}/tandoor-db:/var/lib/postgresql/data
     networks:
       - tandoor
-    healthcheck: # FIXME DRY this
-      test:
-        - "CMD"
-        - "pg_isready"
-        - "--username=tandoor"
-      start_period: 3s
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    healthcheck: *postgres-healthcheck
 
   tandoor:
     <<: *common
@@ -1166,15 +1157,7 @@ services:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
     networks:
       - authelia
-    healthcheck:
-      test:
-        - "CMD"
-        - "pg_isready"
-        - "--username=authelia"
-      start_period: 3s
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    healthcheck: *postgres-healthcheck
 
   authelia-redis:
     <<: *common
