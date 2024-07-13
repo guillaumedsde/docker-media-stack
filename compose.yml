@@ -142,6 +142,7 @@ services:
     command:
       - "-loglevel=info"
       - "-listenip=0.0.0.0"
+      - "-allowfrom=traefik,netdata"
       - '-allowGET=/v1\..{1,2}/(version|info|containers/.*|events.*)'
       - "-shutdowngracetime=5"
       - "-watchdoginterval=600"
