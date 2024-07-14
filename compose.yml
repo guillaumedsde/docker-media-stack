@@ -54,13 +54,13 @@ services:
       # HTTP
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entryPoints.web.http.middlewares=securityHeaders@file"
+      - "--entryPoints.web.http.middlewares=httpHeaders@file"
       # HTTPS
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
       - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
-      - "--entryPoints.websecure.http.middlewares=securityHeaders@file"
+      - "--entryPoints.websecure.http.middlewares=httpHeaders@file"
       # DNS challenge
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
