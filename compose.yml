@@ -54,7 +54,6 @@ services:
       # HTTP
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entryPoints.web.http.middlewares=securityheaders@docker"
       # HTTPS
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.certResolver=le"
