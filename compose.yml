@@ -419,7 +419,7 @@ services:
 
   # readarr, webapp for downloading books through torrent client
   readarr:
-    image: docker.io/linuxserver/readarr:0.3.30-develop
+    image: docker.io/linuxserver/readarr:0.3.31-develop
     <<: *common
     cpu_count: 4
     mem_limit: 2G
