@@ -49,7 +49,6 @@ services:
       # docker configuration
       - "--providers.docker=true"
       - "--providers.docker.endpoint=tcp://traefik-socket-proxy:2375"
-      - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
       # HTTP
@@ -569,6 +568,7 @@ services:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
     labels:
       <<: *traefik
+      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_traefik'
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
