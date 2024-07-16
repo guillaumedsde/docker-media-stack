@@ -361,7 +361,7 @@ services:
 
   # sonarr, webapp for downloading series through torrent client
   sonarr:
-    image: docker.io/linuxserver/sonarr:4.0.6
+    image: docker.io/linuxserver/sonarr:4.0.8
     <<: *common
     cpu_count: 4
     mem_limit: 2G
