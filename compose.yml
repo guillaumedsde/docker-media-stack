@@ -798,7 +798,7 @@ services:
 
   tandoor:
     <<: *common
-    image: docker.io/vabene1111/recipes:1.5.17
+    image: docker.io/vabene1111/recipes:1.5.18
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 5000M
