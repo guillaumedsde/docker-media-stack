@@ -578,7 +578,7 @@ services:
 
   # ombi, plex media requests
   ombi:
-    image: docker.io/linuxserver/ombi:4.43.5
+    image: docker.io/linuxserver/ombi:4.44.1
     <<: *common
     mem_limit: 2G
     memswap_limit: 2G
