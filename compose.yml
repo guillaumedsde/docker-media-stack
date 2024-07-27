@@ -660,6 +660,47 @@ services:
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
   # ombi, plex media requests
+  jellyseer:
+    <<: *common
+    image: docker.io/fallenbagel/jellyseerr:1.9.2@sha256:8f708df0ce3f202056bde5d7bff625eb59efe38f4ee47bdddc7560b6e4a5a214
+    user: ${UID}:${GID}
+    cpu_count: 2
+    mem_limit: 1G
+    memswap_limit: 1G
+    read_only: true
+    depends_on:
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+    volumes:
+      - ${docker_data_folder}/jellyseer:/app/config
+    networks:
+      - traefik
+    environment:
+      <<: *conf
+    labels:
+      <<: *traefik
+      traefik.http.routers.jellyseer.rule: Host(`jellyseer.${root_domain}`)
+      # service
+      traefik.http.services.jellyseer.loadbalancer.server.port: "5055"
+      # Forward auth
+      traefik.http.routers.jellyseer.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:8080
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
+
+  # ombi, plex media requests
   ombi:
     image: docker.io/linuxserver/ombi:4.44.1
     <<: *common
