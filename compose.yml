@@ -696,11 +696,11 @@ services:
         - --timeout=3
         - --tries=1
         - --spider
-        - http://localhost:8080
+        - http://localhost:5055
       interval: 5s
       timeout: 4s
       retries: 4
-      start_period: 10s
+      start_period: 5s
 
   # ombi, plex media requests
   ombi:
