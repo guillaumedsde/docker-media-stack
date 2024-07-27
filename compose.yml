@@ -700,7 +700,7 @@ services:
       interval: 5s
       timeout: 4s
       retries: 4
-      start_period: 5s
+      start_period: 10s
 
   # ombi, plex media requests
   ombi:
