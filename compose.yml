@@ -502,13 +502,25 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
-    image: docker.io/linuxserver/bazarr:1.4.3
     <<: *common
     depends_on:
-      - "radarr"
-      - "sonarr"
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+    image: ghcr.io/onedr0p/bazarr:1.4.3@sha256:742693933be67a3d66fdd6c8fb1b4e9fcaa010dc8c6fd1adb150d11614d2b497
+    cpu_count: 2
+    mem_limit: 500M
+    memswap_limit: 500M
+    read_only: true
+    user: ${UID}:${GID}
     environment:
       <<: *conf
+    volumes:
+      - ${docker_data_folder}/bazarr:/config
+      - ${data_folder}:/data
+    networks:
+      - traefik
     labels:
       <<: *traefik
       traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
@@ -516,17 +528,19 @@ services:
       traefik.http.services.bazarr.loadbalancer.server.port: "6767"
       # Forward auth
       traefik.http.routers.bazarr.middlewares: authelia@docker
-    cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/bazarr:/config
-      - ${data_folder}:/data
-      - ./config/bazarr/sub-clean.sh:/usr/bin/sub-clean.sh
-      - ./config/bazarr/chmod-custom-script.sh:/etc/cont-init.d/99-chmod-custom-script
-    networks:
-      - traefik
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:6767
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   # automatically extract torrented archives
   unpackerr:
