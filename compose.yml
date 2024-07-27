@@ -659,7 +659,6 @@ services:
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
-  # ombi, plex media requests
   jellyseer:
     <<: *common
     image: docker.io/fallenbagel/jellyseerr:1.9.2@sha256:8f708df0ce3f202056bde5d7bff625eb59efe38f4ee47bdddc7560b6e4a5a214
@@ -669,6 +668,8 @@ services:
     memswap_limit: 1G
     read_only: true
     depends_on:
+      jellyfin:
+        condition: service_healthy
       radarr:
         condition: service_healthy
       sonarr:
@@ -683,11 +684,14 @@ services:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.regex: "^https?://ombi.${root_domain}/(.*)"
+      traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.replacement: "https://jellyseer.${root_domain}/"
+      traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.permanent: "false"
       traefik.http.routers.jellyseer.rule: Host(`jellyseer.${root_domain}`)
       # service
       traefik.http.services.jellyseer.loadbalancer.server.port: "5055"
       # Forward auth
-      traefik.http.routers.jellyseer.middlewares: authelia@docker
+      traefik.http.routers.jellyseer.middlewares: ombi-jellyseer-redirect
     healthcheck:
       test:
         - CMD
@@ -701,66 +705,6 @@ services:
       timeout: 4s
       retries: 4
       start_period: 5s
-
-  # ombi, plex media requests
-  ombi:
-    image: docker.io/linuxserver/ombi:4.44.1
-    <<: *common
-    mem_limit: 2G
-    memswap_limit: 2G
-    cpu_count: 2
-    depends_on:
-      - "sonarr"
-      - "radarr"
-      - "lidarr"
-      - "ombi-mariadb"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/ombi:/config
-    networks:
-      - traefik
-      - ombi
-    environment:
-      <<: *conf
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
-      traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
-      # service
-      traefik.http.services.ombi.loadbalancer.server.port: "3579"
-      # Forward auth
-      traefik.http.routers.ombi.middlewares: authelia@docker
-
-  ombi-mariadb:
-    image: docker.io/mariadb:11.4
-    <<: *common
-    cpu_count: 2
-    mem_limit: 1G
-    memswap_limit: 1G
-    user: ${UID}:${GID}
-    environment:
-      MARIADB_ROOT_PASSWORD: ${OMBI_DB_ROOT_PASSWORD}
-      MARIADB_DATABASE: ombi
-      MARIADB_USER: ombi
-      MARIADB_PASSWORD: "${OMBI_DB_PASSWORD}"
-      MARIADB_AUTO_UPGRADE: "true"
-    networks:
-      - ombi
-    volumes:
-      - "${docker_data_folder}/ombi-mariadb:/var/lib/mysql"
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test:
-        - "CMD"
-        - "healthcheck.sh"
-        - "--connect"
-        - "--innodb_initialized"
-      start_period: 10s
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   # personal cloud
   nextcloud: &nextcloud
@@ -1408,7 +1352,6 @@ networks:
   librespeed:
   smokeping:
   tandoor:
-  ombi:
 
 volumes:
   robots-nginx-cache:
