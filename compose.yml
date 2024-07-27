@@ -287,18 +287,20 @@ services:
       retries: 10
 
   prowlarr:
-    image: docker.io/linuxserver/prowlarr:1.20.1
     <<: *common
+    image: ghcr.io/onedr0p/prowlarr:1.21.2.4649@sha256:f04764d37c211cb0c7161cf417d9ca5f117f4cb22c19309e75fca7880309846d
+    cpu_count: 4
+    mem_limit: 3G
+    memswap_limit: 3G
+    read_only: true
+    user: ${UID}:${GID}
+    network_mode: service:wireguard
     depends_on:
       wireguard:
         condition: service_healthy
     volumes:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
-    cpu_count: 4
-    mem_limit: 3G
-    memswap_limit: 3G
-    network_mode: service:wireguard
     environment:
       <<: *conf
     labels:
@@ -332,7 +334,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
-    image: docker.io/guillaumedsde/radarr-distroless:5.6.0.8846
+    image: ghcr.io/onedr0p/radarr:5.8.3.8933@sha256:55f2de2e2483c7013adce243a0a55773ecb826448ab6a142300708b2382cdb75
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -358,21 +360,35 @@ services:
       traefik.http.services.radarr.loadbalancer.server.port: "7878"
       # Forward auth
       traefik.http.routers.radarr.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:7878
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   # sonarr, webapp for downloading series through torrent client
   sonarr:
-    image: docker.io/linuxserver/sonarr:4.0.8
     <<: *common
+    image: ghcr.io/onedr0p/sonarr:4.0.8@sha256:13059c5ecc444bf2b3c578fc4495f46e02a3db80c8f1482f04f51b9df82e4011
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    read_only: true
+    user: ${UID}:${GID}
     depends_on:
       qbittorrent:
         condition: service_healthy
       prowlarr:
         condition: service_healthy
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/sonarr:/config
       - ${data_folder}:/data
     networks:
@@ -386,21 +402,35 @@ services:
       traefik.http.services.sonarr.loadbalancer.server.port: "8989"
       # Forward auth
       traefik.http.routers.sonarr.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:8989
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   # lidarr, webapp for downloading music through torrent client
   lidarr:
-    image: docker.io/linuxserver/lidarr:1.4.5
     <<: *common
+    image: ghcr.io/onedr0p/lidarr:2.4.3.4248@sha256:9c982cdb696b4b2437bd2b622afd2b6de110cb113f0aba411327544cf645b26c
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    read_only: true
+    user: ${UID}:${GID}
     depends_on:
       qbittorrent:
         condition: service_healthy
       prowlarr:
         condition: service_healthy
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/lidarr:/config
       - ${data_folder}:/data
     networks:
@@ -414,14 +444,29 @@ services:
       traefik.http.services.lidarr.loadbalancer.server.port: "8686"
       # Forward auth
       traefik.http.routers.lidarr.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:8686
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   # readarr, webapp for downloading books through torrent client
   readarr:
-    image: docker.io/linuxserver/readarr:0.3.32-develop
     <<: *common
+    image: ghcr.io/onedr0p/readarr-develop:0.3.32@sha256:4bbc4faea2daac8e1a8de9777eb15e0edc19f2a3a12d599aaed460d44bbb2323
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    read_only: true
+    user: ${UID}:${GID}
     depends_on:
       qbittorrent:
         condition: service_healthy
@@ -441,6 +486,19 @@ services:
       traefik.http.services.readarr.loadbalancer.server.port: "8787"
       # Forward auth
       traefik.http.routers.readarr.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:8787
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   # bazarr, webapp for downloading subtitles
   bazarr:
