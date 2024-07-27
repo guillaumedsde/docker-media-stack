@@ -675,6 +675,8 @@ services:
         condition: service_healthy
     volumes:
       - ${docker_data_folder}/jellyseer:/app/config
+    tmpfs:
+      - /.cache/yarn:mode=770,size=50M,uid=${UID},gid=${GID}
     networks:
       - traefik
     environment:
