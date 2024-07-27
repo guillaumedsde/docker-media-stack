@@ -123,17 +123,15 @@ services:
       - 443:443
     healthcheck:
       test:
-        - CMD
-        - wget
-        - --quiet
-        - --timeout=3
-        - --tries=1
-        - --spider
-        - https://ping.${root_domain}
-      interval: 5s
-      timeout: 4s
+        - "CMD"
+        - "nc"
+        - "-vz"
+        - "127.0.0.1"
+        - "80"
+      start_period: 3s
+      interval: 3s
+      timeout: 3s
       retries: 5
-      start_period: 5s
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
