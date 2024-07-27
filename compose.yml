@@ -687,7 +687,7 @@ services:
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.regex: "^https?://ombi.${root_domain}/(.*)"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.replacement: "https://jellyseer.${root_domain}/"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.permanent: "false"
-      traefik.http.routers.jellyseer.rule: Host(`jellyseer.${root_domain}`)
+      traefik.http.routers.jellyseer.rule: Host(`jellyseer.${root_domain}`) || Host(`ombi.${root_domain}`)
       # service
       traefik.http.services.jellyseer.loadbalancer.server.port: "5055"
       # Forward auth
