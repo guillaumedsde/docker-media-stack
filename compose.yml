@@ -121,6 +121,19 @@ services:
     ports:
       - 80:80
       - 443:443
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - https://ping.${root_domain}
+      interval: 5s
+      timeout: 4s
+      retries: 5
+      start_period: 5s
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
@@ -236,7 +249,7 @@ services:
       HEALTH_SUCCESS_WAIT_DURATION: "10m"
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_traefik'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
       # Prowlarr
       # service
       traefik.http.services.prowlarr.loadbalancer.server.port: "9696"
@@ -622,7 +635,7 @@ services:
         target: /data/pictures
         read_only: true
       - type: bind
-        source: '${data_folder}/Recettes de cuisine'
+        source: "${data_folder}/Recettes de cuisine"
         target: /data/recipes
         read_only: true
     networks:
@@ -643,7 +656,7 @@ services:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_traefik'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
@@ -670,7 +683,7 @@ services:
       <<: *conf
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_traefik'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
       traefik.http.routers.ombi.rule: Host(`ombi.${root_domain}`)
       # service
       traefik.http.services.ombi.loadbalancer.server.port: "3579"
@@ -697,6 +710,16 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test:
+        - "CMD"
+        - "healthcheck.sh"
+        - "--connect"
+        - "--innodb_initialized"
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # personal cloud
   nextcloud: &nextcloud
@@ -736,7 +759,7 @@ services:
       MAIL_DOMAIN: ${root_domain}
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_nextcloud-proxy'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_nextcloud-proxy"
       traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
       traefik.http.routers.nextcloud.middlewares: nextcloud-redirectregex
       # service
@@ -749,12 +772,18 @@ services:
     memswap_limit: 4G
     cpu_count: 8
     image: docker.io/nextcloud:29.0-apache
+    healthcheck:
+      test: curl -sSf 'http://localhost/status.php' | grep '"installed":true' | grep '"maintenance":false' | grep '"needsDbUpgrade":false' || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   nextcloud-cron:
     <<: *nextcloud
     labels: {}
     entrypoint:
       - /cron.sh
+    healthcheck: {}
 
   # database for nextcloud
   nextcloud-postgres:
@@ -902,6 +931,19 @@ services:
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.tandoor.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:8080
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   samba:
     environment:
@@ -1032,7 +1074,7 @@ services:
       NETDATA_DISABLE_CLOUD: "1"
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_netdata'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_netdata"
       traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
@@ -1097,6 +1139,16 @@ services:
       traefik.http.services.scrutiny.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.scrutiny.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -sSf
+        - http://localhost:8080
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
 
   ##################################################################
   # Authentication
@@ -1150,7 +1202,7 @@ services:
     memswap_limit: 200M
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_lam'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lam"
       traefik.http.routers.lam.rule: Host(`lam.${root_domain}`)
       # service
       traefik.http.services.lam.loadbalancer.server.port: "80"
@@ -1201,7 +1253,7 @@ services:
       - authelia
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_authelia-proxy'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_authelia-proxy"
       traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
       # service
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
