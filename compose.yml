@@ -913,6 +913,8 @@ services:
       - type: bind
         source: "${docker_data_folder}/tandoor/mediafiles"
         target: "/opt/recipes/mediafiles"
+    tmpfs:
+      - /tmpfs:mode=770,size=10M,uid=${UID},gid=${GID}
     networks:
       - tandoor
     labels:
