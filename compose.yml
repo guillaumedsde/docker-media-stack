@@ -845,27 +845,6 @@ services:
       # Forward auth
       traefik.http.routers.librespeed.middlewares: authelia@docker
 
-  smokeping:
-    image: ghcr.io/linuxserver/smokeping:2.8.2
-    cpu_count: 2
-    mem_limit: 250M
-    memswap_limit: 250M
-    <<: *common
-    environment:
-      <<: *conf
-    volumes:
-      - "${docker_data_folder}/smokeping/config:/config"
-      - "${docker_data_folder}/smokeping/data:/data"
-    networks:
-      - smokeping
-    labels:
-      <<: *traefik
-      traefik.http.routers.smokeping.rule: Host(`smokeping.${root_domain}`)
-      # service
-      traefik.http.services.smokeping.loadbalancer.server.port: "80"
-      # Forward auth
-      traefik.http.routers.smokeping.middlewares: authelia@docker
-
   tandoor-db:
     <<: *common
     image: docker.io/postgres:16-bullseye
