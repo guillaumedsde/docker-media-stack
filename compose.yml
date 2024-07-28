@@ -892,6 +892,8 @@ services:
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 5000M
+    user: ${UID}:${GID}
+    read_only: true
     depends_on:
       tandoor-db:
         condition: service_healthy
@@ -905,8 +907,10 @@ services:
       POSTGRES_DB: tandoor
       REMOTE_USER_AUTH: "1"
     volumes:
-      - "${docker_data_folder}/tandoor/staticfiles:/opt/recipes/staticfiles"
-      - "${docker_data_folder}/tandoor/mediafiles:/opt/recipes/mediafiles"
+      - source: "${docker_data_folder}/tandoor/staticfiles"
+        target: "/opt/recipes/staticfiles"
+      - source: "${docker_data_folder}/tandoor/mediafiles"
+        target: "/opt/recipes/mediafiles"
     networks:
       - tandoor
     labels:
