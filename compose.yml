@@ -1080,8 +1080,10 @@ services:
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 2
+    user: ${UID}:${GID}
     cap_add:
       - SYS_RAWIO
+    read_only: true
     # FIXME: make this dynamic, see: https://stackoverflow.com/a/55089229
     devices:
       - /dev/sda
@@ -1100,6 +1102,9 @@ services:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
       - ${docker_data_folder}/scrutiny/influxdb:/opt/scrutiny/influxdb
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     networks:
       - scrutiny
     environment:
