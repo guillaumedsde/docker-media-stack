@@ -1102,7 +1102,7 @@ services:
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
       - ${docker_data_folder}/scrutiny/influxdb:/opt/scrutiny/influxdb
     tmpfs:
-      - /run:mode=777,size=5M
+      - /run/s6:mode=777,size=5M
       - /tmp:mode=777,size=5M
     networks:
       - scrutiny
