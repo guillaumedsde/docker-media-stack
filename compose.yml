@@ -1080,7 +1080,6 @@ services:
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 2
-    user: ${UID}:${GID}
     cap_add:
       - SYS_RAWIO
     read_only: true
