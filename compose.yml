@@ -907,9 +907,11 @@ services:
       POSTGRES_DB: tandoor
       REMOTE_USER_AUTH: "1"
     volumes:
-      - source: "${docker_data_folder}/tandoor/staticfiles"
+      - type: bind
+        source: "${docker_data_folder}/tandoor/staticfiles"
         target: "/opt/recipes/staticfiles"
-      - source: "${docker_data_folder}/tandoor/mediafiles"
+      - type: bind
+        source: "${docker_data_folder}/tandoor/mediafiles"
         target: "/opt/recipes/mediafiles"
     networks:
       - tandoor
