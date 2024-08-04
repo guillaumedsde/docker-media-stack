@@ -1181,22 +1181,6 @@ services:
       # Forward auth
       traefik.http.routers.lam.middlewares: traefik-forward-auth
 
-  whoami:
-    image: docker.io/containous/whoami:v1.5.0@sha256:e6d0a6d995c167bd339fa8b9bb2f585acd9a6e505a6b3fb6afb5fcbd52bbefb8
-    cpu_count: 2
-    user: ${UID}:${GID}
-    mem_limit: 100M
-    memswap_limit: 100M
-    networks:
-      - traefik
-    labels:
-      <<: *traefik
-      traefik.http.routers.whoami.rule: Host(`whoami.${root_domain}`)
-      # service
-      traefik.http.services.whoami.loadbalancer.server.port: "80"
-      # Forward auth
-      traefik.http.routers.whoami.middlewares: authelia@docker
-
   # SSO
   authelia:
     image: docker.io/authelia/authelia:4.38.9@sha256:491745686a70863b33a9978795e13fdeb8bc82e4fcfa456bf30f788827114cb0
