@@ -826,7 +826,7 @@ services:
         - "ping"
 
   librespeed:
-    image: ghcr.io/linuxserver/librespeed:5.3.3
+    image: ghcr.io/linuxserver/librespeed:5.4.20240804
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
