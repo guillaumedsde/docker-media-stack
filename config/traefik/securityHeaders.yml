@@ -10,14 +10,10 @@ http:
           referrer-policy: 'strict-origin-when-cross-origin'
           x-content-type-options: 'nosniff'
           strict-transport-security: 'max-age=63072000; includeSubDomains; preload'
-          server: ""
-          x-powered-by: ""
-          x-aspnet-version: ""
-          x-aspnetmvc-version: ""
+          server:
+          x-powered-by:
+          x-aspnet-version:
+          x-aspnetmvc-version:
         customRequestHeaders:
-          x-remote-user: ""
-          remote-user: ""
-          x_remote_user: ""
-          remote_user: ""
-          x-remote_user: ""
-          x_remote-user: ""
+          x-remote-user:
+          remote-user:
