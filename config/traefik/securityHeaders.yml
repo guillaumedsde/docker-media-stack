@@ -15,5 +15,5 @@ http:
           x-aspnet-version:
           x-aspnetmvc-version:
         customRequestHeaders:
-          x-remote-user:
-          remote-user:
+          x-remote-user: ""
+          remote-user: ""
