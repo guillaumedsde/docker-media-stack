@@ -849,8 +849,8 @@ services:
     <<: *common
     image: docker.io/postgres:16-bullseye
     cpu_count: 2
-    mem_limit: 250M
-    memswap_limit: 250M
+    mem_limit: 500M
+    memswap_limit: 500M
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -1240,8 +1240,8 @@ services:
     <<: *common
     image: docker.io/postgres:14-bullseye
     cpu_count: 2
-    mem_limit: 250M
-    memswap_limit: 250M
+    mem_limit: 500M
+    memswap_limit: 500M
     user: ${UID}:${GID}
     read_only: true
     environment:
