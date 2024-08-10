@@ -586,6 +586,7 @@ services:
     memswap_limit: 1G
     read_only: true
     environment:
+      <<: *conf
       S6_READ_ONLY_ROOT: '1'
     networks:
       - homeassistant
