@@ -114,6 +114,7 @@ services:
       - librespeed
       - smokeping
       - tandoor
+      - homeassistant
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -576,6 +577,35 @@ services:
       UN_LIDARR_0_URL: http://lidarr:8686
       UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
       UN_LIDARR_0_PATH: /data/download/music
+
+  homeassistant:
+    image: "ghcr.io/home-assistant/home-assistant:2024.8.0@sha256:9024f2f8977b80a819c71bda11dba53c2e2306528a8b2d9c9035999708f701d1"
+    user: "${UID}:${GID}"
+    cpu_count: 2
+    mem_limit: 1G
+    memswap_limit: 1G
+    read_only: true
+    environment:
+      S6_READ_ONLY_ROOT: '1'
+    networks:
+      - homeassistant
+    tmpfs:
+      - /run:exec,mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/homeassistant
+        target: /config
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    labels:
+      <<: *traefik
+      traefik.http.routers.homeassistant.rule: Host(`homeassistant.${root_domain}`)
+      # service
+      traefik.http.services.homeassistant.loadbalancer.server.port: "8123"
+      # Forward auth
+      traefik.http.routers.homeassistant.middlewares: authelia@docker
 
   # homer is a homepage container
   homer:
@@ -1339,6 +1369,7 @@ networks:
   librespeed:
   smokeping:
   tandoor:
+  homeassistant:
 
 volumes:
   robots-nginx-cache:
