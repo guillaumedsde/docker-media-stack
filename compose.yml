@@ -580,7 +580,7 @@ services:
       UN_LIDARR_0_PATH: /data/download/music
 
   homeassistant:
-    image: "ghcr.io/home-assistant/home-assistant:2024.8.0@sha256:9024f2f8977b80a819c71bda11dba53c2e2306528a8b2d9c9035999708f701d1"
+    image: "ghcr.io/home-assistant/home-assistant:2024.8.1@sha256:fa086d561ba8725d59dc2947b337abba9776090ee8a357619fd5f717302f7a79"
     user: "${UID}:${GID}"
     cpu_count: 2
     mem_limit: 1G
