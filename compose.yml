@@ -115,6 +115,7 @@ services:
       - smokeping
       - tandoor
       - homeassistant
+      - miniflux-proxy
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -856,6 +857,55 @@ services:
         - "redis-cli"
         - "ping"
 
+  miniflux:
+    <<: *common
+    depends_on:
+      miniflux-db:
+        condition: service_healthy
+    image: ghcr.io/miniflux/miniflux:2.1.4-distroless@sha256:ad8e8d5ce52fc0d322535b401ef3578df286714f26bbdd1e33ac79e269de7d55
+    cpu_count: 2
+    mem_limit: 500M
+    memswap_limit: 500M
+    read_only: true
+    user: ${UID}:${GID}
+    networks:
+      - miniflux
+      - miniflux-proxy
+    environment:
+      BASE_URL: 'https://miniflux.${root_domain}/'
+      AUTH_PROXY_HEADER: 'Remote-User'
+      AUTH_PROXY_USER_CREATION: 'true'
+      RUN_MIGRATIONS: '1'
+      DATABASE_URL: 'postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux'
+    labels:
+      <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
+      traefik.http.routers.miniflux.rule: Host(`miniflux.${root_domain}`)
+      # service
+      traefik.http.services.miniflux.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.miniflux.middlewares: authelia@docker
+
+  miniflux-db:
+    <<: *common
+    image: docker.io/postgres:16-bookworm
+    cpu_count: 2
+    mem_limit: 2G
+    memswap_limit: 2G
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_PASSWORD: ${MINIFLUX_DB_PASSWORD}
+      POSTGRES_USER: miniflux
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/miniflux-db:/var/lib/postgresql/data
+    networks:
+      - miniflux
+    healthcheck: *postgres-healthcheck
+
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.4.20240804@sha256:256e01b01048ff97ee06a742ad2619e121e4137a553b89df50f6e376b0e93aff
     cpu_count: 2
@@ -1371,6 +1421,9 @@ networks:
   smokeping:
   tandoor:
   homeassistant:
+  miniflux:
+    internal: true
+  miniflux-proxy:
 
 volumes:
   robots-nginx-cache:
