@@ -580,6 +580,7 @@ services:
       UN_LIDARR_0_PATH: /data/download/music
 
   homeassistant:
+    <<: *common
     image: "ghcr.io/home-assistant/home-assistant:2024.8.1@sha256:fa086d561ba8725d59dc2947b337abba9776090ee8a357619fd5f717302f7a79"
     user: "${UID}:${GID}"
     cpu_count: 2
@@ -608,6 +609,34 @@ services:
       traefik.http.services.homeassistant.loadbalancer.server.port: "8123"
       # Forward auth
       traefik.http.routers.homeassistant.middlewares: authelia@docker
+
+  homeassistant-linky:
+    <<: *common
+    image: bokub/ha-linky-standalone:${HA_LINKY_VERSION:-1.5.0}
+    build:
+      context: https://github.com/bokub/ha-linky.git#${HA_LINKY_VERSION:-1.5.0}
+      dockerfile: standalone.Dockerfile
+    user: "${UID}:${GID}"
+    cpu_count: 2
+    mem_limit: 1G
+    memswap_limit: 1G
+    read_only: true
+    configs:
+      - source: homassistant_linky_config
+        target: /data/options.json
+        uid: "${UID}"
+        gid: "${GID}"
+        mode: 0440
+    environment:
+      <<: *conf
+      SUPERVISOR_TOKEN: ${HOMEASSISTANT_TOKEN}
+      WS_URL: ws://homeassistant:8123/api/websocket
+    networks:
+      - homeassistant
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/homeassistant-linky
+        target: /data
 
   # homer is a homepage container
   homer:
@@ -1429,3 +1458,19 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
+
+configs:
+  homassistant_linky_config:
+    content: |
+      {
+        "meters": [
+          {
+            "prm": "${PRM}",
+            "token": "${CONSO_API_TOKEN}",
+            "name": "Consommation Linky",
+            "action": "sync",
+            "production": false
+          }
+        ],
+        "costs": []
+      }
