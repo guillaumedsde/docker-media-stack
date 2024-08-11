@@ -876,7 +876,7 @@ services:
       AUTH_PROXY_HEADER: 'Remote-User'
       AUTH_PROXY_USER_CREATION: 'true'
       RUN_MIGRATIONS: '1'
-      DATABASE_URL: 'postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux'
+      DATABASE_URL: 'postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable'
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
