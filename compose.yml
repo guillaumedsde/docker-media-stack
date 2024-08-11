@@ -633,10 +633,6 @@ services:
       WS_URL: ws://homeassistant:8123/api/websocket
     networks:
       - homeassistant
-    volumes:
-      - type: bind
-        source: ${docker_data_folder}/homeassistant-linky
-        target: /data
 
   # homer is a homepage container
   homer:
