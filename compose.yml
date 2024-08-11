@@ -620,12 +620,12 @@ services:
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
-    read_only: true
+    # NOTE: docker can't mount config in read only filesystem, see:
+    #       https://github.com/docker/compose/issues/12031
+    read_only: false
     configs:
       - source: homassistant_linky_config
         target: /data/options.json
-        uid: "${UID}"
-        gid: "${GID}"
         mode: 0440
     environment:
       <<: *conf
