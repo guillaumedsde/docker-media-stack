@@ -609,9 +609,25 @@ services:
       traefik.http.services.homeassistant.loadbalancer.server.port: "8123"
       # Forward auth
       traefik.http.routers.homeassistant.middlewares: authelia@docker
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:8123
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 10s
 
   homeassistant-linky:
     <<: *common
+    depends_on:
+      homeassistant:
+        condition: service_healthy
     image: bokub/ha-linky-standalone:${HA_LINKY_VERSION:-1.5.0}
     build:
       context: https://github.com/bokub/ha-linky.git#${HA_LINKY_VERSION:-1.5.0}
