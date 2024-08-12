@@ -121,8 +121,26 @@ services:
     memswap_limit: 500M
     cpu_count: 4
     ports:
-      - 80:80
-      - 443:443
+      - target: 80
+        published: 80
+        host_ip: '0.0.0.0'
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        host_ip: '0.0.0.0'
+        protocol: tcp
+        mode: host
+      - target: 80
+        published: 80
+        host_ip: '::'
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        host_ip: '::'
+        protocol: tcp
+        mode: host
     healthcheck:
       test:
         - "CMD"
