@@ -1145,12 +1145,21 @@ services:
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
+    pid: host
     image: docker.io/netdata/netdata:v1.46@sha256:fa9580f5c2291b2a1bbd4eca0451877c75c265c15e92c8d1209e2234ddb356c8
     volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /:/host/root:ro,rslave
       - /etc/passwd:/host/etc/passwd:ro
       - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /run/dbus:/run/dbus:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
       - ${docker_data_folder}/netdata/cache:/var/cache/netdata
     depends_on:
