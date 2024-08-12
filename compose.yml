@@ -1148,9 +1148,6 @@ services:
     pid: host
     image: docker.io/netdata/netdata:v1.46@sha256:fa9580f5c2291b2a1bbd4eca0451877c75c265c15e92c8d1209e2234ddb356c8
     volumes:
-      - netdataconfig:/etc/netdata
-      - netdatalib:/var/lib/netdata
-      - netdatacache:/var/cache/netdata
       - /:/host/root:ro,rslave
       - /etc/passwd:/host/etc/passwd:ro
       - /etc/group:/host/etc/group:ro
@@ -1162,6 +1159,7 @@ services:
       - /run/dbus:/run/dbus:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
       - ${docker_data_folder}/netdata/cache:/var/cache/netdata
+      - ${docker_data_folder}/netdata/netdatalib:/var/lib/netdata
     depends_on:
       netdata-socket-proxy:
         condition: service_healthy
