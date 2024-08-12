@@ -642,7 +642,7 @@ services:
     configs:
       - source: homassistant_linky_config
         target: /data/options.json
-        mode: 0440
+        mode: 0444
     environment:
       <<: *conf
       SUPERVISOR_TOKEN: ${HOMEASSISTANT_TOKEN}
