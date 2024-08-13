@@ -1456,40 +1456,64 @@ services:
 
 networks:
   watchtower:
+    enable_ipv6: true
   traefik:
+    enable_ipv6: true
   ldap:
+    enable_ipv6: true
     internal: true
   authelia:
+    enable_ipv6: true
     internal: true
   nextcloud:
+    enable_ipv6: true
     internal: true
   samba:
+    enable_ipv6: true
   ssh:
+    enable_ipv6: true
   homer:
+    enable_ipv6: true
     internal: true
   nextcloud-proxy:
+    enable_ipv6: true
   robots:
+    enable_ipv6: true
     internal: true
   netdata:
+    enable_ipv6: true
     internal: true
   scrutiny:
+    enable_ipv6: true
   lam:
+    enable_ipv6: true
     internal: true
   authelia-proxy:
+    enable_ipv6: true
   flaresolverr:
+    enable_ipv6: true
   traefik-socket-proxy:
+    enable_ipv6: true
     internal: true
   watchtower-socket-proxy:
+    enable_ipv6: true
     internal: true
   netdata-socket-proxy:
+    enable_ipv6: true
     internal: true
   librespeed:
+    enable_ipv6: true
   smokeping:
+    enable_ipv6: true
   tandoor:
+    enable_ipv6: true
   homeassistant:
+    enable_ipv6: true
   miniflux:
+    enable_ipv6: true
     internal: true
   miniflux-proxy:
+    enable_ipv6: true
 
 volumes:
   robots-nginx-cache:
