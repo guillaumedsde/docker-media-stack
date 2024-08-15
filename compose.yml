@@ -1316,9 +1316,11 @@ services:
           -b "${LDAP_BASE_DN}"
           -D "cn=admin,${LDAP_BASE_DN}"
           -w "${LDAP_ADMIN_PASSWORD}"
-      interval: 30s
+          -o nettimeout=10
+      interval: 15s
       timeout: 10s
-      retries: 3
+      start_period: 5m
+      retries: 20
 
   # LDAP Server management web GUI
   lam:
