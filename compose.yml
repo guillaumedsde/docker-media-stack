@@ -1460,7 +1460,8 @@ networks:
   traefik:
     enable_ipv6: true
   ldap:
-    enable_ipv6: true
+    # FIXME OpenLDAP container does not bind to IPv6
+    enable_ipv6: false
     internal: true
   authelia:
     enable_ipv6: true
