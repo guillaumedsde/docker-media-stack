@@ -700,7 +700,8 @@ services:
     memswap_limit: 8G
     read_only: true
     depends_on:
-      - openldap
+      openldap:
+        condition: service_healthy
     tmpfs:
       - /config/data/transcodes:mode=770,size=4G,uid=${UID},gid=${GID}
     volumes:
@@ -807,7 +808,7 @@ services:
       ssh:
         condition: service_started
       openldap:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
       - ${data_folder}:/data
@@ -1071,7 +1072,8 @@ services:
       - ${docker_data_folder}/samba/secrets.tdb:/var/lib/samba/private/secrets.tdb
       - /data/users:/data/users
     depends_on:
-      - openldap
+      openldap:
+        condition: service_healthy
     <<: *common
     mem_limit: 250M
     memswap_limit: 250M
@@ -1098,7 +1100,8 @@ services:
     environment:
       S6_READ_ONLY_ROOT: "1"
     depends_on:
-      - openldap
+      openldap:
+        condition: service_healthy
     <<: *common
     mem_limit: 200MB
     memswap_limit: 200MB
@@ -1283,6 +1286,7 @@ services:
       LDAP_DOMAIN: ${old_root_domain}
       LDAP_ORGANISATION: ${LDAP_ORGANISATION}
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_BASE_DN: ${LDAP_BASE_DN}
       LDAP_TLS: "true"
       LDAP_TLS_CRT_FILENAME: ldap.${old_root_domain}.cer
       LDAP_TLS_KEY_FILENAME: ldap.${old_root_domain}.key
@@ -1302,9 +1306,26 @@ services:
       - ./ldap_templates:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
       # certificates
       - ${docker_data_folder}/openldap/certs/ldap.${old_root_domain}:/container/service/slapd/assets/certs:ro
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - >-
+          ldapsearch
+          -x
+          -H ldap://localhost
+          -b "${LDAP_BASE_DN}"
+          -D "cn=admin,${LDAP_BASE_DN}"
+          -w "${LDAP_ADMIN_PASSWORD}"
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # LDAP Server management web GUI
   lam:
+    <<: *common
+    depends_on:
+      openldap:
+        condition: service_healthy
     image: ghcr.io/ldapaccountmanager/lam:8.8@sha256:114213e36b7e80f99b43d25cb467832b738a8e2bfde9cebcfd45daf557d2a8ec
     volumes:
       - ${docker_data_folder}/lam/config.cfg:/etc/ldap-account-manager/config.cfg
@@ -1314,9 +1335,6 @@ services:
     networks:
       - lam
       - ldap
-    depends_on:
-      - openldap
-    <<: *common
     mem_limit: 200M
     memswap_limit: 200M
     labels:
@@ -1330,6 +1348,14 @@ services:
 
   # SSO
   authelia:
+    <<: *common
+    depends_on:
+      authelia-db:
+        condition: service_healthy
+      authelia-redis:
+        condition: service_healthy
+      openldap:
+        condition: service_healthy
     image: docker.io/authelia/authelia:4.38.10@sha256:1af32be812f041c1f3a91190faf9a022e586b185251d26a29bcdf7982bcb3bc7
     cpu_count: 4
     user: ${UID}:${GID}
@@ -1356,14 +1382,6 @@ services:
     command:
       - --config
       - /config/config.yml
-    <<: *common
-    depends_on:
-      authelia-db:
-        condition: service_healthy
-      authelia-redis:
-        condition: service_healthy
-      openldap:
-        condition: service_started
     volumes:
       - ./config/authelia:/config:ro
     networks:
