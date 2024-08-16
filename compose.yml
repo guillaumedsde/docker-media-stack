@@ -1116,7 +1116,7 @@ services:
       - sftpgo
     environment:
       SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
-      SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:389"
+      SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:3890"
       SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "cn=sftpgo,${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
@@ -1348,6 +1348,8 @@ services:
       - 'lldap-db'
     environment:
       <<: *conf
+      LLDAP_LDAP_HOST: '*'
+      LLDAP_LDAP_PORT: '3890'
       LLDAP_JWT_SECRET: '${LLDAP_JWT_SECRET}'
       LLDAP_KEY_SEED: '${LLDAP_KEY_SEED}'
       LLDAP_LDAP_BASE_DN: '${LLDAP_LDAP_BASE_DN}'
