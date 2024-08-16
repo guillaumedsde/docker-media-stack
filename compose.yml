@@ -1121,7 +1121,7 @@ services:
       SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
       SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=person)(memberOf=cn=real_people,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))' 
-      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: real_people
+      SFTPGO_PLUGIN_AUTH_MEMBERSHIP_GROUP_PREFIX: real_people
       SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
       SFTPGO_PLUGINS__0__TYPE: "auth"
       SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
