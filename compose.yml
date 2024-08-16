@@ -1307,7 +1307,10 @@ services:
 
   kanidm:
     <<: *common
-    image: 'docker.io/kanidm/server:1.2.3@sha256:cb0f02027f4ab89839ce6be24542b850bf1136f978fb5ee707858df9bdb16953'
+    depends_on:
+      traefik-certs-dumper:
+        condition: service_started
+    image: 'docker.io/kanidm/server:1.3.2@sha256:cb0f02027f4ab89839ce6be24542b850bf1136f978fb5ee707858df9bdb16953'
     cpu_count: 4
     user: '${UID}:${GID}'
     read_only: true
