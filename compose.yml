@@ -1275,6 +1275,59 @@ services:
   ##################################################################
   # Authentication
 
+  lldap:
+    <<: *common
+    depends_on:
+      lldap-db:
+        condition: service_healthy
+    image: 'docker.io/lldap/lldap:2024-08-08-alpine-rootless@sha256:5f472f57407cbe8d022cf5d01ffab339a63e171283cee1ab35441e698232d6fd'
+    cpu_count: 2
+    mem_limit: '250M'
+    memswap_limit: '250M'
+    user: '${UID}:${GID}'
+    read_only: true
+    volumes:
+      - type: 'bind'
+        source: '${docker_data_folder}/lldap'
+        target: /data
+    networks:
+      - 'lldap'
+      - 'lldap-db'
+    environment:
+      <<: *conf
+      LLDAP_JWT_SECRET: '${LLDAP_JWT_SECRET}'
+      LLDAP_KEY_SEED: '${LLDAP_KEY_SEED}'
+      LLDAP_LDAP_BASE_DN: '${LLDAP_LDAP_BASE_DN}'
+      LLDAP_LDAP_USER_PASS: '${LLDAP_LDAP_USER_PASS}'
+      LLDAP_DATABASE_URL: 'postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap'
+      LLDAP_HTTP_URL: 'https://lldap.${root_domain}'
+      LLDAP_HTTP_PORT: '17170'
+    labels:
+      <<: *traefik
+      traefik.docker.network: 'lldap'
+      traefik.http.routers.lldap.rule: 'Host(`lldap.${root_domain}`)'
+      # service
+      traefik.http.services.lldap.loadbalancer.server.port: '17170'
+
+  lldap-db:
+    <<: *common
+    image: docker.io/postgres:16-bookworm
+    cpu_count: 2
+    mem_limit: 250M
+    memswap_limit: 250M
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_USER: lldap
+      POSTGRES_PASSWORD: ${LLDAP_DB_PASSWORD}
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/lldap-db:/var/lib/postgresql/data
+    networks:
+      - lldap-db
+    healthcheck: *postgres-healthcheck
 
   # LDAP server
   openldap:
@@ -1536,6 +1589,11 @@ networks:
     internal: true
   miniflux-proxy:
     enable_ipv6: true
+  lldap:
+    enable_ipv6: true
+  lldap-db:
+    enable_ipv6: true
+    internal: true
 
 volumes:
   robots-nginx-cache:
