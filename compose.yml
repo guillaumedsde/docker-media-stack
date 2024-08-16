@@ -1304,7 +1304,7 @@ services:
       LLDAP_HTTP_PORT: '17170'
     labels:
       <<: *traefik
-      traefik.docker.network: 'lldap'
+      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_lldap'
       traefik.http.routers.lldap.rule: 'Host(`lldap.${root_domain}`)'
       # service
       traefik.http.services.lldap.loadbalancer.server.port: '17170'
