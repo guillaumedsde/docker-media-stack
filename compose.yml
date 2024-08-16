@@ -1348,7 +1348,7 @@ services:
       - 'lldap-db'
     environment:
       <<: *conf
-      LLDAP_LDAP_HOST: '*'
+      LLDAP_LDAP_HOST: '::'
       LLDAP_LDAP_PORT: '3890'
       LLDAP_JWT_SECRET: '${LLDAP_JWT_SECRET}'
       LLDAP_KEY_SEED: '${LLDAP_KEY_SEED}'
