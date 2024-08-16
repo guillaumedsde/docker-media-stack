@@ -1338,12 +1338,11 @@ services:
       KANIDM_DB_FS_TYPE: '${KANIDM_DB_FS_TYPE:-zfs}'
     labels:
       <<: *traefik
-      traefik.docker.network: 'kanidm'
       traefik.http.routers.kanidm.rule: 'Host(`kanidm.${root_domain}`)'
       # service
       traefik.http.services.kanidm.loadbalancer.server.port: '8443'
       traefik.http.services.kanidm.loadbalancer.server.scheme: 'https'
-      # traefik.http.services.kanidm.loadBalancer.serversTransport: kanidmTransport@file
+      traefik.http.services.kanidm.loadBalancer.serversTransport: kanidmTransport@file
 
 
   # LDAP server
