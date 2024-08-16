@@ -116,6 +116,7 @@ services:
       - tandoor
       - homeassistant
       - miniflux-proxy
+      - lldap
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
