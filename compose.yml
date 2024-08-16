@@ -1118,7 +1118,7 @@ services:
       SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
       SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:3890"
       SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
-      SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "cn=sftpgo,${LLDAP_LDAP_BASE_DN}"
+      SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
       SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=person)(memberOf=cn=real_people,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))' 
       SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
