@@ -1101,6 +1101,8 @@ services:
       - target: 2022
         published: 2022
         protocol: tcp
+    tmpfs:
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: /data/users
