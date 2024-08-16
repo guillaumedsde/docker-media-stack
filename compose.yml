@@ -1307,7 +1307,7 @@ services:
 
   kanidm:
     <<: *common
-    image: 'docker.io/kanidm/server:1.2.3@sha256:cb0f02027f4ab89839ce6be24542b850bf1136f978fb5ee707858df9bdb16953'
+    image: 'docker.io/kanidm/server:1.2.3@sha256:a77460ef91253f48d270546dbe5c15608af258bb0e440b5010c6a736675b3044'
     cpu_count: 4
     user: '${UID}:${GID}'
     read_only: true
