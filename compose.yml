@@ -117,6 +117,7 @@ services:
       - homeassistant
       - miniflux-proxy
       - lldap
+      - sftpgo
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1110,7 +1111,7 @@ services:
         target: /var/lib/sftpgo
     networks:
       - lldap
-      - traefik
+      - sftpgo
     environment:
       SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
       SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:389"
@@ -1126,7 +1127,7 @@ services:
       SFTPGO_PLUGINS__0__AUTO_MTLS: "1"
     labels:
       <<: *traefik
-      traefik.docker.network: traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_sftpgo"
       traefik.http.routers.sftp.rule: Host(`sftp.${root_domain}`)
       # service
       traefik.http.services.sftp.loadbalancer.server.port: "8080"
@@ -1644,6 +1645,8 @@ networks:
   lldap-db:
     enable_ipv6: true
     internal: true
+  sftpgo:
+    enable_ipv6: true
 
 volumes:
   robots-nginx-cache:
