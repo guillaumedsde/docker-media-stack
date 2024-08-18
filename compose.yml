@@ -410,7 +410,7 @@ services:
   # sonarr, webapp for downloading series through torrent client
   sonarr:
     <<: *common
-    image: ghcr.io/onedr0p/sonarr:4.0.8@sha256:13059c5ecc444bf2b3c578fc4495f46e02a3db80c8f1482f04f51b9df82e4011
+    image: ghcr.io/onedr0p/sonarr:4.0.8.1874@sha256:13059c5ecc444bf2b3c578fc4495f46e02a3db80c8f1482f04f51b9df82e4011
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -494,7 +494,7 @@ services:
   # readarr, webapp for downloading books through torrent client
   readarr:
     <<: *common
-    image: ghcr.io/onedr0p/readarr-develop:0.3.32@sha256:4bbc4faea2daac8e1a8de9777eb15e0edc19f2a3a12d599aaed460d44bbb2323
+    image: ghcr.io/onedr0p/readarr-develop:0.3.32.2587@sha256:4bbc4faea2daac8e1a8de9777eb15e0edc19f2a3a12d599aaed460d44bbb2323
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
