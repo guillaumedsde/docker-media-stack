@@ -601,7 +601,7 @@ services:
 
   homeassistant:
     <<: *common
-    image: "ghcr.io/home-assistant/home-assistant:2024.8.1@sha256:fa086d561ba8725d59dc2947b337abba9776090ee8a357619fd5f717302f7a79"
+    image: "ghcr.io/home-assistant/home-assistant:2024.8.2@sha256:f4f1dbd0187b381e5c86eb6b24ebd735a69519fe1a9c7909974303254853413c"
     user: "${UID}:${GID}"
     cpu_count: 2
     mem_limit: 1G
