@@ -15,7 +15,7 @@ access_control:
         - GET
         - HEAD
       policy: bypass
-    - domain_regex: '^(scrutiny|netdata|prowlarr)\..+$'
+    - domain_regex: '^(scrutiny|netdata)\..+$'
       policy: two_factor
 
 notifier:
