@@ -495,7 +495,7 @@ services:
   # readarr, webapp for downloading books through torrent client
   readarr:
     <<: *common
-    image: ghcr.io/onedr0p/readarr-develop:0.3.32.2587@sha256:282040fbe7339d19d070294beb193ee45fb65359c54df650e17d7e8db67537b1
+    image: ghcr.io/onedr0p/readarr-develop:0.3.32.2587@sha256:3ae920c56261b120ec6e7fce038cd700cc691b74d6326ac074b0a8985af5f8b6
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
