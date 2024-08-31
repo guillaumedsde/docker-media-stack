@@ -118,6 +118,7 @@ services:
       - miniflux-proxy
       - lldap
       - sftpgo
+      - photoview-proxy
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1707,6 +1708,11 @@ networks:
     enable_ipv6: true
     internal: true
   sftpgo:
+    enable_ipv6: true
+  photoview:
+    enable_ipv6: true
+    internal: true
+  photoview-proxy:
     enable_ipv6: true
 
 volumes:
