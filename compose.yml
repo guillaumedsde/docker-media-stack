@@ -125,22 +125,22 @@ services:
     ports:
       - target: 80
         published: 80
-        host_ip: '0.0.0.0'
+        host_ip: "0.0.0.0"
         protocol: tcp
         mode: host
       - target: 443
         published: 443
-        host_ip: '0.0.0.0'
+        host_ip: "0.0.0.0"
         protocol: tcp
         mode: host
       - target: 80
         published: 80
-        host_ip: '::'
+        host_ip: "::"
         protocol: tcp
         mode: host
       - target: 443
         published: 443
-        host_ip: '::'
+        host_ip: "::"
         protocol: tcp
         mode: host
     healthcheck:
@@ -609,7 +609,7 @@ services:
     read_only: true
     environment:
       <<: *conf
-      S6_READ_ONLY_ROOT: '1'
+      S6_READ_ONLY_ROOT: "1"
     networks:
       - homeassistant
     tmpfs:
@@ -934,11 +934,11 @@ services:
       - miniflux
       - miniflux-proxy
     environment:
-      BASE_URL: 'https://miniflux.${root_domain}/'
-      AUTH_PROXY_HEADER: 'Remote-User'
-      AUTH_PROXY_USER_CREATION: 'true'
-      RUN_MIGRATIONS: '1'
-      DATABASE_URL: 'postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable'
+      BASE_URL: "https://miniflux.${root_domain}/"
+      AUTH_PROXY_HEADER: "Remote-User"
+      AUTH_PROXY_USER_CREATION: "true"
+      RUN_MIGRATIONS: "1"
+      DATABASE_URL: "postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
@@ -1120,8 +1120,8 @@ services:
       SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
-      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=person)(memberOf=cn=real_people,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))' 
-      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: 'real_people'
+      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: "(&(objectclass=person)(memberOf=cn=real_people,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))"
+      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: "real_people"
       SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
       SFTPGO_PLUGINS__0__TYPE: "auth"
       SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
@@ -1334,36 +1334,36 @@ services:
     depends_on:
       lldap-db:
         condition: service_healthy
-    image: 'docker.io/lldap/lldap:2024-08-08-alpine-rootless@sha256:5f472f57407cbe8d022cf5d01ffab339a63e171283cee1ab35441e698232d6fd'
+    image: "docker.io/lldap/lldap:2024-08-08-alpine-rootless@sha256:5f472f57407cbe8d022cf5d01ffab339a63e171283cee1ab35441e698232d6fd"
     cpu_count: 2
-    mem_limit: '250M'
-    memswap_limit: '250M'
-    user: '${UID}:${GID}'
+    mem_limit: "250M"
+    memswap_limit: "250M"
+    user: "${UID}:${GID}"
     read_only: true
     volumes:
-      - type: 'bind'
-        source: '${docker_data_folder}/lldap'
+      - type: "bind"
+        source: "${docker_data_folder}/lldap"
         target: /data
     networks:
-      - 'lldap'
-      - 'lldap-db'
+      - "lldap"
+      - "lldap-db"
     environment:
       <<: *conf
-      LLDAP_LDAP_HOST: '::'
-      LLDAP_LDAP_PORT: '3890'
-      LLDAP_JWT_SECRET: '${LLDAP_JWT_SECRET}'
-      LLDAP_KEY_SEED: '${LLDAP_KEY_SEED}'
-      LLDAP_LDAP_BASE_DN: '${LLDAP_LDAP_BASE_DN}'
-      LLDAP_LDAP_USER_PASS: '${LLDAP_LDAP_USER_PASS}'
-      LLDAP_DATABASE_URL: 'postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap'
-      LLDAP_HTTP_URL: 'https://lldap.${root_domain}'
-      LLDAP_HTTP_PORT: '17170'
+      LLDAP_LDAP_HOST: "::"
+      LLDAP_LDAP_PORT: "3890"
+      LLDAP_JWT_SECRET: "${LLDAP_JWT_SECRET}"
+      LLDAP_KEY_SEED: "${LLDAP_KEY_SEED}"
+      LLDAP_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
+      LLDAP_LDAP_USER_PASS: "${LLDAP_LDAP_USER_PASS}"
+      LLDAP_DATABASE_URL: "postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap"
+      LLDAP_HTTP_URL: "https://lldap.${root_domain}"
+      LLDAP_HTTP_PORT: "17170"
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_lldap'
-      traefik.http.routers.lldap.rule: 'Host(`lldap.${root_domain}`)'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
+      traefik.http.routers.lldap.rule: "Host(`lldap.${root_domain}`)"
       # service
-      traefik.http.services.lldap.loadbalancer.server.port: '17170'
+      traefik.http.services.lldap.loadbalancer.server.port: "17170"
 
   lldap-db:
     <<: *common
