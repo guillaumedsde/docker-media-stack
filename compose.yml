@@ -968,6 +968,62 @@ services:
       - miniflux
     healthcheck: *postgres-healthcheck
 
+  photoview:
+    image: docker.io/viktorstrate/photoview:2.4.0@sha256:f914c44b202fc8175e09bd56f35bb1a4a7c04dc451652306f240aabc3eea133e
+    cpu_count: 4
+    mem_limit: 1G
+    memswap_limit: 1G
+    read_only: true
+    user: ${UID}:${GID}
+    environment:
+      PHOTOVIEW_DATABASE_DRIVER: postgres
+      PHOTOVIEW_POSTGRES_URL: postgres://photoview:${PHOTOVIEW_DB_PASSWORD}@photoview-db:5432/photoview
+      PHOTOVIEW_LISTEN_IP: "0.0.0.0"
+      PHOTOVIEW_LISTEN_PORT: "8080"
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/photoview
+        target: /home/photoview/media-cache
+      - type: bind
+        source: ${data_folder}/pictures
+        target: /photos
+        read_only: true
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    networks:
+      - photoview
+      - photoview-proxy
+    labels:
+      <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_photoview-proxy"
+      traefik.http.routers.photoview.rule: Host(`photos.${root_domain}`)
+      # service
+      traefik.http.services.photoview.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.photoview.middlewares: authelia@docker
+
+  photoview-db:
+    <<: *common
+    image: docker.io/postgres:16-bookworm
+    cpu_count: 2
+    mem_limit: 2G
+    memswap_limit: 2G
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_PASSWORD: ${PHOTOVIEW_DB_PASSWORD}
+      POSTGRES_USER: photoview
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/photoview-db:/var/lib/postgresql/data
+    networks:
+      - photoview
+    healthcheck: *postgres-healthcheck
+
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.4.20240804@sha256:256e01b01048ff97ee06a742ad2619e121e4137a553b89df50f6e376b0e93aff
     cpu_count: 2
