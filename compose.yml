@@ -969,41 +969,6 @@ services:
       - miniflux
     healthcheck: *postgres-healthcheck
 
-  spis:
-    <<: *common
-    image: ghcr.io/gbbirkisson/spis:v0.8.0@sha256:b576d0d29dc9171af6ac526e2b8445b96919f43c8a083bd73c87132176fb3d82
-    cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
-    read_only: true
-    user: ${UID}:${GID}
-    environment:
-      SPIS_PROCESSING_SCHEDULE: "0 0 2 * * *"
-      SPIS_PROCESSING_RUN_ON_START: "true"
-      SPIS_FEATURE_FAVORITE: "true"
-      SPIS_FEATURE_ARCHIVE: "false"
-      SPIS_FEATURE_FOLLOW_SYMLINKS: "false"
-      RUST_LOG: "error,spis=info"
-    volumes:
-      - type: bind
-        source: ${docker_data_folder}/spis
-        target: /var/lib/spis/data
-      - type: bind
-        source: ${data_folder}/pictures
-        target: /var/lib/spis/media
-        read_only: true
-    tmpfs:
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    networks:
-      - spis
-    labels:
-      <<: *traefik
-      traefik.http.routers.spis.rule: Host(`photos.${root_domain}`)
-      # service
-      traefik.http.services.spis.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.spis.middlewares: authelia@docker
-
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.4.20240804@sha256:256e01b01048ff97ee06a742ad2619e121e4137a553b89df50f6e376b0e93aff
     cpu_count: 2
