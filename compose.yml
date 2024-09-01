@@ -118,7 +118,7 @@ services:
       - miniflux-proxy
       - lldap
       - sftpgo
-      - photoview-proxy
+      - spis
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -969,65 +969,38 @@ services:
       - miniflux
     healthcheck: *postgres-healthcheck
 
-  photoview:
+  spis:
     <<: *common
-    depends_on:
-      photoview-db:
-        condition: service_healthy
-    image: docker.io/viktorstrate/photoview:2.4.0@sha256:f914c44b202fc8175e09bd56f35bb1a4a7c04dc451652306f240aabc3eea133e
+    image: ghcr.io/gbbirkisson/spis:v0.8.0@sha256:b576d0d29dc9171af6ac526e2b8445b96919f43c8a083bd73c87132176fb3d82
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
     environment:
-      PHOTOVIEW_DATABASE_DRIVER: postgres
-      PHOTOVIEW_POSTGRES_URL: postgres://photoview:${PHOTOVIEW_DB_PASSWORD}@photoview-db:5432/photoview
-      PHOTOVIEW_LISTEN_IP: "0.0.0.0"
-      PHOTOVIEW_LISTEN_PORT: "8080"
+      SPIS_PROCESSING_SCHEDULE: "0 0 2 * * *"
+      SPIS_PROCESSING_RUN_ON_START: "true"
+      SPIS_FEATURE_FAVORITE: "true"
+      SPIS_FEATURE_ARCHIVE: "false"
+      SPIS_FEATURE_FOLLOW_SYMLINKS: "false"
+      RUST_LOG: "error,spis=info"
     volumes:
       - type: bind
-        source: ${docker_data_folder}/photoview
-        target: /home/photoview/media-cache
+        source: ${docker_data_folder}/spis
+        target: /var/lib/spis/data
       - type: bind
         source: ${data_folder}/pictures
-        target: /photos
-        read_only: true
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
+        target: /var/lib/spis/media
         read_only: true
     networks:
-      - photoview
-      - photoview-proxy
+      - spis
     labels:
       <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_photoview-proxy"
-      traefik.http.routers.photoview.rule: Host(`photos.${root_domain}`)
+      traefik.http.routers.spis.rule: Host(`photos.${root_domain}`)
       # service
-      traefik.http.services.photoview.loadbalancer.server.port: "8080"
+      traefik.http.services.spis.loadbalancer.server.port: "8080"
       # Forward auth
-      traefik.http.routers.photoview.middlewares: authelia@docker
-
-  photoview-db:
-    <<: *common
-    image: docker.io/postgres:16-bookworm
-    cpu_count: 2
-    mem_limit: 2G
-    memswap_limit: 2G
-    user: ${UID}:${GID}
-    read_only: true
-    environment:
-      POSTGRES_PASSWORD: ${PHOTOVIEW_DB_PASSWORD}
-      POSTGRES_USER: photoview
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - ${docker_data_folder}/photoview-db:/var/lib/postgresql/data
-    networks:
-      - photoview
-    healthcheck: *postgres-healthcheck
+      traefik.http.routers.spis.middlewares: authelia@docker
 
   librespeed:
     image: ghcr.io/linuxserver/librespeed:5.4.20240804@sha256:256e01b01048ff97ee06a742ad2619e121e4137a553b89df50f6e376b0e93aff
@@ -1713,11 +1686,9 @@ networks:
     internal: true
   sftpgo:
     enable_ipv6: true
-  photoview:
+  spis:
     enable_ipv6: true
     internal: true
-  photoview-proxy:
-    enable_ipv6: true
 
 volumes:
   robots-nginx-cache:
