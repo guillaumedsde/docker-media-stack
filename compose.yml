@@ -992,6 +992,8 @@ services:
         source: ${data_folder}/pictures
         target: /var/lib/spis/media
         read_only: true
+    tmpfs:
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     networks:
       - spis
     labels:
