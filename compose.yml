@@ -33,7 +33,7 @@ x-traefik: &traefik
 services:
   # reverse proxy
   traefik:
-    image: docker.io/traefik:v3.1.2@sha256:ec1a82940b8e00eaeef33fb4113aa1d1573b2ebb6440e10c023743fe96f08475
+    image: docker.io/traefik:v3.1.2@sha256:9cfb79b4b77ba446716f81a35c7bf5ddd826dac786afd694e38b02af3f0a1f30
     user: ${UID}:${GID}
     depends_on:
       traefik-socket-proxy:
