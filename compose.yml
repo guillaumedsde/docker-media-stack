@@ -866,7 +866,7 @@ services:
   # database for nextcloud
   nextcloud-postgres:
     <<: *common
-    image: docker.io/postgres:15-bookworm
+    image: docker.io/postgres:16-bookworm
     cpu_count: 2
     mem_limit: 2G
     memswap_limit: 2G
@@ -1514,7 +1514,7 @@ services:
   # DB for authelia
   authelia-db:
     <<: *common
-    image: docker.io/postgres:14-bookworm
+    image: docker.io/postgres:16-bookworm
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
