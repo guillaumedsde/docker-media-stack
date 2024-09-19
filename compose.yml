@@ -849,7 +849,7 @@ services:
     mem_limit: 4G
     memswap_limit: 4G
     cpu_count: 8
-    image: docker.io/nextcloud:29.0-apache
+    image: docker.io/nextcloud:30.0-apache
     healthcheck:
       test: curl -sSf 'http://localhost/status.php' | grep '"installed":true' | grep '"maintenance":false' | grep '"needsDbUpgrade":false' || exit 1
       interval: 10s
