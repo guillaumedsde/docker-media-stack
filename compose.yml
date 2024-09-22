@@ -1298,7 +1298,6 @@ services:
       - /dev/sdi
       - /dev/sdj
       - /dev/sdk
-      - /dev/sdl
     volumes:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
