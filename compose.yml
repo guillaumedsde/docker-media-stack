@@ -320,7 +320,7 @@ services:
 
   prowlarr:
     <<: *common
-    image: ghcr.io/onedr0p/prowlarr:1.23.1.4708@sha256:68b27f658b850e41e6d67fe8f3bf630bef8dc468495c1d9abf5d96647f30cd2c
+    image: ghcr.io/onedr0p/prowlarr:1.24.3.4754@sha256:ded48df5280e019992d5bb686e562ac8dad39916ab1c20da2aec992124e8b1b9
     cpu_count: 4
     mem_limit: 3G
     memswap_limit: 3G
