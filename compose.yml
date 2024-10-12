@@ -600,7 +600,7 @@ services:
 
   homeassistant:
     <<: *common
-    image: "ghcr.io/home-assistant/home-assistant:2024.10.1@sha256:4576a54b0771dd1438a08d9af7fdc2ff7bc054abd5dc76d35236c963b9694f7c"
+    image: "ghcr.io/home-assistant/home-assistant:2024.10.2@sha256:4a9f22291ca5a6814d5910a82b3fc7a1c44a629a8a8cc4354125e83fb4124d6b"
     user: "${UID}:${GID}"
     cpu_count: 2
     mem_limit: 1G
