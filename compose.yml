@@ -113,10 +113,7 @@ services:
       - authelia-proxy
       - librespeed
       - tandoor
-      - homeassistant
       - miniflux-proxy
-      - lldap
-      - sftpgo
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1455,18 +1452,11 @@ networks:
     enable_ipv6: true
   tandoor:
     enable_ipv6: true
-  homeassistant:
-    enable_ipv6: true
   miniflux:
     enable_ipv6: true
     internal: true
   miniflux-proxy:
     enable_ipv6: true
-  lldap:
-    enable_ipv6: true
-  lldap-db:
-    enable_ipv6: true
-    internal: true
 
 volumes:
   robots-nginx-cache:
