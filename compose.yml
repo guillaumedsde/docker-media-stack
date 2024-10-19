@@ -598,77 +598,6 @@ services:
       UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
       UN_LIDARR_0_PATH: /data/download/music
 
-  homeassistant:
-    <<: *common
-    image: "ghcr.io/home-assistant/home-assistant:2024.10.3@sha256:9fbe69be41444b7aed42bbbcf3b44d8ffde24546db47f7d8c9237fc11423cf2b"
-    user: "${UID}:${GID}"
-    cpu_count: 2
-    mem_limit: 1G
-    memswap_limit: 1G
-    read_only: true
-    environment:
-      <<: *conf
-      S6_READ_ONLY_ROOT: "1"
-    networks:
-      - homeassistant
-    tmpfs:
-      - /run:exec,mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - type: bind
-        source: ${docker_data_folder}/homeassistant
-        target: /config
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
-        read_only: true
-    labels:
-      <<: *traefik
-      traefik.http.routers.homeassistant.rule: Host(`homeassistant.${root_domain}`)
-      # service
-      traefik.http.services.homeassistant.loadbalancer.server.port: "8123"
-      # Forward auth
-      traefik.http.routers.homeassistant.middlewares: authelia@docker
-    healthcheck:
-      test:
-        - CMD
-        - wget
-        - --quiet
-        - --timeout=3
-        - --tries=1
-        - --spider
-        - http://localhost:8123
-      interval: 5s
-      timeout: 4s
-      retries: 4
-      start_period: 10s
-
-  homeassistant-linky:
-    <<: *common
-    depends_on:
-      homeassistant:
-        condition: service_healthy
-    image: bokub/ha-linky-standalone:${HA_LINKY_VERSION:-1.5.0}
-    build:
-      context: https://github.com/bokub/ha-linky.git#${HA_LINKY_VERSION:-1.5.0}
-      dockerfile: standalone.Dockerfile
-    user: "${UID}:${GID}"
-    cpu_count: 2
-    mem_limit: 1G
-    memswap_limit: 1G
-    # NOTE: docker can't mount config in read only filesystem, see:
-    #       https://github.com/docker/compose/issues/12031
-    read_only: false
-    configs:
-      - source: homassistant_linky_config
-        target: /data/options.json
-        mode: 0444
-    environment:
-      <<: *conf
-      SUPERVISOR_TOKEN: ${HOMEASSISTANT_TOKEN}
-      WS_URL: ws://homeassistant:8123/api/websocket
-    networks:
-      - homeassistant
-
   # homer is a homepage container
   homer:
     image: docker.io/b4bz/homer:v24.10.1@sha256:f62ec1d6ad657212c47af91489def9d3b014f580d948846c398cc0282eb27909
@@ -1084,58 +1013,6 @@ services:
       - ldap
     image: docker.io/guillaumedsde/samba-ldap:latest
 
-  sftpgo:
-    <<: *common
-    image: docker.io/drakkan/sftpgo:v2.6.2-plugins@sha256:f1426b79fb243a43fd3dcc739cf2c9560f9f56bbe280a75a44968ce41aceb1ea
-    cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
-    user: root
-    read_only: true
-    depends_on:
-      lldap:
-        # TODO healthcheck
-        condition: service_started
-    ports:
-      - target: 2022
-        published: 2022
-        protocol: tcp
-    tmpfs:
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - type: bind
-        source: /data/users
-        target: /srv/sftpgo/data
-        read_only: true
-      - type: bind
-        source: ${docker_data_folder}/sftpgo
-        target: /var/lib/sftpgo
-    networks:
-      - lldap
-      - sftpgo
-    environment:
-      SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
-      SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:3890"
-      SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
-      SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
-      SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
-      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: "(&(objectclass=person)(memberOf=cn=real_people,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))"
-      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: "real_people"
-      SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
-      SFTPGO_PLUGINS__0__TYPE: "auth"
-      SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
-      SFTPGO_PLUGINS__0__CMD: "/usr/local/bin/sftpgo-plugin-auth"
-      SFTPGO_PLUGINS__0__ARGS: "serve"
-      SFTPGO_PLUGINS__0__AUTO_MTLS: "1"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_sftpgo"
-      traefik.http.routers.sftp.rule: Host(`sftp.${root_domain}`)
-      # service
-      traefik.http.services.sftp.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.sftp.middlewares: authelia@docker
-
   ssh:
     ports:
       - "1998:2222"
@@ -1326,62 +1203,6 @@ services:
 
   ##################################################################
   # Authentication
-
-  lldap:
-    <<: *common
-    depends_on:
-      lldap-db:
-        condition: service_healthy
-    image: "docker.io/lldap/lldap:2024-08-08-alpine-rootless@sha256:5f472f57407cbe8d022cf5d01ffab339a63e171283cee1ab35441e698232d6fd"
-    cpu_count: 2
-    mem_limit: "250M"
-    memswap_limit: "250M"
-    user: "${UID}:${GID}"
-    read_only: true
-    volumes:
-      - type: "bind"
-        source: "${docker_data_folder}/lldap"
-        target: /data
-    networks:
-      - "lldap"
-      - "lldap-db"
-    environment:
-      <<: *conf
-      LLDAP_LDAP_HOST: "::"
-      LLDAP_LDAP_PORT: "3890"
-      LLDAP_JWT_SECRET: "${LLDAP_JWT_SECRET}"
-      LLDAP_KEY_SEED: "${LLDAP_KEY_SEED}"
-      LLDAP_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
-      LLDAP_LDAP_USER_PASS: "${LLDAP_LDAP_USER_PASS}"
-      LLDAP_DATABASE_URL: "postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap"
-      LLDAP_HTTP_URL: "https://lldap.${root_domain}"
-      LLDAP_HTTP_PORT: "17170"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
-      traefik.http.routers.lldap.rule: "Host(`lldap.${root_domain}`)"
-      # service
-      traefik.http.services.lldap.loadbalancer.server.port: "17170"
-
-  lldap-db:
-    <<: *common
-    image: docker.io/postgres:16-bookworm
-    cpu_count: 2
-    mem_limit: 250M
-    memswap_limit: 250M
-    user: ${UID}:${GID}
-    read_only: true
-    environment:
-      POSTGRES_USER: lldap
-      POSTGRES_PASSWORD: ${LLDAP_DB_PASSWORD}
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - ${docker_data_folder}/lldap-db:/var/lib/postgresql/data
-    networks:
-      - lldap-db
-    healthcheck: *postgres-healthcheck
 
   # LDAP server
   openldap:
@@ -1646,8 +1467,6 @@ networks:
   lldap-db:
     enable_ipv6: true
     internal: true
-  sftpgo:
-    enable_ipv6: true
 
 volumes:
   robots-nginx-cache:
