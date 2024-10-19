@@ -1472,19 +1472,3 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
-
-configs:
-  homassistant_linky_config:
-    content: |
-      {
-        "meters": [
-          {
-            "prm": "${PRM}",
-            "token": "${CONSO_API_TOKEN}",
-            "name": "Consommation Linky",
-            "action": "sync",
-            "production": false
-          }
-        ],
-        "costs": []
-      }
