@@ -301,9 +301,9 @@ services:
     tmpfs:
       - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     read_only: true
-    cpu_count: 4
-    mem_limit: 8G
-    memswap_limit: 8G
+    cpu_count: 6
+    mem_limit: 10G
+    memswap_limit: 10G
     user: ${UID}:${GID}
     # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
