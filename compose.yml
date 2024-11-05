@@ -1065,7 +1065,60 @@ services:
     networks:
       - ssh
       - ldap
+      - kanidm
     image: docker.io/guillaumedsde/ssh-ldap
+  
+  sftpgo:
+    <<: *common
+    image: docker.io/drakkan/sftpgo:v2.6.2-plugins@sha256:f1426b79fb243a43fd3dcc739cf2c9560f9f56bbe280a75a44968ce41aceb1ea
+    cpu_count: 2
+    mem_limit: 500M
+    memswap_limit: 500M
+    user: root
+    read_only: true
+    depends_on:
+      lldap:
+        # TODO healthcheck
+        condition: service_started
+    ports:
+      - target: 2022
+        published: 2022
+        protocol: tcp
+    tmpfs:
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - type: bind
+        source: /data/users
+        target: /srv/sftpgo/data
+        read_only: true
+      - type: bind
+        source: ${docker_data_folder}/sftpgo
+        target: /var/lib/sftpgo
+    networks:
+      - lldap
+      - sftpgo
+    environment:
+      SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
+      SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:3890"
+      SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
+      SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
+      SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
+      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=person)(memberOf=cn=real_people,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))' 
+      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: 'real_people'
+      SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
+      SFTPGO_PLUGINS__0__TYPE: "auth"
+      SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
+      SFTPGO_PLUGINS__0__CMD: "/usr/local/bin/sftpgo-plugin-auth"
+      SFTPGO_PLUGINS__0__ARGS: "serve"
+      SFTPGO_PLUGINS__0__AUTO_MTLS: "1"
+    labels:
+      <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_sftpgo"
+      traefik.http.routers.sftp.rule: Host(`sftp.${root_domain}`)
+      # service
+      traefik.http.services.sftp.loadbalancer.server.port: "8080"
+      # Forward auth
+      traefik.http.routers.sftp.middlewares: authelia@docker
 
   # Web Service Discovery host daemon
   # see https://github.com/christgau/wsdd
@@ -1230,44 +1283,61 @@ services:
   ##################################################################
   # Authentication
 
-  kanidm:
+  lldap:
     <<: *common
     depends_on:
-      traefik-certs-dumper:
-        condition: service_started
-    image: 'docker.io/kanidm/server:1.4.1@sha256:131e1cf354f3bd9501e87fd720e693457a81710e313da91d94f302ebef6d1584'
-    cpu_count: 4
-    user: '${UID}:${GID}'
-    read_only: true
+      lldap-db:
+        condition: service_healthy
+    image: 'docker.io/lldap/lldap:2024-11-04-alpine-rootless@sha256:161c273471134ed9e7b6feca5c96a321372e699b4f086738e113e873c4f6d9a2'
+    cpu_count: 2
     mem_limit: '250M'
     memswap_limit: '250M'
-    networks:
-      - kanidm
+    user: '${UID}:${GID}'
+    read_only: true
     volumes:
       - type: 'bind'
-        source: '${docker_data_folder}/kanidm'
-        target: '/data'
-      - type: 'bind'
-        source: '${docker_data_folder}/traefik-certs-dumper'
-        target: '/certificates'
-        read_only: true
+        source: '${docker_data_folder}/lldap'
+        target: /data
+    networks:
+      - 'lldap'
+      - 'lldap-db'
     environment:
-      KANIDM_BINDADDRESS: '[::]:8443'
-      KANIDM_LDAPBINDADDRESS: '[::]:3636'
-      KANIDM_DB_PATH: '/data/kanidm.db'
-      KANIDM_TLS_CHAIN: '/certificates/certs/${root_domain}.crt'
-      KANIDM_TLS_KEY: '/certificates/private/${root_domain}.key'
-      KANIDM_DOMAIN: 'kanidm.${root_domain}'
-      KANIDM_ORIGIN: 'https://kanidm.${root_domain}'
-      KANIDM_TRUST_X_FORWARD_FOR: 'true'
-      KANIDM_DB_FS_TYPE: '${KANIDM_DB_FS_TYPE:-zfs}'
+      <<: *conf
+      LLDAP_LDAP_HOST: '::'
+      LLDAP_LDAP_PORT: '3890'
+      LLDAP_JWT_SECRET: '${LLDAP_JWT_SECRET}'
+      LLDAP_KEY_SEED: '${LLDAP_KEY_SEED}'
+      LLDAP_LDAP_BASE_DN: '${LLDAP_LDAP_BASE_DN}'
+      LLDAP_LDAP_USER_PASS: '${LLDAP_LDAP_USER_PASS}'
+      LLDAP_DATABASE_URL: 'postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap'
+      LLDAP_HTTP_URL: 'https://lldap.${root_domain}'
+      LLDAP_HTTP_PORT: '17170'
     labels:
       <<: *traefik
-      traefik.http.routers.kanidm.rule: 'Host(`kanidm.${root_domain}`)'
+      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_lldap'
+      traefik.http.routers.lldap.rule: 'Host(`lldap.${root_domain}`)'
       # service
-      traefik.http.services.kanidm.loadbalancer.server.port: '8443'
-      traefik.http.services.kanidm.loadbalancer.server.scheme: 'https'
-      traefik.http.services.kanidm.loadBalancer.serversTransport: kanidmTransport@file
+      traefik.http.services.lldap.loadbalancer.server.port: '17170'
+
+  lldap-db:
+    <<: *common
+    image: docker.io/postgres:16-bookworm
+    cpu_count: 2
+    mem_limit: 250M
+    memswap_limit: 250M
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_USER: lldap
+      POSTGRES_PASSWORD: ${LLDAP_DB_PASSWORD}
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/lldap-db:/var/lib/postgresql/data
+    networks:
+      - lldap-db
+    healthcheck: *postgres-healthcheck
 
   # LDAP server
   openldap:
@@ -1525,8 +1595,12 @@ networks:
     internal: true
   miniflux-proxy:
     enable_ipv6: true
-  kanidm:
+  lldap:
+    enable_ipv6: true
+  lldap-db:
+    enable_ipv6: true
     internal: true
+  sftpgo:
     enable_ipv6: true
 
 volumes:
