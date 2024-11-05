@@ -1065,13 +1065,12 @@ services:
     cpu_count: 2
     networks:
       - ssh
-      - ldap
-      - kanidm
+      - ldap 
     image: docker.io/guillaumedsde/ssh-ldap
   
   sftpgo:
     <<: *common
-    image: docker.io/drakkan/sftpgo:v2.6.2-plugins@sha256:f1426b79fb243a43fd3dcc739cf2c9560f9f56bbe280a75a44968ce41aceb1ea
+    image: docker.io/drak²/sftpgo:v2.6.2-plugins@sha256:f1426b79fb243a43fd3dcc739cf2c9560f9f56bbe280a75a44968ce41aceb1ea
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
