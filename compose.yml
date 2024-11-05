@@ -114,6 +114,7 @@ services:
       - librespeed
       - tandoor
       - miniflux-proxy
+      - kanidm
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -150,6 +151,34 @@ services:
       interval: 3s
       timeout: 3s
       retries: 5
+  
+  traefik-certs-dumper:
+    <<: *common
+    depends_on:
+      traefik:
+        condition: service_healthy
+    image: 'docker.io/ldez/traefik-certs-dumper:v2.8.3'
+    user: '${UID}:${GID}'
+    read_only: true
+    mem_limit: '50M'
+    memswap_limit: '50M'
+    cpu_count: 2
+    network_mode: none
+    volumes:
+      - type: 'bind'
+        source: '${docker_data_folder}/traefik/data/acme.json'
+        target: '/traefik/acme.json'
+        read_only: true
+      - type: 'bind'
+        source: '${docker_data_folder}/traefik-certs-dumper'
+        target: /data
+    command:
+      - 'file'
+      - '--source=/traefik/acme.json'
+      - '--dest=/data'
+      - '--watch'
+      - '--clean'
+      - '--version=v2'
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
@@ -1201,6 +1230,45 @@ services:
   ##################################################################
   # Authentication
 
+  kanidm:
+    <<: *common
+    depends_on:
+      traefik-certs-dumper:
+        condition: service_started
+    image: 'docker.io/kanidm/server:1.4.1@sha256:131e1cf354f3bd9501e87fd720e693457a81710e313da91d94f302ebef6d1584'
+    cpu_count: 4
+    user: '${UID}:${GID}'
+    read_only: true
+    mem_limit: '250M'
+    memswap_limit: '250M'
+    networks:
+      - kanidm
+    volumes:
+      - type: 'bind'
+        source: '${docker_data_folder}/kanidm'
+        target: '/data'
+      - type: 'bind'
+        source: '${docker_data_folder}/traefik-certs-dumper'
+        target: '/certificates'
+        read_only: true
+    environment:
+      KANIDM_BINDADDRESS: '[::]:8443'
+      KANIDM_LDAPBINDADDRESS: '[::]:3636'
+      KANIDM_DB_PATH: '/data/kanidm.db'
+      KANIDM_TLS_CHAIN: '/certificates/certs/${root_domain}.crt'
+      KANIDM_TLS_KEY: '/certificates/private/${root_domain}.key'
+      KANIDM_DOMAIN: 'kanidm.${root_domain}'
+      KANIDM_ORIGIN: 'https://kanidm.${root_domain}'
+      KANIDM_TRUST_X_FORWARD_FOR: 'true'
+      KANIDM_DB_FS_TYPE: '${KANIDM_DB_FS_TYPE:-zfs}'
+    labels:
+      <<: *traefik
+      traefik.http.routers.kanidm.rule: 'Host(`kanidm.${root_domain}`)'
+      # service
+      traefik.http.services.kanidm.loadbalancer.server.port: '8443'
+      traefik.http.services.kanidm.loadbalancer.server.scheme: 'https'
+      traefik.http.services.kanidm.loadBalancer.serversTransport: kanidmTransport@file
+
   # LDAP server
   openldap:
     image: docker.io/osixia/openldap:1.5.0@sha256:0de3850635911109f0daf8f5957808ec4f4eb827fbaaa339100b5f1bab925745
@@ -1456,6 +1524,9 @@ networks:
     enable_ipv6: true
     internal: true
   miniflux-proxy:
+    enable_ipv6: true
+  kanidm:
+    internal: true
     enable_ipv6: true
 
 volumes:
