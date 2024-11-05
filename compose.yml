@@ -114,7 +114,8 @@ services:
       - librespeed
       - tandoor
       - miniflux-proxy
-      - kanidm
+      - lldap
+      - sftpgo
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
