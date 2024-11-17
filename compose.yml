@@ -965,7 +965,7 @@ services:
 
   tandoor:
     <<: *common
-    image: docker.io/vabene1111/recipes:1.5.20@sha256:6c449f9aa4a47fdfded488c9df708096bb40bebc16e5bced881cbde7ec21c0dc
+    image: docker.io/vabene1111/recipes:1.5.22@sha256:c6c6740db20a0f2401c025a942b5570b773c0d9fd02a9d3738a745535bbd1e97
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
