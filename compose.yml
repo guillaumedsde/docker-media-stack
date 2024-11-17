@@ -152,34 +152,34 @@ services:
       interval: 3s
       timeout: 3s
       retries: 5
-  
+
   traefik-certs-dumper:
     <<: *common
     depends_on:
       traefik:
         condition: service_healthy
-    image: 'docker.io/ldez/traefik-certs-dumper:v2.9.1'
-    user: '${UID}:${GID}'
+    image: "docker.io/ldez/traefik-certs-dumper:v2.9.1"
+    user: "${UID}:${GID}"
     read_only: true
-    mem_limit: '50M'
-    memswap_limit: '50M'
+    mem_limit: "50M"
+    memswap_limit: "50M"
     cpu_count: 2
     network_mode: none
     volumes:
-      - type: 'bind'
-        source: '${docker_data_folder}/traefik/data/acme.json'
-        target: '/traefik/acme.json'
+      - type: "bind"
+        source: "${docker_data_folder}/traefik/data/acme.json"
+        target: "/traefik/acme.json"
         read_only: true
-      - type: 'bind'
-        source: '${docker_data_folder}/traefik-certs-dumper'
+      - type: "bind"
+        source: "${docker_data_folder}/traefik-certs-dumper"
         target: /data
     command:
-      - 'file'
-      - '--source=/traefik/acme.json'
-      - '--dest=/data'
-      - '--watch'
-      - '--clean'
-      - '--version=v2'
+      - "file"
+      - "--source=/traefik/acme.json"
+      - "--dest=/data"
+      - "--watch"
+      - "--clean"
+      - "--version=v2"
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
@@ -1065,9 +1065,9 @@ services:
     cpu_count: 2
     networks:
       - ssh
-      - ldap 
-    image: docker.io/guillaumedsde/ssh-ldap
-  
+      - ldap
+    image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
+
   sftpgo:
     <<: *common
     image: docker.io/drakkan/sftpgo:v2.6.3-plugins@sha256:97156096b03e708284ef6d3192c397eda7371e79d07fb46d6bdf168d0cb74be7
@@ -1104,8 +1104,8 @@ services:
       SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
       SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
       # TODO make group var
-      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: '(&(objectclass=person)(memberOf=cn=family,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))' 
-      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: 'family'
+      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: "(&(objectclass=person)(memberOf=cn=family,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))"
+      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: "family"
       SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
       SFTPGO_PLUGINS__0__TYPE: "auth"
       SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
@@ -1289,36 +1289,36 @@ services:
     depends_on:
       lldap-db:
         condition: service_healthy
-    image: 'docker.io/lldap/lldap:2024-11-04-alpine-rootless@sha256:161c273471134ed9e7b6feca5c96a321372e699b4f086738e113e873c4f6d9a2'
+    image: "docker.io/lldap/lldap:2024-11-04-alpine-rootless@sha256:161c273471134ed9e7b6feca5c96a321372e699b4f086738e113e873c4f6d9a2"
     cpu_count: 2
-    mem_limit: '250M'
-    memswap_limit: '250M'
-    user: '${UID}:${GID}'
+    mem_limit: "250M"
+    memswap_limit: "250M"
+    user: "${UID}:${GID}"
     read_only: true
     volumes:
-      - type: 'bind'
-        source: '${docker_data_folder}/lldap'
+      - type: "bind"
+        source: "${docker_data_folder}/lldap"
         target: /data
     networks:
-      - 'lldap'
-      - 'lldap-db'
+      - "lldap"
+      - "lldap-db"
     environment:
       <<: *conf
-      LLDAP_LDAP_HOST: '::'
-      LLDAP_LDAP_PORT: '3890'
-      LLDAP_JWT_SECRET: '${LLDAP_JWT_SECRET}'
-      LLDAP_KEY_SEED: '${LLDAP_KEY_SEED}'
-      LLDAP_LDAP_BASE_DN: '${LLDAP_LDAP_BASE_DN}'
-      LLDAP_LDAP_USER_PASS: '${LLDAP_LDAP_USER_PASS}'
-      LLDAP_DATABASE_URL: 'postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap'
-      LLDAP_HTTP_URL: 'https://lldap.${root_domain}'
-      LLDAP_HTTP_PORT: '17170'
+      LLDAP_LDAP_HOST: "::"
+      LLDAP_LDAP_PORT: "3890"
+      LLDAP_JWT_SECRET: "${LLDAP_JWT_SECRET}"
+      LLDAP_KEY_SEED: "${LLDAP_KEY_SEED}"
+      LLDAP_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
+      LLDAP_LDAP_USER_PASS: "${LLDAP_LDAP_USER_PASS}"
+      LLDAP_DATABASE_URL: "postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap"
+      LLDAP_HTTP_URL: "https://lldap.${root_domain}"
+      LLDAP_HTTP_PORT: "17170"
     labels:
       <<: *traefik
-      traefik.docker.network: '${COMPOSE_PROJECT_NAME}_lldap'
-      traefik.http.routers.lldap.rule: 'Host(`lldap.${root_domain}`)'
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
+      traefik.http.routers.lldap.rule: "Host(`lldap.${root_domain}`)"
       # service
-      traefik.http.services.lldap.loadbalancer.server.port: '17170'
+      traefik.http.services.lldap.loadbalancer.server.port: "17170"
 
   lldap-db:
     <<: *common
