@@ -1070,7 +1070,7 @@ services:
 
   sftpgo:
     <<: *common
-    image: docker.io/drakkan/sftpgo:v2.6.3-plugins@sha256:97156096b03e708284ef6d3192c397eda7371e79d07fb46d6bdf168d0cb74be7
+    image: docker.io/drakkan/sftpgo:v2.6.4-plugins@sha256:9c21aeb99be0fe911c426267cb0bf357a2aec77e30ffef77f121713b1b9f87bb
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
