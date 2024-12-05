@@ -158,7 +158,7 @@ services:
     depends_on:
       traefik:
         condition: service_healthy
-    image: "docker.io/ldez/traefik-certs-dumper:v2.9.1"
+    image: "docker.io/ldez/traefik-certs-dumper:v2.9.3"
     user: "${UID}:${GID}"
     read_only: true
     mem_limit: "50M"
