@@ -271,8 +271,7 @@ services:
         source: ${docker_data_folder}/gluetun
         target: /gluetun
     devices:
-      - source: /dev/net/tun
-        target: /dev/net/tun
+      - /dev/net/tun:/dev/net/tun
     networks:
       traefik:
         aliases:
