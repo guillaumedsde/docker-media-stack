@@ -1173,6 +1173,7 @@ services:
   # netdata, server monitoring
   netdata:
     <<: *common
+    hostname: "status.gauf.fr"
     cpu_count: 2
     mem_limit: 1G
     memswap_limit: 1G
@@ -1188,6 +1189,8 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
       - /var/log:/host/var/log:ro
       - /run/dbus:/run/dbus:ro
+      # NOTE: see https://learn.netdata.cloud/docs/netdata-agent/installation/docker#change-the-default-hostname
+      - /etc/hostname:/host/etc/hostname:ro
       - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
       - ${docker_data_folder}/netdata/cache:/var/cache/netdata
       - ${docker_data_folder}/netdata/netdatalib:/var/lib/netdata
