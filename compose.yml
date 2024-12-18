@@ -1399,7 +1399,7 @@ services:
     depends_on:
       openldap:
         condition: service_healthy
-    image: ghcr.io/ldapaccountmanager/lam:8.9@sha256:dcc4ae5beef8262b2af03639f2f3b68c5e36a18a468297108f522097ce02b070
+    image: ghcr.io/ldapaccountmanager/lam:9.0@sha256:05ec9ad5d54f9db40c00cc03b8ee9146e842cf4aff4150835ba4c31e32a80c60
     volumes:
       - ${docker_data_folder}/lam/config.cfg:/etc/ldap-account-manager/config.cfg
       - ${docker_data_folder}/lam/lam.conf:/var/lib/ldap-account-manager/config/lam.conf
