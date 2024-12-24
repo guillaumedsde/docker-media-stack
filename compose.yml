@@ -569,7 +569,7 @@ services:
         condition: service_healthy
       sonarr:
         condition: service_healthy
-    image: ghcr.io/onedr0p/bazarr:1.4.5@sha256:a522fcf415674dc0b6efd80f44e686fd58c41bc4661816288fc09f430bfa29f8
+    image: ghcr.io/onedr0p/bazarr:1.5.0@sha256:c9ebde593be67f10956d87ed2082d3e17267b62f949a0677ca02e761e9174aeb
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
