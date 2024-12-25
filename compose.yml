@@ -349,7 +349,7 @@ services:
 
   prowlarr:
     <<: *common
-    image: ghcr.io/onedr0p/prowlarr:1.28.2.4885@sha256:11cc6b7f5962a3b3a98a9072a1677314378db307a8a5b5490b27e448c80f005b
+    image: ghcr.io/elfhosted/prowlarr-develop:1.29.0.4897@sha256:dcd40899d7535b2840c05be5f3add89ab2809706b7bc522113570e141d1b1e35
     cpu_count: 4
     mem_limit: 3G
     memswap_limit: 3G
@@ -395,7 +395,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
-    image: ghcr.io/onedr0p/radarr:5.16.3.9541@sha256:a29e6fde098e8306ad844b28b775da83cb627dd1f4c91ab701420d85574b33d9
+    image: ghcr.io/elfhosted/radarr:5.16.3.9541@sha256:b58199899ec81e27af796e85010e8f5cecb4d325249a8ce3a4b63f64ddf3aa94
     <<: *common
     cpu_count: 4
     mem_limit: 2G
@@ -438,7 +438,7 @@ services:
   # sonarr, webapp for downloading series through torrent client
   sonarr:
     <<: *common
-    image: ghcr.io/onedr0p/sonarr:4.0.11.2680@sha256:20b41a96bc9ac957df2fc2db0d2b8813ef9754220925beec88bcb221c4269887
+    image: ghcr.io/elfhosted/sonarr-develop:4.0.11.2793@sha256:a616ec5f638d231cba9c8c9787a86ec832b4f2464e30783129bbf3d30ea021d2
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -480,7 +480,7 @@ services:
   # lidarr, webapp for downloading music through torrent client
   lidarr:
     <<: *common
-    image: ghcr.io/onedr0p/lidarr:2.4.3.4248@sha256:401aec97ad0f0fc26f87f73ae793b981b849c71cd1e4278b60b2a5a8c4507914
+    image: ghcr.io/elfhosted/lidarr:2.8.2.4493@sha256:53a87900571644f4f440c3c238e0dbf5de1cea04ae5bd45a8d05833f8b322aea
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -522,7 +522,7 @@ services:
   # readarr, webapp for downloading books through torrent client
   readarr:
     <<: *common
-    image: ghcr.io/onedr0p/readarr-develop:0.3.32.2587@sha256:3ae920c56261b120ec6e7fce038cd700cc691b74d6326ac074b0a8985af5f8b6
+    image: ghcr.io/elfhosted/readarr-develop:0.4.6.2711@sha256:d1a2d9d9bd7b81dbc7ef62687183f903fe55f273b6e7605b7fb66a46eda5beb0
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -569,7 +569,7 @@ services:
         condition: service_healthy
       sonarr:
         condition: service_healthy
-    image: ghcr.io/onedr0p/bazarr:1.5.0@sha256:c9ebde593be67f10956d87ed2082d3e17267b62f949a0677ca02e761e9174aeb
+    image: ghcr.io/elfhosted/bazarr:1.5.0@sha256:d874f764f5205bb228c5a2001318d1960ff07593fbbd6a8080bf5fc3c8304823
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
