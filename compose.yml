@@ -501,6 +501,9 @@ services:
       - traefik
     environment:
       <<: *conf
+      # NOTE: fix for read-only filesystems, see:
+      #       https://stackoverflow.com/questions/74447989/failed-to-create-coreclr-hresult-0x80004005#comment131446515_74447989
+      COMPlus_EnableDiagnostics: "0"
     labels:
       <<: *traefik
       traefik.http.routers.lidarr.rule: Host(`music.${root_domain}`)
