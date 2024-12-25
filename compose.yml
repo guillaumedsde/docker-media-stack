@@ -280,6 +280,7 @@ services:
       flaresolverr:
     healthcheck:
       retries: 25
+      start_period: 30s
     environment:
       <<: *conf
       LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
