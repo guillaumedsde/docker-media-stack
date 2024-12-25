@@ -1512,8 +1512,6 @@ services:
     read_only: true
     user: ${UID}:${GID}
     image: docker.io/valkey/valkey:8-alpine
-    environment:
-      REDISCLI_AUTH: "${NEXTCLOUD_REDIS_PASS}"
     healthcheck: *redis-healthcheck
     volumes:
       - ${docker_data_folder}/authelia-redis:/data
