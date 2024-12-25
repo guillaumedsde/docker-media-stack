@@ -881,10 +881,10 @@ services:
     environment:
       REDISCLI_AUTH: "${NEXTCLOUD_REDIS_PASS}"
       VALKEY_EXTRA_FLAGS: "--requirepass ${NEXTCLOUD_REDIS_PASS}"
-    healthcheck: &redis-healthcheck
+    healthcheck: &valkey-healthcheck
       test:
         - "CMD"
-        - "redis-cli"
+        - "valkey-cli"
         - "ping"
 
   miniflux:
@@ -1512,7 +1512,7 @@ services:
     read_only: true
     user: ${UID}:${GID}
     image: docker.io/valkey/valkey:8-alpine
-    healthcheck: *redis-healthcheck
+    healthcheck: *valkey-healthcheck
     volumes:
       - ${docker_data_folder}/authelia-redis:/data
     networks:
