@@ -867,6 +867,7 @@ services:
 
   # cache for nextcloud
   nextcloud-redis:
+    <<: *common
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -875,7 +876,6 @@ services:
     image: docker.io/valkey/valkey:8-alpine
     networks:
       - nextcloud
-    <<: *common
     volumes:
       - ${docker_data_folder}/nextcloud-redis:/data
     environment:
@@ -1435,7 +1435,7 @@ services:
     depends_on:
       authelia-db:
         condition: service_healthy
-      authelia-redis:
+      authelia-valkey:
         condition: service_healthy
       openldap:
         condition: service_healthy
@@ -1504,19 +1504,16 @@ services:
       - authelia
     healthcheck: *postgres-healthcheck
 
-  authelia-redis:
+  authelia-valkey:
     <<: *common
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
-    image: docker.io/redis:7-bookworm
-    command:
-      - redis-server
-      - --save
-      - "60"
-      - "1"
+    image: docker.io/valkey/valkey:8-alpine
+    environment:
+      REDISCLI_AUTH: "${NEXTCLOUD_REDIS_PASS}"
     healthcheck: *redis-healthcheck
     volumes:
       - ${docker_data_folder}/authelia-redis:/data

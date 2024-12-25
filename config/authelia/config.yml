@@ -51,7 +51,7 @@ session:
   inactivity: 1M
   remember_me_duration: 2M
   redis:
-    host: authelia-redis
+    host: authelia-valkey
     port: 6379
 
 storage:
