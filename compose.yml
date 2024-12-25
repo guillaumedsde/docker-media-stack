@@ -872,7 +872,7 @@ services:
     memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
-    image: redis:7-bookworm
+    image: docker.io/valkey/valkey:8-alpine
     networks:
       - nextcloud
     <<: *common
@@ -880,7 +880,7 @@ services:
       - ${docker_data_folder}/nextcloud-redis:/data
     environment:
       REDISCLI_AUTH: "${NEXTCLOUD_REDIS_PASS}"
-    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASS}
+      VALKEY_EXTRA_FLAGS: "--requirepass ${NEXTCLOUD_REDIS_PASS}"
     healthcheck: &redis-healthcheck
       test:
         - "CMD"
