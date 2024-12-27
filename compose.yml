@@ -1258,8 +1258,19 @@ services:
     cpu_count: 2
     cap_add:
       - SYS_RAWIO
-    device_cgroup_rules:
-      - 'b 8:* rmw'
+    devices:
+      - /dev/sda
+      - /dev/sdb
+      - /dev/sdc
+      - /dev/sdd
+      - /dev/sde
+      - /dev/sdf
+      - /dev/sdg
+      - /dev/sdh
+      - /dev/sdi
+      - /dev/sdj
+      - /dev/sdk
+      - /dev/sdl
     volumes:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
