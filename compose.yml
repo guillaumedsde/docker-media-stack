@@ -1259,7 +1259,7 @@ services:
     cap_add:
       - SYS_RAWIO
     device_cgroup_rules:
-      - 'b 8:* r'
+      - 'b 8:* rmw'
     volumes:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
