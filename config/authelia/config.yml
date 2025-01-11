@@ -60,10 +60,9 @@ authentication_backend:
       username: uid
       display_name: displayName
       mail: mail
+      group_name: cn
     users_filter: (&({username_attribute}={input})(objectClass=inetOrgPerson))
     groups_filter: (&(member={dn})(objectClass=posixGroup))
-    group_name_attribute: cn
-    
 
 session:
   expiration: 24h
