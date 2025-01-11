@@ -39,8 +39,7 @@ access_control:
 notifier:
   disable_startup_check: false
   smtp:
-    host: smtp.sendgrid.net
-    port: 587
+    address: tcp://smtp.sendgrid.net:587
     timeout: 5s
     username: apikey
     sender: Authelia authelia@gauf.fr
@@ -57,24 +56,26 @@ authentication_backend:
   refresh_interval: 5m
   ldap:
     url: ldap://openldap
-    username_attribute: uid
+    attributes:
+      username: uid
+      display_name: displayName
+      mail: mail
     users_filter: (&({username_attribute}={input})(objectClass=inetOrgPerson))
     groups_filter: (&(member={dn})(objectClass=posixGroup))
     group_name_attribute: cn
-    mail_attribute: mail
-    display_name_attribute: displayName
+    
 
 session:
   expiration: 24h
   inactivity: 1M
-  remember_me_duration: 2M
+  remember_me: 2M
   redis:
     host: authelia-valkey
     port: 6379
 
 storage:
   postgres:
-    host: authelia-db
+    address: tcp://authelia-db:5432
     database: authelia
     username: authelia
 
