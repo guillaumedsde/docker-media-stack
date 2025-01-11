@@ -39,7 +39,7 @@ access_control:
 notifier:
   disable_startup_check: false
   smtp:
-    address: tcp://smtp.sendgrid.net:587
+    address: smtp://smtp.sendgrid.net:587
     timeout: 5s
     username: apikey
     sender: Authelia authelia@gauf.fr
