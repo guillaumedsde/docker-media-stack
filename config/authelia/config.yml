@@ -7,6 +7,30 @@ access_control:
       resources: '^/feed(/v.)*/calendar/.+\.ics(\?.*)*$'
       methods:
         - GET
+    # Allow *arr ping endpoint access
+    - domain_regex: '^(movies|series|music|books|prowlarr)\..+$'
+      policy: bypass
+      resources: '^/ping$'
+      methods:
+        - HEAD
+    # Allow qbittorrent healthcheck endpoint access
+    - domain_regex: '^torrent\..+$'
+      policy: bypass
+      resources: '^/api/v2/app/version$'
+      methods:
+        - HEAD
+    # Allow Nextcloud healthcheck endpoint access
+    - domain_regex: '^cloud\..+$'
+      policy: bypass
+      resources: '^/status.php$'
+      methods:
+        - HEAD
+    # Allow miniflux healthcheck endpoint access
+    - domain_regex: '^miniflux\..+$'
+      policy: bypass
+      resources: '^/healthcheck$'
+      methods:
+        - HEAD
     # Allow homer on LAN
     - domain_regex: '^(home)\..+$'
       networks:
