@@ -55,7 +55,7 @@ notifier:
 authentication_backend:
   refresh_interval: 5m
   ldap:
-    url: ldap://openldap
+    address: ldap://openldap
     attributes:
       username: uid
       display_name: displayName
