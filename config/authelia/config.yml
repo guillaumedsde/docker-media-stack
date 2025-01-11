@@ -19,12 +19,6 @@ access_control:
       resources: '^/api/v2/app/version$'
       methods:
         - HEAD
-    # Allow Nextcloud healthcheck endpoint access
-    - domain_regex: '^cloud\..+$'
-      policy: bypass
-      resources: '^/status.php$'
-      methods:
-        - HEAD
     # Allow miniflux healthcheck endpoint access
     - domain_regex: '^miniflux\..+$'
       policy: bypass
