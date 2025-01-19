@@ -90,7 +90,7 @@ services:
       # Dashboard
       traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`)
       traefik.http.routers.dashboard.service: api@internal
-      traefik.http.routers.dashboard.middlewares: traefik-forward-auth
+      traefik.http.routers.dashboard.middlewares: authelia@docker
       # Healthcheck
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
@@ -109,13 +109,11 @@ services:
       - robots
       - netdata
       - scrutiny
-      - lam
       - authelia-proxy
       - librespeed
       - tandoor
       - miniflux-proxy
       - lldap
-      - sftpgo
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -669,7 +667,7 @@ services:
     memswap_limit: 8G
     read_only: true
     depends_on:
-      openldap:
+      lldap:
         condition: service_healthy
     tmpfs:
       - /config/data/transcodes:mode=770,size=4G,uid=${UID},gid=${GID}
@@ -700,7 +698,7 @@ services:
         read_only: true
     networks:
       - traefik
-      - ldap
+      - lldap
     environment:
       <<: *conf
       # NOTE: required for read only root filesystem, see:
@@ -777,7 +775,7 @@ services:
         condition: service_healthy
       ssh:
         condition: service_started
-      openldap:
+      lldap:
         condition: service_healthy
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
@@ -786,7 +784,7 @@ services:
       - traefik
       - nextcloud
       - nextcloud-proxy
-      - ldap
+      - lldap
       - ssh
     environment:
       <<: *conf
@@ -1028,66 +1026,13 @@ services:
       retries: 4
       start_period: 5s
 
-  samba:
-    environment:
-      SAMBA_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
-      SID: ${SID}
-    ports:
-      - "139:139"
-      - "445:445"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
-      - ${docker_data_folder}/samba/smb.conf:/etc/samba/smb.conf:ro
-      - ${docker_data_folder}/samba/secrets.tdb:/var/lib/samba/private/secrets.tdb
-      - /data/users:/data/users
-    depends_on:
-      openldap:
-        condition: service_healthy
-    <<: *common
-    mem_limit: 250M
-    memswap_limit: 250M
-    cpu_count: 2
-    networks:
-      - samba
-      - ldap
-    image: docker.io/guillaumedsde/samba-ldap:latest
-
   ssh:
     ports:
       - "1998:2222"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/samba/nslcd.conf:/etc/nslcd.conf:ro
-      - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
-      - ${docker_data_folder}/ssh/authorized_keys:/etc/ssh/authorized_keys
-      - ${docker_data_folder}/ssh/config:/config
-      - /data/users:/data/users
-    read_only: true
-    tmpfs:
-      - /run/sshd
-      - /var:rw,exec
-    environment:
-      S6_READ_ONLY_ROOT: "1"
-    depends_on:
-      openldap:
-        condition: service_healthy
-    <<: *common
-    mem_limit: 200MB
-    memswap_limit: 200MB
-    cpu_count: 2
-    networks:
-      - ssh
-      - ldap
-    image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
-
-  ssh2:
-    ports:
-      - "1999:2222"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
       - ${docker_data_folder}/samba/nslcd2.conf:/etc/nslcd.conf:ro
-      - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
+      - ${docker_data_folder}/ssh/sshd_config2:/etc/ssh/sshd_config:ro
       - ${docker_data_folder}/ssh/authorized_keys:/etc/ssh/authorized_keys
       - ${docker_data_folder}/ssh/config:/config
       - /data/users:/data/users
@@ -1097,82 +1042,16 @@ services:
       - /var:rw,exec
     environment:
       S6_READ_ONLY_ROOT: "1"
-    depends_on:
-      openldap:
-        condition: service_healthy
-    <<: *common
-    mem_limit: 200MB
-    memswap_limit: 200MB
-    cpu_count: 2
-    networks:
-      - lldap
-    image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
-
-  sftpgo:
-    <<: *common
-    image: docker.io/drakkan/sftpgo:v2.6.4-plugins@sha256:9c21aeb99be0fe911c426267cb0bf357a2aec77e30ffef77f121713b1b9f87bb
-    cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
-    user: root
-    read_only: true
     depends_on:
       lldap:
-        # TODO healthcheck
-        condition: service_started
-    ports:
-      - target: 2022
-        published: 2022
-        protocol: tcp
-    tmpfs:
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
-    volumes:
-      - type: bind
-        source: /data/users
-        target: /srv/sftpgo/data
-        read_only: true
-      - type: bind
-        source: ${docker_data_folder}/sftpgo
-        target: /var/lib/sftpgo
+        condition: service_healthy
+    <<: *common
+    mem_limit: 200MB
+    memswap_limit: 200MB
+    cpu_count: 2
     networks:
       - lldap
-      - sftpgo
-    environment:
-      SFTPGO_DATA_PROVIDER__USERS_BASE_DIR: "/srv/sftpgo/data"
-      SFTPGO_PLUGIN_AUTH_LDAP_URL: "ldap://lldap:3890"
-      SFTPGO_PLUGIN_AUTH_LDAP_BASE_DN: "${LLDAP_LDAP_BASE_DN}"
-      SFTPGO_PLUGIN_AUTH_LDAP_BIND_DN: "uid=sftpgo,ou=people,${LLDAP_LDAP_BASE_DN}"
-      SFTPGO_PLUGIN_AUTH_LDAP_PASSWORD: "${SFTPGO_LDAP_PASSWORD}"
-      # TODO make group var
-      SFTPGO_PLUGIN_AUTH_LDAP_SEARCH_QUERY: "(&(objectclass=person)(memberOf=cn=family,ou=groups,${LLDAP_LDAP_BASE_DN})(uid=%username%))"
-      SFTPGO_PLUGIN_AUTH_PRIMARY_GROUP_PREFIX: "family"
-      SFTPGO_PLUGIN_AUTH_CACHE_TIME: "60"
-      SFTPGO_PLUGINS__0__TYPE: "auth"
-      SFTPGO_PLUGINS__0__AUTH_OPTIONS__SCOPE: "5"
-      SFTPGO_PLUGINS__0__CMD: "/usr/local/bin/sftpgo-plugin-auth"
-      SFTPGO_PLUGINS__0__ARGS: "serve"
-      SFTPGO_PLUGINS__0__AUTO_MTLS: "1"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_sftpgo"
-      traefik.http.routers.sftp.rule: Host(`sftp.${root_domain}`)
-      # service
-      traefik.http.services.sftp.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.sftp.middlewares: authelia@docker
-
-  # Web Service Discovery host daemon
-  # see https://github.com/christgau/wsdd
-  wsdd:
-    network_mode: host
-    user: ${UID}:${GID}
-    read_only: true
-    mem_limit: 150M
-    memswap_limit: 150M
-    cpu_count: 2
-    <<: *common
-    command: --ipv4only --verbose --hostname ${WSDD_HOSTNAME} --interface ${WSDD_INTERFACE}
-    image: docker.io/guillaumedsde/wsdd-distroless:v0.7.1@sha256:9ad3119d192e68a66f4df11099bad078be49443d12a389123225fb30025c474d
+    image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
 
   robots:
     <<: *common
@@ -1383,79 +1262,6 @@ services:
       - lldap-db
     healthcheck: *postgres-healthcheck
 
-  # LDAP server
-  openldap:
-    image: docker.io/osixia/openldap:1.5.0@sha256:0de3850635911109f0daf8f5957808ec4f4eb827fbaaa339100b5f1bab925745
-    hostname: ldap.${old_root_domain}
-    mem_limit: 250M
-    memswap_limit: 250M
-    environment:
-      HOSTNAME: ldap.${old_root_domain}
-      LDAP_DOMAIN: ${old_root_domain}
-      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
-      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
-      LDAP_BASE_DN: ${LDAP_BASE_DN}
-      LDAP_TLS: "true"
-      LDAP_TLS_CRT_FILENAME: ldap.${old_root_domain}.cer
-      LDAP_TLS_KEY_FILENAME: ldap.${old_root_domain}.key
-      LDAP_TLS_CA_CRT_FILENAME: ca.cer
-      LDAP_OPENLDAP_UID: ${UID}
-      LDAP_OPENLDAP_GID: ${GID}
-    command: "--copy-service"
-    <<: *common
-    networks:
-      - ldap
-    ports:
-      - 389:389
-      - 636:636
-    volumes:
-      - ${docker_data_folder}/openldap/ldap:/var/lib/ldap
-      - ${docker_data_folder}/openldap/slapd.d:/etc/ldap/slapd.d
-      - ./ldap_templates:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
-      # certificates
-      - ${docker_data_folder}/openldap/certs/ldap.${old_root_domain}:/container/service/slapd/assets/certs:ro
-    healthcheck:
-      test:
-        - "CMD-SHELL"
-        - >-
-          ldapsearch
-          -x
-          -H ldap://localhost
-          -b "${LDAP_BASE_DN}"
-          -D "cn=admin,${LDAP_BASE_DN}"
-          -w "${LDAP_ADMIN_PASSWORD}"
-          -o nettimeout=10
-      interval: 15s
-      timeout: 10s
-      start_period: 5m
-      retries: 20
-
-  # LDAP Server management web GUI
-  lam:
-    <<: *common
-    depends_on:
-      openldap:
-        condition: service_healthy
-    image: ghcr.io/ldapaccountmanager/lam:9.0@sha256:05ec9ad5d54f9db40c00cc03b8ee9146e842cf4aff4150835ba4c31e32a80c60
-    volumes:
-      - ${docker_data_folder}/lam/config.cfg:/etc/ldap-account-manager/config.cfg
-      - ${docker_data_folder}/lam/lam.conf:/var/lib/ldap-account-manager/config/lam.conf
-    environment:
-      LAM_SKIP_PRECONFIGURE: "true"
-    networks:
-      - lam
-      - ldap
-    mem_limit: 200M
-    memswap_limit: 200M
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lam"
-      traefik.http.routers.lam.rule: Host(`lam.${root_domain}`)
-      # service
-      traefik.http.services.lam.loadbalancer.server.port: "80"
-      # Forward auth
-      traefik.http.routers.lam.middlewares: traefik-forward-auth
-
   # SSO
   authelia:
     <<: *common
@@ -1464,7 +1270,7 @@ services:
         condition: service_healthy
       authelia-valkey:
         condition: service_healthy
-      openldap:
+      lldap:
         condition: service_healthy
     image: docker.io/authelia/authelia:4.38.18@sha256:a5e6fa4b1dbdc296f80f9175157b145a0598690ec8cd4d6e105cd4498fe0c731
     cpu_count: 4
@@ -1480,9 +1286,9 @@ services:
       AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@${root_domain}>
       AUTHELIA_NOTIFIER_SMTP_STARTUP_CHECK_ADDRESS: ${letsencrypt_email}
       # LDAP backend configuration
-      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN: ${LDAP_BASE_DN}
-      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER: ${LDAP_ADMIN_USER}
-      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN: ${LLDAP_LDAP_BASE_DN}
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER: "uid=authelia,ou=people,${LLDAP_LDAP_BASE_DN}"
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD: ${AUTHELIA_BIND_PASSWORD}
       # Session configuration
       AUTHELIA_SESSION_DOMAIN: ${root_domain}
       # Storage configuration
@@ -1545,55 +1351,17 @@ services:
     networks:
       - authelia
 
-  # OIDC forward authentication for traefik
-  traefik-forward-auth:
-    image: docker.io/thomseddon/traefik-forward-auth:2.2.0@sha256:e875194d67e21c077f3de0b9d315bb3023a226f2cac81ddd9d02a4250ed89b4b
-    <<: *common
-    cpu_count: 2
-    mem_limit: 100M
-    memswap_limit: 100M
-    read_only: true
-    user: ${UID}:${GID}
-    environment:
-      PROVIDERS_GOOGLE_CLIENT_ID: ${OAUTH2_PROXY_CLIENT_ID}
-      PROVIDERS_GOOGLE_CLIENT_SECRET: ${OAUTH2_PROXY_CLIENT_SECRET}
-      SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
-      #OIDC_ISSUER: https://accounts.google.com
-      WHITELIST: "${allowed_emails}"
-      AUTH_HOST: "oauth.${root_domain}"
-      COOKIE_DOMAIN: "${root_domain}"
-      COOKIE_NAME: _google_forward_auth
-      CSRF_COOKIE_NAME: _google_forward_auth_csrf
-    networks:
-      - traefik
-    labels:
-      <<: *traefik
-      # HTTP entrypoint
-      traefik.http.routers.traefik-forward-auth.rule: Host(`oauth.${root_domain}`)
-      # service
-      traefik.http.services.traefik-forward-auth.loadbalancer.server.port: "4181"
-      # Forward auth
-      traefik.http.middlewares.traefik-forward-auth.forwardauth.address: http://traefik-forward-auth:4181
-      traefik.http.routers.traefik-forward-auth.middlewares: traefik-forward-auth
-      traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders: X-Forwarded-User
-
 networks:
   watchtower:
     enable_ipv6: true
   traefik:
     enable_ipv6: true
-  ldap:
-    # FIXME OpenLDAP container does not bind to IPv6
-    enable_ipv6: false
-    internal: true
   authelia:
     enable_ipv6: true
     internal: true
   nextcloud:
     enable_ipv6: true
     internal: true
-  samba:
-    enable_ipv6: true
   ssh:
     enable_ipv6: true
   homer:
@@ -1609,9 +1377,6 @@ networks:
     internal: true
   scrutiny:
     enable_ipv6: true
-  lam:
-    enable_ipv6: true
-    internal: true
   authelia-proxy:
     enable_ipv6: true
   flaresolverr:
@@ -1639,8 +1404,6 @@ networks:
   lldap-db:
     enable_ipv6: true
     internal: true
-  sftpgo:
-    enable_ipv6: true
 
 volumes:
   robots-nginx-cache:
