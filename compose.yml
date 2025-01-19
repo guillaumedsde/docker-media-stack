@@ -1209,8 +1209,10 @@ services:
       LLDAP_SMTP_OPTIONS__SERVER: "smtp.sendgrid.net"
       LLDAP_SMTP_OPTIONS__PORT: "465"
       LLDAP_SMTP_OPTIONS__SMTP_ENCRYPTION: TLS
-      LLDAP_SMTP_OPTIONS__USER: "lldap@${root_domain}"
+      LLDAP_SMTP_OPTIONS__USER: "apikey"
       LLDAP_SMTP_OPTIONS__PASSWORD: "${SENDGRID_PASS}"
+      LLDAP_SMTP_OPTIONS__FROM: "lldap <lldap@${root_domain}>"
+      LLDAP_SMTP_OPTIONS__TO: "${letsencrypt_email}"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
