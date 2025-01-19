@@ -1205,6 +1205,12 @@ services:
       LLDAP_DATABASE_URL: "postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap"
       LLDAP_HTTP_URL: "https://lldap.${root_domain}"
       LLDAP_HTTP_PORT: "17170"
+      LLDAP_SMTP_OPTIONS__ENABLE_PASSWORD_RESET: "true"
+      LLDAP_SMTP_OPTIONS__SERVER: "smtp.sendgrid.net"
+      LLDAP_SMTP_OPTIONS__PORT: "465"
+      LLDAP_SMTP_OPTIONS__SMTP_ENCRYPTION: TLS
+      LLDAP_SMTP_OPTIONS__USER: "lldap@${root_domain}"
+      LLDAP_SMTP_OPTIONS__PASSWORD: "${SENDGRID_PASS}"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
