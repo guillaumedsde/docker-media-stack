@@ -777,7 +777,7 @@ services:
         condition: service_healthy
     volumes:
       - ${docker_data_folder}/nextcloud:/var/www/html
-      - ${data_folder}:/data
+      - ${user_data_folder}:/data/users
     networks:
       - traefik
       - nextcloud
