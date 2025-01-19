@@ -1302,7 +1302,7 @@ services:
       - ./config/authelia:/config:ro
     networks:
       - authelia-proxy
-      - ldap
+      - lldap
       - authelia
     labels:
       <<: *traefik
