@@ -1305,7 +1305,7 @@ services:
     depends_on:
       lldap-db:
         condition: service_healthy
-    image: "docker.io/lldap/lldap:2024-11-04-alpine-rootless@sha256:161c273471134ed9e7b6feca5c96a321372e699b4f086738e113e873c4f6d9a2"
+    image: "docker.io/lldap/lldap:v0.6.1-alpine-rootless@sha256:7e1c16090167c49d34e9e98f9f7d3fce97d3d86de8d2f62eedefad3dca3d270b"
     cpu_count: 2
     mem_limit: "250M"
     memswap_limit: "250M"
