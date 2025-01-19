@@ -1081,6 +1081,33 @@ services:
       - ldap
     image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
 
+  ssh2:
+    ports:
+      - "1999:2222"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_data_folder}/samba/nslcd2.conf:/etc/nslcd.conf:ro
+      - ${docker_data_folder}/ssh/sshd_config:/etc/ssh/sshd_config:ro
+      - ${docker_data_folder}/ssh/authorized_keys:/etc/ssh/authorized_keys
+      - ${docker_data_folder}/ssh/config:/config
+      - /data/users:/data/users
+    read_only: true
+    tmpfs:
+      - /run/sshd
+      - /var:rw,exec
+    environment:
+      S6_READ_ONLY_ROOT: "1"
+    depends_on:
+      openldap:
+        condition: service_healthy
+    <<: *common
+    mem_limit: 200MB
+    memswap_limit: 200MB
+    cpu_count: 2
+    networks:
+      - lldap
+    image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
+
   sftpgo:
     <<: *common
     image: docker.io/drakkan/sftpgo:v2.6.4-plugins@sha256:9c21aeb99be0fe911c426267cb0bf357a2aec77e30ffef77f121713b1b9f87bb
