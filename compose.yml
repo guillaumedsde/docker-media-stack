@@ -773,8 +773,6 @@ services:
         condition: service_healthy
       nextcloud-redis:
         condition: service_healthy
-      ssh:
-        condition: service_started
       lldap:
         condition: service_healthy
     volumes:
@@ -785,7 +783,6 @@ services:
       - nextcloud
       - nextcloud-proxy
       - lldap
-      - ssh
     environment:
       <<: *conf
       POSTGRES_DB: nextcloud
@@ -1025,33 +1022,6 @@ services:
       timeout: 4s
       retries: 4
       start_period: 5s
-
-  ssh:
-    ports:
-      - "1998:2222"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${docker_data_folder}/samba/nslcd2.conf:/etc/nslcd.conf:ro
-      - ${docker_data_folder}/ssh/sshd_config2:/etc/ssh/sshd_config:ro
-      - ${docker_data_folder}/ssh/authorized_keys:/etc/ssh/authorized_keys
-      - ${docker_data_folder}/ssh/config:/config
-      - /data/users:/data/users
-    read_only: true
-    tmpfs:
-      - /run/sshd
-      - /var:rw,exec
-    environment:
-      S6_READ_ONLY_ROOT: "1"
-    depends_on:
-      lldap:
-        condition: service_healthy
-    <<: *common
-    mem_limit: 200MB
-    memswap_limit: 200MB
-    cpu_count: 2
-    networks:
-      - lldap
-    image: docker.io/guillaumedsde/ssh-ldap:902179d37a409e566a34b0be3853862833af88ca
 
   robots:
     <<: *common
@@ -1362,8 +1332,6 @@ networks:
   nextcloud:
     enable_ipv6: true
     internal: true
-  ssh:
-    enable_ipv6: true
   homer:
     enable_ipv6: true
     internal: true
