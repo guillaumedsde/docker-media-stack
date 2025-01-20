@@ -887,7 +887,7 @@ services:
     depends_on:
       miniflux-db:
         condition: service_healthy
-    image: ghcr.io/miniflux/miniflux:2.2.4-distroless@sha256:abd42acc4e18944de78fca1166fa97dc24fb167f31dd34cfc87a07a7e1a0f722
+    image: ghcr.io/miniflux/miniflux:2.2.5-distroless@sha256:ae1ec65014ee5d0a9a6c0910868aca617917a085cb9a9e5d61040b417379b4ba
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
