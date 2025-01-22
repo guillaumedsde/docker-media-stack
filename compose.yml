@@ -151,34 +151,6 @@ services:
       timeout: 3s
       retries: 5
 
-  traefik-certs-dumper:
-    <<: *common
-    depends_on:
-      traefik:
-        condition: service_healthy
-    image: "docker.io/ldez/traefik-certs-dumper:v2.9.3@sha256:34924388ea083f50fa5fa6b0ff4bdeccf4257459eb2bf64231c9006e57201d98"
-    user: "${UID}:${GID}"
-    read_only: true
-    mem_limit: "50M"
-    memswap_limit: "50M"
-    cpu_count: 2
-    network_mode: none
-    volumes:
-      - type: "bind"
-        source: "${docker_data_folder}/traefik/data/acme.json"
-        target: "/traefik/acme.json"
-        read_only: true
-      - type: "bind"
-        source: "${docker_data_folder}/traefik-certs-dumper"
-        target: /data
-    command:
-      - "file"
-      - "--source=/traefik/acme.json"
-      - "--dest=/data"
-      - "--watch"
-      - "--clean"
-      - "--version=v2"
-
   traefik-socket-proxy: &socket-proxy
     <<: *common
     image: docker.io/wollomatic/socket-proxy:1.5.3@sha256:e7e5573df597fe726899c21a17f56017512331b7acb7f71490cbbc0b939dfa2b
