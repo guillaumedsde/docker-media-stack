@@ -55,7 +55,7 @@ notifier:
 authentication_backend:
   refresh_interval: 5m
   password_reset:
-    disable: false
+    disable: true
   ldap:
     implementation: lldap
     address: ldap://lldap:3890
