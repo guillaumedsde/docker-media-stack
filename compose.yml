@@ -922,9 +922,15 @@ services:
     environment:
       DB_HOSTNAME: immich-db
       DB_USERNAME: immich
-      DB_PASSWORD: "${IMICH_DB_PASSWORD}"
+      DB_PASSWORD: "${IMMICH_DB_PASSWORD}"
       DB_VECTOR_EXTENSION: "pgvecto.rs"
       REDIS_HOSTNAME: immich-valkey
+    security_opt:
+      - "no-new-privileges=true"
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: /etc/localtime
@@ -975,7 +981,7 @@ services:
     environment:
       POSTGRES_DB: immich
       POSTGRES_USER: immich
-      POSTGRES_PASSWORD: "${IMICH_DB_PASSWORD}"
+      POSTGRES_PASSWORD: "${IMMICH_DB_PASSWORD}"
       POSTGRES_INITDB_ARGS: "--data-checksums"
     command: >-
       postgres
