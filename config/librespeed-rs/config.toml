@@ -1,0 +1,14 @@
+# bind socket adress
+bind_address = "0.0.0.0"
+# socket listent port, default is 8080
+listen_port = 8080
+
+# you can specify the number of worker threads. default is 1
+# auto: number of cpu cores, or more than 0 as desired
+# increasing the count increases memory usage
+worker_threads = "auto"
+
+# database config for : mysql, postgres, sqlite, memory, or disable by write none
+# after restarting the service, the in-memory database is reset
+# if none is specified, no telemetry/stats will be recorded, and no result JPG will be generated
+database_type = "none"

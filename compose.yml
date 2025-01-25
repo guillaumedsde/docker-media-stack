@@ -904,22 +904,22 @@ services:
     healthcheck: *postgres-healthcheck
 
   librespeed:
-    image: ghcr.io/linuxserver/librespeed:5.4.20240804@sha256:256e01b01048ff97ee06a742ad2619e121e4137a553b89df50f6e376b0e93aff
+    <<: *common
+    image: ghcr.io/librespeed/speedtest-rust:v1.3.7@sha256:c4d18c0fe1892efcbfc7cb917cfa0a5ffd5ba8b616243d980c5755cb4f08edce
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
-    <<: *common
-    environment:
-      <<: *conf
+    user: ${UID}:${GID}
+    read_only: true
     volumes:
-      - "${docker_data_folder}/librespeed:/config"
+      - ./config/librespeed-rs/config.toml:/etc/nginx/conf.d/default.conf:ro
     networks:
       - librespeed
     labels:
       <<: *traefik
       traefik.http.routers.librespeed.rule: Host(`librespeed.${root_domain}`)
       # service
-      traefik.http.services.librespeed.loadbalancer.server.port: "80"
+      traefik.http.services.librespeed.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.librespeed.middlewares: authelia@docker
 
