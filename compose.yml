@@ -940,6 +940,9 @@ services:
         source: "${data_folder}/pictures"
         target: /data/pictures
         read_only: true
+      - type: bind
+        source: "${data_folder}/immich-uploads"
+        target: /usr/src/app/upload
     networks:
       - immich
       - immich-valkey
@@ -995,7 +998,9 @@ services:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
       - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     volumes:
-      - ${docker_data_folder}/immich-db:/var/lib/postgresql/data
+      - type: bind
+        source: "${docker_data_folder}/immich-db"
+        target: /var/lib/postgresql/data
     networks:
       - immich-db
     # NOTE: this is the healthcheck recommended in the immich docs
