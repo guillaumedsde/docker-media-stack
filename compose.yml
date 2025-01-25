@@ -941,7 +941,7 @@ services:
         target: /data/pictures
         read_only: true
       - type: bind
-        source: "${data_folder}/immich-uploads"
+        source: "${docker_data_folder}/immich-uploads"
         target: /usr/src/app/upload
     networks:
       - immich
