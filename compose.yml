@@ -971,7 +971,7 @@ services:
 
   immich-db:
     <<: *common
-    image: docker.io/tensorchord/pgvecto-rs:pg17-v0.4.0@sha256:26929154aa397eab0545e7f9c38be381e4962c31badc7771556967d4ad1e5cf0
+    image: docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0@sha256:9722631d44e76d46a8301859c46294f2c2c6a2f95e8706b55b4d654d6eaeafba
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
