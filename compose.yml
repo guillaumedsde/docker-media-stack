@@ -806,6 +806,7 @@ services:
     cpu_count: 2
     mem_limit: 2G
     memswap_limit: 2G
+    shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -889,6 +890,7 @@ services:
     cpu_count: 2
     mem_limit: 2G
     memswap_limit: 2G
+    shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -932,6 +934,7 @@ services:
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
+    shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -1201,6 +1204,7 @@ services:
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
+    shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
     environment:
@@ -1276,6 +1280,7 @@ services:
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
+    shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
     environment:
