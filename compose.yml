@@ -114,6 +114,7 @@ services:
       - tandoor
       - miniflux-proxy
       - lldap
+      - immich
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -905,6 +906,104 @@ services:
       - miniflux
     healthcheck: *postgres-healthcheck
 
+  immich:
+    <<: *common
+    image: ghcr.io/immich-app/immich-server:v1.125.2@sha256:d79c347eef06594cbf7334fa2e76f069d744ca77bff33e54ec0dc623eef246a2
+    depends_on:
+      immich-db:
+        condition: service_healthy
+      immich-valkey:
+        condition: service_healthy
+    cpu_count: 4
+    mem_limit: 4G
+    memswap_limit: 4G
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      DB_HOSTNAME: immich-db
+      DB_USERNAME: immich
+      DB_PASSWORD: "${IMICH_DB_PASSWORD}"
+      DB_VECTOR_EXTENSION: "pgvecto.rs"
+      REDIS_HOSTNAME: immich-valkey
+    volumes:
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: bind
+        source: "${data_folder}/pictures"
+        target: /data/pictures
+        read_only: true
+    networks:
+      - immich
+      - immich-valkey
+      - immich-db
+    labels:
+      <<: *traefik
+      traefik.http.routers.immich.rule: Host(`photos.${root_domain}`)
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_immich"
+      # service
+      traefik.http.services.immich.loadbalancer.server.port: "2283"
+      # Forward auth
+      traefik.http.routers.immich.middlewares: authelia@docker
+
+  immich-valkey:
+    <<: *common
+    cpu_count: 2
+    mem_limit: 250M
+    memswap_limit: 250M
+    read_only: true
+    user: ${UID}:${GID}
+    image: docker.io/valkey/valkey:8-alpine
+    healthcheck: *valkey-healthcheck
+    volumes:
+      - type: bind
+        source: "${docker_data_folder}/immich-valkey"
+        target: /data
+    networks:
+      - immich-valkey
+
+  immich-db:
+    <<: *common
+    image: docker.io/tensorchord/pgvecto-rs:pg17-v0.4.0@sha256:26929154aa397eab0545e7f9c38be381e4962c31badc7771556967d4ad1e5cf0
+    cpu_count: 2
+    mem_limit: 500M
+    memswap_limit: 500M
+    shm_size: 128mb
+    user: ${UID}:${GID}
+    read_only: true
+    environment:
+      POSTGRES_DB: immich
+      POSTGRES_USER: immich
+      POSTGRES_PASSWORD: "${IMICH_DB_PASSWORD}"
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    command: >-
+      postgres
+      -c shared_preload_libraries=vectors.so
+      -c 'search_path="$$user", public, vectors'
+      -c logging_collector=on
+      -c max_wal_size=2GB
+      -c shared_buffers=512MB
+      -c wal_compression=on
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - ${docker_data_folder}/immich-db:/var/lib/postgresql/data
+    networks:
+      - immich-db
+    # NOTE: this is the healthcheck recommended in the immich docs
+    healthcheck:
+      test: >-
+        pg_isready --dbname="$${POSTGRES_DB}" --username="$${POSTGRES_USER}" || exit 1;
+        Chksum="$$(psql --dbname="$${POSTGRES_DB}" --username="$${POSTGRES_USER}" --tuples-only --no-align
+        --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')";
+        echo "checksum failure count is $$Chksum";
+        [ "$$Chksum" = '0' ] || exit 1
+      interval: 5m
+      start_interval: 30s
+      start_period: 5m
+
   librespeed:
     <<: *common
     image: ghcr.io/librespeed/speedtest-rust:v1.3.7@sha256:c4d18c0fe1892efcbfc7cb917cfa0a5ffd5ba8b616243d980c5755cb4f08edce
@@ -1358,6 +1457,14 @@ networks:
   lldap:
     enable_ipv6: true
   lldap-db:
+    enable_ipv6: true
+    internal: true
+  immich:
+    enable_ipv6: true
+  immich-valkey:
+    enable_ipv6: true
+    internal: true
+  immich-db:
     enable_ipv6: true
     internal: true
 
