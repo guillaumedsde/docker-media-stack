@@ -638,6 +638,8 @@ services:
     mem_limit: 8G
     memswap_limit: 8G
     read_only: true
+    cap_drop:
+      - ALL
     depends_on:
       lldap:
         condition: service_healthy
