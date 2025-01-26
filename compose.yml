@@ -245,7 +245,7 @@ services:
     command:
       - |
         mknod "/gluetun/tun" c 10 200
-        chmod ${UID}:${GID} "/gluetun/tun"
+        chown ${UID}:${GID} "/gluetun/tun"
 
   # Wireguard VPN client
   wireguard:
