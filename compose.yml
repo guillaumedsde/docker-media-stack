@@ -243,6 +243,9 @@ services:
       - type: bind
         source: ${docker_data_folder}/gluetun
         target: /gluetun
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
     command: |
       mknod "${docker_data_folder}/gluetun/tun" c 10 200
       chmod ${UID}:${GID} "${docker_data_folder}/gluetun/tun"
