@@ -248,8 +248,8 @@ services:
       - "-c"
     command:
       - |
-        mknod "${docker_data_folder}/gluetun/tun" c 10 200
-        chmod ${UID}:${GID} "${docker_data_folder}/gluetun/tun"
+        mknod "/gluetun/tun" c 10 200
+        chmod ${UID}:${GID} "/gluetun/tun"
 
   # Wireguard VPN client
   wireguard:
