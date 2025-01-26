@@ -246,7 +246,7 @@ services:
       - |
         if [ ! -f /gluetun/tun ]
         then
-            mknod "/gluetun/tun" c 10 200'
+            mknod "/gluetun/tun" c 10 200
         fi
 
   # Wireguard VPN client
