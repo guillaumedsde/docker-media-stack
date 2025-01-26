@@ -231,10 +231,6 @@ services:
 
   wireguard-tun-device-creator:
     image: docker.io/busybox:1-musl
-    cap_drop:
-      - ALL
-    cap_add:
-      - MKNOD
     cpu_count: 2
     mem_limit: 20M
     memswap_limit: 20M
