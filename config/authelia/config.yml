@@ -30,6 +30,7 @@ access_control:
       policy: bypass
       resources: '^/fever/.+$'
       methods:
+        - GET
         - POST
     # Allow homer on LAN
     - domain_regex: '^(home)\..+$'
