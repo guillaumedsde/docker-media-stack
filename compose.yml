@@ -740,6 +740,7 @@ services:
 
   # personal cloud
   nextcloud: &nextcloud
+    <<: *common
     depends_on:
       nextcloud-postgres:
         condition: service_healthy
@@ -747,9 +748,27 @@ services:
         condition: service_healthy
       lldap:
         condition: service_healthy
+    mem_limit: 4G
+    memswap_limit: 4G
+    cpu_count: 8
+    image: docker.io/nextcloud:30.0-apache
+    user: ${NEXTCLOUD_UID}:${GID}
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${NEXTCLOUD_UID},gid=${GID}
+      - /tmp:mode=770,size=5M,uid=${NEXTCLOUD_UID},gid=${GID}
     volumes:
-      - ${docker_data_folder}/nextcloud:/var/www/html
-      - ${user_data_folder}:/data/users
+      - type: "bind"
+        source: "${docker_data_folder}/nextcloud"
+        target: "/var/www/html"
+      - type: "bind"
+        source: "${user_data_folder}"
+        target: "/data/users"
+      - type: "bind"
+        source: "${docker_data_folder}/nextcloud/redis-session.ini"
+        target: "/usr/local/etc/php/conf.d/redis-session.ini"
     networks:
       - traefik
       - nextcloud
@@ -781,11 +800,6 @@ services:
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: https://cloud.${root_domain}/.well-known/(card|cal)dav
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
-    <<: *common
-    mem_limit: 4G
-    memswap_limit: 4G
-    cpu_count: 8
-    image: docker.io/nextcloud:30.0-apache
     healthcheck:
       test: curl -sSf 'http://localhost/status.php' | grep '"installed":true' | grep '"maintenance":false' | grep '"needsDbUpgrade":false' || exit 1
       interval: 10s
