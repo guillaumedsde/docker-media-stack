@@ -25,16 +25,12 @@ access_control:
       resources: '^/healthcheck$'
       methods:
         - HEAD
-    # Allow miniflux Google reader API endpoint access
+    # Allow miniflux Fever API endpoint access
     - domain_regex: '^miniflux\..+$'
       policy: bypass
-      resources: '^/reader/api/0/.+$'
+      resources: '^/fever/.+$'
       methods:
-        - GET
         - POST
-        - PUT
-        - DELETE
-        - OPTIONS
     # Allow homer on LAN
     - domain_regex: '^(home)\..+$'
       networks:
