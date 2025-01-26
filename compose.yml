@@ -40,6 +40,8 @@ services:
         condition: service_healthy
       authelia:
         condition: service_healthy
+    cap_drop:
+      - ALL
     cap_add:
       - NET_BIND_SERVICE
     command:
@@ -201,6 +203,8 @@ services:
     cpu_count: 2
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     environment:
       DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
     depends_on:
@@ -229,6 +233,8 @@ services:
   wireguard:
     <<: *common
     image: docker.io/qmcgaw/gluetun:v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
+    cap_drop:
+      - ALL
     cap_add:
       - NET_ADMIN
     cpu_count: 4
@@ -308,6 +314,8 @@ services:
     mem_limit: 10G
     memswap_limit: 10G
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
     network_mode: service:wireguard
@@ -326,6 +334,8 @@ services:
     memswap_limit: 3G
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     network_mode: service:wireguard
     depends_on:
       wireguard:
@@ -359,6 +369,8 @@ services:
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
+    cap_drop:
+      - ALL
     environment:
       <<: *conf
     networks:
@@ -373,6 +385,8 @@ services:
     memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     depends_on:
       qbittorrent:
         condition: service_healthy
@@ -415,6 +429,8 @@ services:
     memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     depends_on:
       qbittorrent:
         condition: service_healthy
@@ -460,6 +476,8 @@ services:
     memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     depends_on:
       qbittorrent:
         condition: service_healthy
@@ -505,6 +523,8 @@ services:
     memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     depends_on:
       qbittorrent:
         condition: service_healthy
@@ -555,6 +575,8 @@ services:
     memswap_limit: 500M
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     environment:
       <<: *conf
     volumes:
@@ -585,13 +607,15 @@ services:
 
   # automatically extract torrented archives
   unpackerr:
+    <<: *common
     image: docker.io/golift/unpackerr:0.14.5@sha256:8493ffc2dd17e0b8a034552bb52d44e003fa457ee407da97ccc69328bce4a815
     user: ${UID}:${GID}
     read_only: true
     cpu_count: 4
     mem_limit: 500M
     memswap_limit: 500M
-    <<: *common
+    cap_drop:
+      - ALL
     networks:
       - traefik
     volumes:
@@ -609,13 +633,15 @@ services:
 
   # homer is a homepage container
   homer:
+    <<: *common
     image: docker.io/b4bz/homer:v24.12.1@sha256:4b44a4a9e3294ccef756275271342661c389ae2936e71ac96b911a139de57757
     user: ${UID}:${GID}
     cpu_count: 2
     mem_limit: 100M
     memswap_limit: 100M
     read_only: true
-    <<: *common
+    cap_drop:
+      - ALL
     networks:
       - homer
     volumes:
@@ -701,6 +727,8 @@ services:
     mem_limit: 500M
     memswap_limit: 500M
     read_only: true
+    cap_drop:
+      - ALL
     depends_on:
       jellyfin:
         condition: service_healthy
@@ -825,6 +853,8 @@ services:
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     environment:
       POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
       POSTGRES_USER: nextcloud
@@ -858,6 +888,8 @@ services:
     read_only: true
     user: ${UID}:${GID}
     image: docker.io/valkey/valkey:8-alpine
+    cap_drop:
+      - ALL
     networks:
       - nextcloud
     volumes:
@@ -882,6 +914,8 @@ services:
     memswap_limit: 500M
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     networks:
       - miniflux
       - miniflux-proxy
@@ -909,6 +943,8 @@ services:
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     environment:
       POSTGRES_PASSWORD: ${MINIFLUX_DB_PASSWORD}
       POSTGRES_USER: miniflux
@@ -929,6 +965,8 @@ services:
     memswap_limit: 500M
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     volumes:
       - type: bind
         source: "./config/librespeed-rs/config.toml"
@@ -953,6 +991,8 @@ services:
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     environment:
       POSTGRES_USER: tandoor
       POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
@@ -973,6 +1013,8 @@ services:
     memswap_limit: 500M
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     depends_on:
       tandoor-db:
         condition: service_healthy
@@ -1190,6 +1232,8 @@ services:
     memswap_limit: "250M"
     user: "${UID}:${GID}"
     read_only: true
+    cap_drop:
+      - ALL
     volumes:
       - type: "bind"
         source: "${docker_data_folder}/lldap"
@@ -1232,6 +1276,8 @@ services:
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     environment:
       POSTGRES_USER: lldap
       POSTGRES_PASSWORD: ${LLDAP_DB_PASSWORD}
@@ -1259,6 +1305,8 @@ services:
     user: ${UID}:${GID}
     mem_limit: 250M
     memswap_limit: 250M
+    cap_drop:
+      - ALL
     environment:
       # Global configuration
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
@@ -1308,6 +1356,8 @@ services:
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
+    cap_drop:
+      - ALL
     environment:
       POSTGRES_USER: authelia
       POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
@@ -1327,6 +1377,8 @@ services:
     memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
+    cap_drop:
+      - ALL
     image: docker.io/valkey/valkey:8-alpine
     healthcheck: *valkey-healthcheck
     volumes:
