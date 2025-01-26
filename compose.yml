@@ -243,7 +243,11 @@ services:
       - "/bin/sh"
       - "-c"
     command:
-      - '[ ! -f /gluetun/tun ] && mknod "/gluetun/tun" c 10 200'
+      - |
+        if [ ! -f /gluetun/tun ]
+        then
+            mknod "/gluetun/tun" c 10 200'
+        fi
 
   # Wireguard VPN client
   wireguard:
