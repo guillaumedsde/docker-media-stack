@@ -590,7 +590,7 @@ services:
         condition: service_healthy
       sonarr:
         condition: service_healthy
-    image: ghcr.io/elfhosted/bazarr:1.5.1@sha256:688fc84002fcb93514cd0223fbec2cca2955fa5df7c2efc7ebe73c5ed4a4d9b5
+    image: ghcr.io/elfhosted/bazarr:1.5.1@sha256:b3019fd3d8f62ebb61540f9be1625e3602de8e8c1c7b87d531f65e8379eafb0f
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
