@@ -66,7 +66,7 @@ services:
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
       - "--certificatesresolvers.le.acme.dnschallenge=true"
-      - "--certificatesresolvers.le.acme.dnschallenge.delayBeforeCheck=30"
+      - "--certificatesresolvers.le.acme.dnschallenge.propagation.delayBeforeChecks=30s"
       - "--certificatesresolvers.le.acme.dnschallenge.provider=ovh"
       - "--certificatesresolvers.le.acme.email=${letsencrypt_email}"
       - "--certificatesresolvers.le.acme.keytype=EC384"
