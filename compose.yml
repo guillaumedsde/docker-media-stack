@@ -62,6 +62,9 @@ services:
       - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
       - "--entryPoints.websecure.http.middlewares=securityHeaders@file"
+      # NOTE: setting this to 10min to enable 1GB file upload on 15mb/s connection
+      #       see https://github.com/nextcloud/server/issues/37695#issuecomment-2266716070
+      - "--entryPoints.websecure.transport.respondingTimeouts.readTimeout=60000s"
       # DNS challenge
       - "--certificatesresolvers.le=true"
       - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
@@ -809,7 +812,9 @@ services:
     read_only: true
     tmpfs:
       - /run:mode=770,size=5M,uid=${NEXTCLOUD_UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${NEXTCLOUD_UID},gid=${GID}
+      # NOTE: /tmp needs to be proportional to max uploadable file size, see:
+      #       https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/big_file_upload_configuration.html#system-configuration
+      - /tmp:mode=770,size=4000M,uid=${NEXTCLOUD_UID},gid=${GID}
     volumes:
       - type: "bind"
         source: "${docker_data_folder}/nextcloud"
@@ -841,6 +846,8 @@ services:
       SMTP_PASSWORD: ${SENDGRID_PASS}
       MAIL_FROM_ADDRESS: nextcloud
       MAIL_DOMAIN: ${root_domain}
+      PHP_UPLOAD_LIMIT: 1G
+      APACHE_BODY_LIMIT: "1073741824"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_nextcloud-proxy"
