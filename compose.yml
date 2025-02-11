@@ -158,7 +158,7 @@ services:
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
-    image: docker.io/wollomatic/socket-proxy:1.5.4@sha256:cd8b18ed2ca7ad9a3e45b87fadaa3eec01bed845a31d693b2827085b80a20aec
+    image: docker.io/wollomatic/socket-proxy:1.5.5@sha256:1758664e7d8964adc0855a591c16cf56c2e7591282c610d991afec75fa6d4d72
     cpu_count: 2
     mem_limit: 50M
     memswap_limit: 50M
