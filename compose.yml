@@ -872,7 +872,12 @@ services:
     <<: *nextcloud
     labels: {}
     entrypoint:
-      - /cron.sh
+      - /bin/bash
+      - -c
+      - |
+        set -euxo pipefail
+        php /var/www/html/cron.php --verbose
+        sleep 5m
     healthcheck: {}
 
   # database for nextcloud
