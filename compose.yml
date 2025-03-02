@@ -825,6 +825,10 @@ services:
       - type: "bind"
         source: "${docker_data_folder}/nextcloud/redis-session.ini"
         target: "/usr/local/etc/php/conf.d/redis-session.ini"
+        bind:
+          # TODO: improve this, currently external tooling needs to
+          #       create a file here (and not a directory).
+          create_host_path: false
     networks:
       - traefik
       - nextcloud
