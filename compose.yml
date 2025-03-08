@@ -201,8 +201,8 @@ services:
   watchtower:
     image: ghcr.io/containrrr/watchtower:1.7.1@sha256:f9086bfda061100361fc2bacf069585678d760d705cf390918ccdbda8a00980b
     <<: *common
-    mem_limit: 50M
-    memswap_limit: 50M
+    mem_limit: 100M
+    memswap_limit: 100M
     cpu_count: 2
     read_only: true
     user: ${UID}:${GID}
@@ -748,8 +748,8 @@ services:
     image: docker.io/fallenbagel/jellyseerr:2.3.0@sha256:df53a7b06006e9da117a7072a55cf5d8b2071a6272f6bb329d8ca62b6f5c08a6
     user: ${UID}:${GID}
     cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 750M
+    memswap_limit: 750M
     read_only: true
     cap_drop:
       - ALL
@@ -945,9 +945,9 @@ services:
   nextcloud-imaginary:
     <<: *common
     image: docker.io/nextcloud/aio-imaginary:20250306_093458@sha256:be5df22530a03b5cd2dd8ec507f4651c076b407fee21cca7f578e459b16d0d7a
-    cpu_count: 8
-    mem_limit: 4G
-    memswap_limit: 4G
+    cpu_count: 12
+    mem_limit: 2500M
+    memswap_limit: 2500M
     read_only: true
     user: ${UID}:${GID}
     cap_add:
@@ -957,8 +957,9 @@ services:
     tmpfs:
       - /tmp:mode=770,size=2000M,uid=${UID},gid=${GID}
     command:
-      - "-cpus=8"
+      - "-cpus=12"
       - "-enable-url-source"
+      - "-concurrency=50"
     networks:
       - nextcloud
     healthcheck:
@@ -1075,8 +1076,8 @@ services:
     <<: *common
     image: docker.io/vabene1111/recipes:1.5.31@sha256:063eb446e2981a737c8722642acef6aeacbd7b33f672a982209bd82c068b1a2c
     cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 750M
+    memswap_limit: 750M
     user: ${UID}:${GID}
     read_only: true
     cap_drop:
