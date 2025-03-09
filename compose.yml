@@ -352,7 +352,7 @@ services:
 
   prowlarr:
     <<: *common
-    image: ghcr.io/elfhosted/prowlarr-develop:1.32.0.4978@sha256:a2e23c960968f123edacde06263a195a9bfcec7d0ccbd226bf384733a416b835
+    image: ghcr.io/elfhosted/prowlarr-develop:1.32.1.4983@sha256:19543804779191479701f3702002cc0f293fdc67a8c27f9b00285949f873a385
     cpu_count: 4
     mem_limit: 3G
     memswap_limit: 3G
