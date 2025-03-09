@@ -25,13 +25,6 @@ access_control:
       resources: "^/healthcheck$"
       methods:
         - HEAD
-    # Allow miniflux Fever API endpoint access
-    - domain_regex: '^miniflux\..+$'
-      policy: bypass
-      resources: "^/fever/.+$"
-      methods:
-        - GET
-        - POST
     # Allow homer on LAN
     - domain_regex: '^(home)\..+$'
       networks:
@@ -40,6 +33,7 @@ access_control:
         - GET
         - HEAD
       policy: bypass
+    # 2FA on admin apps
     - domain_regex: '^(scrutiny|netdata)\..+$'
       policy: two_factor
 
