@@ -1386,7 +1386,7 @@ services:
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN: ${LLDAP_LDAP_BASE_DN}
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER: "uid=authelia,ou=people,${LLDAP_LDAP_BASE_DN}"
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD: ${AUTHELIA_BIND_PASSWORD}
-      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USERS_FILTER: "(&(objectclass=person)(memberOf=cn=family,ou=groups,${LLDAP_LDAP_BASE_DN}))"
+      AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USERS_FILTER: "(&({username_attribute}={input})(objectclass=person)(memberOf=cn=family,ou=groups,${LLDAP_LDAP_BASE_DN}))"
       # Session configuration
       AUTHELIA_SESSION_DOMAIN: ${root_domain}
       # Storage configuration
