@@ -10,32 +10,32 @@ access_control:
     # Allow *arr ping endpoint access
     - domain_regex: '^(movies|series|music|books|prowlarr)\..+$'
       policy: bypass
-      resources: '^/ping$'
+      resources: "^/ping$"
       methods:
         - HEAD
     # Allow qbittorrent healthcheck endpoint access
     - domain_regex: '^torrent\..+$'
       policy: bypass
-      resources: '^/api/v2/app/version$'
+      resources: "^/api/v2/app/version$"
       methods:
         - HEAD
     # Allow miniflux healthcheck endpoint access
     - domain_regex: '^miniflux\..+$'
       policy: bypass
-      resources: '^/healthcheck$'
+      resources: "^/healthcheck$"
       methods:
         - HEAD
     # Allow miniflux Fever API endpoint access
     - domain_regex: '^miniflux\..+$'
       policy: bypass
-      resources: '^/fever/.+$'
+      resources: "^/fever/.+$"
       methods:
         - GET
         - POST
     # Allow homer on LAN
     - domain_regex: '^(home)\..+$'
       networks:
-        - '192.168.0.0/24'
+        - "192.168.0.0/24"
       methods:
         - GET
         - HEAD
@@ -49,7 +49,6 @@ notifier:
     address: smtp://smtp.sendgrid.net:587
     timeout: 5s
     username: apikey
-    sender: Authelia authelia@gauf.fr
     identifier: authelia
     subject: "[Authelia] {title}"
     disable_require_tls: false
