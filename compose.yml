@@ -1367,7 +1367,7 @@ services:
         condition: service_healthy
       lldap:
         condition: service_healthy
-    image: docker.io/authelia/authelia:4.38.19@sha256:46021dc20efdcc5cdc38a29e3050b8835429a155ae6215388ed3b793a02eb0ab
+    image: docker.io/authelia/authelia:4.39.1@sha256:e325963609cc928861ffe8130c09111862df88dd8fcafbcd2c47e5ff0a4ae268
     cpu_count: 4
     user: ${UID}:${GID}
     mem_limit: 250M
