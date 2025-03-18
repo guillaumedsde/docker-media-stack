@@ -402,7 +402,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
-    image: ghcr.io/elfhosted/radarr:5.19.3.9730@sha256:62eb9a12ca6581b0e9ab893c21211ac69577bb6c38d5a0995d90c3ef9ec97556
+    image: ghcr.io/elfhosted/radarr:5.20.2.9777@sha256:367eae5e4e1d064baa84c8c84e3a57e5057c929d2d409223c6f213a8b8c24013
     <<: *common
     cpu_count: 4
     mem_limit: 2G
