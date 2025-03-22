@@ -827,7 +827,7 @@ services:
         target: "/data/users"
       - type: "bind"
         source: "./config/nextcloud/redis_config_generator.sh"
-        target: "/docker-entrypoint-hooks.d/redis_config_generator.sh"
+        target: "/docker-entrypoint-hooks.d/before-starting/redis_config_generator.sh"
         read_only: true
     networks:
       - traefik
@@ -840,7 +840,7 @@ services:
       POSTGRES_USER: nextcloud
       POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
       POSTGRES_HOST: nextcloud-postgres
-      # NOTE: HOOK_ prefix is for env var to be used with /docker-entrypoint-hooks.d/ scripts
+      # NOTE: HOOK_ prefix is for env var to be used with /docker-entrypoint-hooks.d/before-starting scripts
       HOOK_REDIS_HOST: nextcloud-redis
       HOOK_REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
       SMTP_HOST: smtp.sendgrid.net
