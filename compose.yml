@@ -267,6 +267,7 @@ services:
     memswap_limit: 250M
     sysctls:
       net.ipv6.conf.all.disable_ipv6: 0
+      net.ipv4.conf.all.src_valid_mark: 1
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -326,6 +327,7 @@ services:
     <<: *common
     depends_on:
       wireguard:
+        restart: true
         condition: service_healthy
     volumes:
       - ${docker_data_folder}/qbittorrent:/config
@@ -364,6 +366,7 @@ services:
     network_mode: service:wireguard
     depends_on:
       wireguard:
+        restart: true
         condition: service_healthy
     volumes:
       - ${docker_data_folder}/prowlarr:/config
