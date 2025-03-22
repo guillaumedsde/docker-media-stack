@@ -238,6 +238,7 @@ services:
     mem_limit: 20M
     memswap_limit: 20M
     read_only: true
+    network_mode: "none"
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -831,6 +832,12 @@ services:
           # TODO: improve this, currently external tooling needs to
           #       create a file here (and not a directory).
           create_host_path: false
+    configs:
+      - source: nextcloud_redis_config
+        target: /usr/local/etc/php/conf.d/redis-session.ini
+        uid: "${NEXTCLOUD_UID}"
+        gid: "${GID}"
+        mode: 0440
     networks:
       - traefik
       - nextcloud
@@ -842,8 +849,6 @@ services:
       POSTGRES_USER: nextcloud
       POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
       POSTGRES_HOST: nextcloud-postgres
-      REDIS_HOST: nextcloud-redis
-      REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
       SMTP_HOST: smtp.sendgrid.net
       SMTP_SECURE: ssl
       SMTP_PORT: "465"
@@ -872,6 +877,7 @@ services:
 
   nextcloud-cron:
     <<: *nextcloud
+    restart: unless-stopped
     labels: {}
     entrypoint:
       - /bin/bash
@@ -1510,3 +1516,12 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
+
+configs:
+  nextcloud_redis_config:
+    content: |
+      session.save_handler = redis
+      session.save_path = "tcp://nextcloud-redis:6379?auth=${NEXTCLOUD_REDIS_PASS}"
+      redis.session.locking_enabled = 1
+      redis.session.lock_retries = -1
+      redis.session.lock_wait_time = 10000
