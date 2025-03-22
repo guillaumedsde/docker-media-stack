@@ -1,7 +1,0 @@
-dn: olcOverlay={0}smbk5pwd,olcDatabase={1}mdb,cn=config
-changetype: add
-objectClass: olcOverlayConfig
-objectClass: olcSmbK5PwdConfig
-olcOverlay: {0}smbk5pwd
-olcSmbK5PwdEnable: samba
-olcSmbK5PwdMustChange: 0
