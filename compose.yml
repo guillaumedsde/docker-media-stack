@@ -843,6 +843,8 @@ services:
       # NOTE: HOOK_ prefix is for env var to be used with /docker-entrypoint-hooks.d/before-starting scripts
       HOOK_REDIS_HOST: nextcloud-redis
       HOOK_REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
+      # NOTE: see https://www.php.net/manual/en/configuration.file.php
+      PHP_INI_SCAN_DIR: "/tmp/php_conf_d:"
       SMTP_HOST: smtp.sendgrid.net
       SMTP_SECURE: ssl
       SMTP_PORT: "465"
