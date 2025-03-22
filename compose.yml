@@ -825,16 +825,10 @@ services:
       - type: "bind"
         source: "${user_data_folder}"
         target: "/data/users"
-      - type: "bind"
-        source: "${docker_data_folder}/nextcloud/redis-session.ini"
-        target: "/usr/local/etc/php/conf.d/redis-session.ini"
-        bind:
-          # TODO: improve this, currently external tooling needs to
-          #       create a file here (and not a directory).
-          create_host_path: false
     configs:
       - source: nextcloud_redis_config
         target: /usr/local/etc/php/conf.d/redis-session.ini
+
         uid: "${NEXTCLOUD_UID}"
         gid: "${GID}"
         mode: 0440
