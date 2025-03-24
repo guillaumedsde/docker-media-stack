@@ -1184,7 +1184,7 @@ services:
     mem_limit: 1G
     memswap_limit: 1G
     pid: host
-    image: docker.io/netdata/netdata:v2.3.0@sha256:48ccf75d70f385afba2418e283b58b620b6b3ca480309cb324e4f22aa19553ca
+    image: docker.io/netdata/netdata:v2.3.1@sha256:ce17cae9010970ea7a0336424edebea4ed92586c4287505f426d682dab712bb2
     volumes:
       - /:/host/root:ro,rslave
       - /etc/passwd:/host/etc/passwd:ro
