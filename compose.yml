@@ -111,7 +111,6 @@ services:
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
-      - ./config/traefik/static_configuration.yml:/etc/traefik/traefik.yml:ro
       - ./config/traefik/dynamic_configuration.yml:/etc/traefik/dynamic_configuration.yml:ro
     tmpfs:
       - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
