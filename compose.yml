@@ -44,44 +44,6 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
-    command:
-      - "--global.checknewversion=false"
-      - "--global.sendanonymoususage=false"
-      - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
-      # docker configuration
-      - "--providers.docker=true"
-      - "--providers.docker.endpoint=tcp://traefik-socket-proxy:2375"
-      - "--providers.docker.exposedbydefault=false"
-      # entrypoints
-      # HTTP
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      # HTTPS
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.tls.certResolver=le"
-      - "--entrypoints.websecure.http.tls.domains[0].main=${root_domain}"
-      - "--entrypoints.websecure.http.tls.domains[0].sans=*.${root_domain}"
-      - "--entryPoints.websecure.http.middlewares=securityHeaders@file"
-      # NOTE: setting this to 10min to enable 1GB file upload on 15mb/s connection
-      #       see https://github.com/nextcloud/server/issues/37695#issuecomment-2266716070
-      - "--entryPoints.websecure.transport.respondingTimeouts.readTimeout=60000s"
-      # DNS challenge
-      - "--certificatesresolvers.le=true"
-      - "--certificatesresolvers.le.acme.storage=/traefik/acme.json"
-      - "--certificatesresolvers.le.acme.dnschallenge=true"
-      - "--certificatesresolvers.le.acme.dnschallenge.propagation.delayBeforeChecks=30s"
-      - "--certificatesresolvers.le.acme.dnschallenge.provider=ovh"
-      - "--certificatesresolvers.le.acme.email=${letsencrypt_email}"
-      - "--certificatesresolvers.le.acme.keytype=EC384"
-      - "--certificatesresolvers.le.acme.dnsChallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
-      # configs
-      - "--providers.file.directory=/config/"
-      # traefik API and dashboard
-      - "--api=true"
-      - "--api.dashboard=true"
-      # traefik healthcheck
-      - "--ping=true"
-      - "--ping.manualrouting=true"
     environment:
       TZ: ${TZ}
       OVH_ENDPOINT: ${OVH_ENDPOINT}
@@ -89,6 +51,9 @@ services:
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
       LEGO_EXPERIMENTAL_CNAME_SUPPORT: "true"
+      TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_DOMAINS_0_MAIN: "${root_domain}"
+      TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_DOMAINS_0_SANS: "*.${root_domain}"
+      TRAEFIK_CERTIFICATESRESOLVERS_letsencrypt_resolver_ACME_EMAIL: "${letsencrypt_email}"
     labels:
       <<: *traefik
       # Dashboard
@@ -101,8 +66,8 @@ services:
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
-      - ./config/traefik:/config:ro
-      - ${docker_data_folder}/traefik/plugins-storage:/plugins-storage
+      - ./config/traefik/static_configuration.yml:/etc/traefik/traefik.yml:ro
+      - ./config/traefik/dynamic_configuration:/dynamic_configuration:ro
     tmpfs:
       - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
     networks:

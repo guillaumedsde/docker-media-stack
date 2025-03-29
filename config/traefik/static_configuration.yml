@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3.json
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+ping:
+  manualRouting: true
+
+api:
+  dashboard: true
+  disableDashboardAd: true
+
+providers:
+  file:
+    directory: "/dynamic_configuration/"
+  docker:
+    endpoint: "tcp://traefik-socket-proxy:2375"
+    exposedByDefault: false
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt_resolver
+      middlewares:
+        - "securityHeaders@file"
+    transport:
+      respondingTimeouts:
+        # NOTE: setting this to 10min to enable 1GB file upload on 15mb/s connection
+        #       see https://github.com/nextcloud/server/issues/37695#issuecomment-2266716070
+        readTimeout: "10m"
+
+certificatesResolvers:
+  letsencrypt_resolver:
+    acme:
+      storage: "/traefik/acme.json"
+      dnsChallenge:
+        propagation:
+          delayBeforeChecks: "30s"
+        provider: "ovh"
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+      keyType: "EC384"
+
+accessLog:
+  addInternals: true
+  format: json
+  fields:
+    defaultMode: drop
+    names:
+      ClientHost: keep
+      ClientUsername: keep
+      RequestHost: keep
+      RequestScheme: keep
+      RequestLine: keep
+      RequestContentSize: keep
+      DownstreamStatus: keep
+      DownstreamContentSize: keep
+      Overhead: keep
+      TLSVersion: keep
+    headers:
+      defaultMode: keep
+      names:
+        Authorization: redact
