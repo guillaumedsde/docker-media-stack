@@ -51,8 +51,8 @@ services:
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
       LEGO_EXPERIMENTAL_CNAME_SUPPORT: "true"
-      TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_DOMAINS_0_MAIN: "${root_domain}"
-      TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_DOMAINS_0_SANS: "*.${root_domain}"
+      TRAEFIK_ENTRYPOINTS_websecure_HTTP_TLS_DOMAINS_0_MAIN: "${root_domain}"
+      TRAEFIK_ENTRYPOINTS_websecure_HTTP_TLS_DOMAINS_0_SANS: "*.${root_domain}"
       TRAEFIK_CERTIFICATESRESOLVERS_letsencrypt_resolver_ACME_EMAIL: "${letsencrypt_email}"
     labels:
       <<: *traefik
