@@ -1,5 +1,6 @@
-# Limiting the Logs to Specific Fields
 accessLog:
+  filePath: "/dev/stdout"
+  addInternals: true
   format: json
   fields:
     defaultMode: drop
