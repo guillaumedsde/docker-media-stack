@@ -18,15 +18,6 @@ tls:
 
 http:
   middlewares:
-    authelia:
-      forwardAuth:
-        address: "http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/"
-        trustForwardHeader: true
-        authResponseHeaders:
-          - Remote-User
-          - Remote-Groups
-          - Remote-Name
-          - Remote-Email
     securityHeaders:
       # NOTE: all headers are case insensitive
       # NOTE: set to empty string to remove header (yaml null value does not work)
