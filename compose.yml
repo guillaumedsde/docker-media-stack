@@ -82,9 +82,8 @@ services:
       # traefik healthcheck
       - "--ping=true"
       - "--ping.manualrouting=true"
-      # traefik access logs
-      # - "--accesslog=true"
     environment:
+      TZ: ${TZ}
       OVH_ENDPOINT: ${OVH_ENDPOINT}
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}

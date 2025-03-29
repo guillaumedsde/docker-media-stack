@@ -1,0 +1,20 @@
+# Limiting the Logs to Specific Fields
+accessLog:
+  format: json
+  fields:
+    defaultMode: drop
+    names:
+      ClientHost: keep
+      ClientUsername: keep
+      RequestHost: keep
+      RequestScheme: keep
+      RequestLine: keep
+      RequestContentSize: keep
+      DownstreamStatus: keep
+      DownstreamContentSize: keep
+      Overhead: keep
+      TLSVersion: keep
+    headers:
+      defaultMode: keep
+      names:
+        Authorization: redact
