@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://json.schemastore.org/traefik-v3-file-provider.json
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: true
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+
+http:
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Groups
+          - Remote-Name
+          - Remote-Email
+    securityHeaders:
+      # NOTE: all headers are case insensitive
+      # NOTE: set to empty string to remove header (yaml null value does not work)
+      headers:
+        customResponseHeaders:
+          x-robots-tag: "noindex, nofollow"
+          x-frame-options: "SAMEORIGIN"
+          permissions-policy: "interest-cohort=()"
+          referrer-policy: "strict-origin-when-cross-origin"
+          x-content-type-options: "nosniff"
+          strict-transport-security: "max-age=63072000; includeSubDomains; preload"
+          server: ""
+          x-powered-by: ""
+          x-aspnet-version: ""
+          x-aspnetmvc-version: ""
+        customRequestHeaders:
+          remote-user: ""
+          remote_user: ""
+          # NOTE: remove all variants of remote user, see:
+          #       https://github.com/benoitc/gunicorn/issues/2799
+          x-remote-user: ""
+          x_remote_user: ""
+          x-remote_user: ""
+          x_remote-user: ""
