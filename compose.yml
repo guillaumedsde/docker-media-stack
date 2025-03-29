@@ -717,10 +717,6 @@ services:
         target: /data/music
         read_only: true
       - type: bind
-        source: ${data_folder}/pictures
-        target: /data/pictures
-        read_only: true
-      - type: bind
         source: "${data_folder}/Recettes de cuisine"
         target: /data/recipes
         read_only: true
