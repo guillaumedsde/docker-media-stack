@@ -1368,7 +1368,7 @@ services:
         source: "${docker_data_folder}/grafana"
         target: "/var/lib/grafana"
       - type: bind
-        source: "./grafana/dashboard_definitions"
+        source: "./config/grafana/dashboard_definitions"
         target: "/var/lib/grafana/dashboards"
         read_only: true
       - type: bind
