@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: "Traefik"
+  - name: "Node Exporter"
     disableDeletion: true
     allowUiUpdates: false
     options:
-      path: /var/lib/grafana/dashboards/traefik_v9.json
+      path: /var/lib/grafana/dashboards/node_export_full_v37.json
       foldersFromFilesStructure: false
