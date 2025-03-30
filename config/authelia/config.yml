@@ -28,7 +28,7 @@ access_control:
       methods:
         - HEAD
     # Allow homer on LAN
-    - domain_regex: '^(home)\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^home\.{{ env "ROOT_DOMAIN" }}$'
       networks:
         - "192.168.0.0/24"
       methods:
@@ -64,6 +64,8 @@ authentication_backend:
   refresh_interval: 5m
   password_reset:
     disable: true
+  password_change:
+    disable: true
   ldap:
     implementation: lldap
     address: ldap://lldap:3890
@@ -83,3 +85,7 @@ storage:
     username: authelia
 
 theme: auto
+
+telemetry:
+  metrics:
+    enabled: false
