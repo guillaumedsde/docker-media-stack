@@ -1311,6 +1311,7 @@ services:
         target: "/etc/grafana/provisioning"
         read_only: true
     environment:
+      HOSTNAME: "grafana.${root_domain}"
       GF_SERVER_ROOT_URL: "https://grafana.${root_domain}"
       GF_AUTH_PROXY_ENABLED: "true"
       GF_AUTH_PROXY_HEADER_NAME: "Remote-User"
@@ -1321,7 +1322,12 @@ services:
       GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "true"
       GF_SECURITY_DISABLE_GRAVATAR: "true"
       GF_SECURITY_ANGULAR_SUPPORT_ENABLED: "false"
+      GF_DATE_FORMATS_USE_BROWSER_LOCALE: "true"
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: "browser"
       GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_PROFILE_ENABLED: "false"
+      GF_HELP_ENABLED: "false"
+      GF_METRICS_ENABLED: "false"
       GF_ANALYTICS_ENABLED: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
