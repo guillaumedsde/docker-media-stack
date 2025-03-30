@@ -127,7 +127,6 @@ services:
       - homer
       - nextcloud-proxy
       - robots
-      - netdata
       - scrutiny
       - authelia-proxy
       - librespeed
@@ -1189,73 +1188,6 @@ services:
   ##################################################################
   # Monitoring
 
-  # netdata, server monitoring
-  netdata:
-    <<: *common
-    hostname: "status.${root_domain}"
-    cpu_count: 2
-    mem_limit: 1G
-    memswap_limit: 1G
-    pid: host
-    image: docker.io/netdata/netdata:v2.3.1@sha256:ce17cae9010970ea7a0336424edebea4ed92586c4287505f426d682dab712bb2
-    volumes:
-      - /:/host/root:ro,rslave
-      - /etc/passwd:/host/etc/passwd:ro
-      - /etc/group:/host/etc/group:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /etc/os-release:/host/etc/os-release:ro
-      - /var/log:/host/var/log:ro
-      - /run/dbus:/run/dbus:ro
-      # NOTE: see https://learn.netdata.cloud/docs/netdata-agent/installation/docker#change-the-default-hostname
-      - /etc/hostname:/host/etc/hostname:ro
-      - ${docker_data_folder}/netdata/health_alarm_notify.conf:/etc/netdata/health_alarm_notify.conf
-      - ${docker_data_folder}/netdata/cache:/var/cache/netdata
-      - ${docker_data_folder}/netdata/netdatalib:/var/lib/netdata
-    depends_on:
-      netdata-socket-proxy:
-        condition: service_healthy
-    networks:
-      - netdata
-      - netdata-socket-proxy
-    environment:
-      <<: *conf
-      DOCKER_HOST: netdata-socket-proxy:2375
-      NETDATA_DISABLE_TELEMETRY: "1"
-      DISABLE_TELEMETRY: "1"
-      DO_NOT_TRACK: "1"
-      NETDATA_DISABLE_CLOUD: "1"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_netdata"
-      traefik.http.routers.netdata.rule: Host(`netdata.${root_domain}`)
-      # service
-      traefik.http.services.netdata.loadbalancer.server.port: "19999"
-      # CSP HTTP header middleware
-      traefik.http.middlewares.netdataCSP.headers.customresponseheaders.Content-Security-Policy:
-        >-
-        Content-Security-Policy:
-        base-uri 'self';
-        default-src 'self' 'unsafe-inline' 'unsafe-eval';
-      # Forward auth
-      traefik.http.routers.netdata.middlewares: authelia@docker,netdataCSP@docker
-    cap_add:
-      - SYS_PTRACE
-      - SYS_ADMIN
-    security_opt:
-      - apparmor:unconfined
-
-  netdata-socket-proxy:
-    <<: *socket-proxy
-    command:
-      - "-allowfrom=netdata"
-      - '-allowGET=/v1\..{2}/(containers/.*|images/.*|info)'
-      # NOTE: for some reason netdata accesses non-versionned docker endpoints
-      - "-allowGET=/containers/.*"
-    networks:
-      - netdata-socket-proxy
-
   scrutiny:
     image: ghcr.io/analogj/scrutiny:v0.8.1-omnibus@sha256:214261df881879941b4b3e2235c601b086b358d0a29b513a82c4bf1e2de68e3e
     <<: *common
@@ -1302,9 +1234,6 @@ services:
       timeout: 4s
       retries: 4
       start_period: 5s
-
-  ##################################################################
-  # Monitoring
 
   prometheus:
     <<: *common
@@ -1647,9 +1576,6 @@ networks:
   robots:
     enable_ipv6: true
     internal: true
-  netdata:
-    enable_ipv6: true
-    internal: true
   scrutiny:
     enable_ipv6: true
   authelia-proxy:
@@ -1660,9 +1586,6 @@ networks:
     enable_ipv6: true
     internal: true
   watchtower-socket-proxy:
-    enable_ipv6: true
-    internal: true
-  netdata-socket-proxy:
     enable_ipv6: true
     internal: true
   librespeed:

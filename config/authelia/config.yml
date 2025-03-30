@@ -36,7 +36,7 @@ access_control:
         - HEAD
       policy: bypass
     # 2FA on admin apps
-    - domain_regex: '^(scrutiny|netdata)\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^(scrutiny|grafana|prometheus)\.{{ env "ROOT_DOMAIN" }}$'
       domain: '{group}.{{ env "ROOT_DOMAIN" }}'
       policy: two_factor
     # Default rule for other apps
