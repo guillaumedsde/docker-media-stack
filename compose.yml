@@ -1221,7 +1221,7 @@ services:
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_netdata"
-      traefik.http.routers.netdata.rule: Host(`status.${root_domain}`)
+      traefik.http.routers.netdata.rule: Host(`netdata.${root_domain}`)
       # service
       traefik.http.services.netdata.loadbalancer.server.port: "19999"
       # CSP HTTP header middleware
