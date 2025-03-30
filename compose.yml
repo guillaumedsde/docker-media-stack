@@ -1318,6 +1318,9 @@ services:
       - ALL
     networks:
       - prometheus
+    extra_hosts:
+      # NOTE: make host accessible to scrape node-exporter metrics
+      host.docker.internal: host-gateway
     volumes:
       - type: bind
         source: "./config/prometheus/prometheus.yml"
@@ -1352,6 +1355,9 @@ services:
 
   grafana:
     <<: *common
+    depends_on:
+      prometheus:
+        condition: service_healthy
     image: docker.io/grafana/grafana:11.6.0@sha256:62d2b9d20a19714ebfe48d1bb405086081bc602aa053e28cf6d73c7537640dfb
     mem_limit: 500M
     memswap_limit: 500M
@@ -1409,6 +1415,41 @@ services:
         - --tries=1
         - --spider
         - http://localhost:3000/api/health
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+
+  node-exporter:
+    <<: *common
+    image: docker.io/prom/node-exporter:v1.9.0@sha256:c99d7ee4d12a38661788f60d9eca493f08584e2e544bbd3b3fca64749f86b848
+    mem_limit: 250M
+    memswap_limit: 250M
+    cpu_count: 2
+    user: ${UID}:${GID}
+    read_only: true
+    pid: host
+    cap_drop:
+      - ALL
+    volumes:
+      - type: bind
+        source: "/"
+        target: "/host"
+        read_only: true
+        bind:
+          propagation: "rslave"
+    network_mode: host
+    command:
+      - "--path.rootfs=/host"
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:9100/
       interval: 10s
       timeout: 5s
       retries: 8
