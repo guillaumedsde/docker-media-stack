@@ -1553,6 +1553,9 @@ networks:
   lldap-db:
     enable_ipv6: true
     internal: true
+  prometheus:
+    enable_ipv6: true
+    internal: true
 
 volumes:
   robots-nginx-cache:
