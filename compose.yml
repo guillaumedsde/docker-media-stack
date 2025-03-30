@@ -1372,7 +1372,7 @@ services:
         target: "/var/lib/grafana/dashboards"
         read_only: true
       - type: bind
-        source: "./grafana/provisioning"
+        source: "./config/grafana/provisioning"
         target: "/etc/grafana/provisioning"
         read_only: true
     environment:
