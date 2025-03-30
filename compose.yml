@@ -135,6 +135,7 @@ services:
       - miniflux-proxy
       - lldap
       - prometheus
+      - grafana
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1347,7 +1348,67 @@ services:
       interval: 10s
       timeout: 5s
       retries: 8
-      start_period: 15s
+      start_period: 10s
+
+  grafana:
+    <<: *common
+    image: docker.io/grafana/grafana:11.6.0@sha256:62d2b9d20a19714ebfe48d1bb405086081bc602aa053e28cf6d73c7537640dfb
+    mem_limit: 500M
+    memswap_limit: 500M
+    cpu_count: 4
+    user: ${UID}:${GID}
+    read_only: true
+    cap_drop:
+      - ALL
+    networks:
+      - grafana
+      - prometheus
+    volumes:
+      - type: bind
+        source: "${docker_data_folder}/grafana"
+        target: "/var/lib/grafana"
+      - type: bind
+        source: "./grafana/dashboard_definitions"
+        target: "/var/lib/grafana/dashboards"
+        read_only: true
+      - type: bind
+        source: "./grafana/provisioning"
+        target: "/etc/grafana/provisioning"
+        read_only: true
+    environment:
+      GF_SERVER_ROOT_URL: "https://grafana.${root_domain}"
+      GF_AUTH_PROXY_ENABLED: "true"
+      GF_AUTH_PROXY_HEADER_NAME: "Remote-User"
+      GF_AUTH_PROXY_HEADER_ENABLE_LOGIN_TOKEN: "false"
+      GF_ANALYTICS_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_ANALYTICS_FEEDBACK_LINKS_ENABLED: "false"
+      GF_SECURITY_DISABLE_GRAVATAR: "true"
+      GF_SECURITY_ANGULAR_SUPPORT_ENABLED: "false"
+      GF_SNAPSHOTS_ENABLED: "false"
+      GF_DISABLE_SIGNOUT_MENU: "true"
+    labels:
+      <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_grafana"
+      traefik.http.routers.grafana.rule: Host(`grafana.${root_domain}`)
+      traefik.http.routers.grafana.middlewares: authelia@docker
+      # service
+      traefik.http.services.grafana.loadbalancer.server.port: "3000"
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:3000/api/health
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
 
   ##################################################################
   # Authentication
@@ -1573,6 +1634,9 @@ networks:
     enable_ipv6: true
     internal: true
   prometheus:
+    enable_ipv6: true
+    internal: true
+  grafana:
     enable_ipv6: true
     internal: true
 
