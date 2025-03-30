@@ -128,6 +128,7 @@ services:
       - tandoor
       - miniflux-proxy
       - lldap
+      - prometheus
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1294,6 +1295,40 @@ services:
       timeout: 4s
       retries: 4
       start_period: 5s
+
+  ##################################################################
+  # Monitoring
+
+  prometheus:
+    <<: *common
+    image: docker.io/prom/prometheus:v3.2.1@sha256:6927e0919a144aa7616fd0137d4816816d42f6b816de3af269ab065250859a62
+    mem_limit: 500M
+    memswap_limit: 500M
+    cpu_count: 4
+    user: ${UID}:${GID}
+    read_only: true
+    cap_drop:
+      - ALL
+    networks:
+      - prometheus
+    volumes:
+      - type: bind
+        source: "./config/prometheus/prometheus.yml"
+        target: "/etc/prometheus/prometheus.yml"
+        read_only: true
+      - type: bind
+        source: "${docker_data_folder}/prometheus"
+        target: "/prometheus"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-otlp-receiver"
+    labels:
+      <<: *traefik
+      traefik.http.routers.prometheus.rule: Host(`prometheus.${root_domain}`)
+      traefik.http.routers.prometheus.middlewares: authelia@docker
+      # service
+      traefik.http.services.prometheus.loadbalancer.server.port: "9090"
 
   ##################################################################
   # Authentication
