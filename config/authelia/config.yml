@@ -1,34 +1,34 @@
 # yaml-language-server: $schema=https://www.authelia.com/schemas/latest/json-schema/configuration.json
 
 access_control:
-  default_policy: one_factor
+  default_policy: deny
   rules:
     # Allow *arr calendar access
-    - domain_regex: '^(movies|series|music|books)\..+$'
+    - domain_regex: '^(movies|series|music|books)\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: '^/feed(/v.)*/calendar/.+\.ics(\?.*)*$'
       methods:
         - GET
     # Allow *arr ping endpoint access
-    - domain_regex: '^(movies|series|music|books|prowlarr)\..+$'
+    - domain_regex: '^(movies|series|music|books|prowlarr)\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: "^/ping$"
       methods:
         - HEAD
     # Allow qbittorrent healthcheck endpoint access
-    - domain_regex: '^torrent\..+$'
+    - domain_regex: '^torrent\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: "^/api/v2/app/version$"
       methods:
         - HEAD
     # Allow miniflux healthcheck endpoint access
-    - domain_regex: '^miniflux\..+$'
+    - domain_regex: '^miniflux\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: "^/healthcheck$"
       methods:
         - HEAD
     # Allow homer on LAN
-    - domain_regex: '^(home)\..+$'
+    - domain_regex: '^(home)\.{{ env "ROOT_DOMAIN" }}$'
       networks:
         - "192.168.0.0/24"
       methods:
@@ -36,8 +36,12 @@ access_control:
         - HEAD
       policy: bypass
     # 2FA on admin apps
-    - domain_regex: '^(scrutiny|netdata)\..+$'
+    - domain_regex: '^(scrutiny|netdata)\.{{ env "ROOT_DOMAIN" }}$'
+      domain: '{group}.{{ env "ROOT_DOMAIN" }}'
       policy: two_factor
+    # Default rule for other apps
+    - domain: '{group}.{{ env "ROOT_DOMAIN" }}'
+      policy: one_factor
 
 notifier:
   disable_startup_check: false

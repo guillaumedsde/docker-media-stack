@@ -1385,6 +1385,8 @@ services:
     cap_drop:
       - ALL
     environment:
+      # Environment variables for configuration templating
+      ROOT_DOMAIN: "${root_domain}"
       # Global configuration
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
       AUTHELIA_DEFAULT_REDIRECTION_URL: https://${root_domain}
