@@ -1681,7 +1681,6 @@ networks:
     internal: true
   prometheus:
     enable_ipv6: true
-    internal: true
   grafana:
     enable_ipv6: true
     internal: true
