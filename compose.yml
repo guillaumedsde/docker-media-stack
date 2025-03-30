@@ -40,6 +40,8 @@ services:
         condition: service_healthy
       authelia:
         condition: service_healthy
+      prometheus:
+        condition: service_healthy
     cap_drop:
       - ALL
     cap_add:
@@ -100,6 +102,10 @@ services:
       # NOTE: headers
       TRAEFIK_ACCESSLOG_FIELDS_HEADERS_DEFAULTMODE: "keep"
       TRAEFIK_ACCESSLOG_FIELDS_HEADERS_NAMES_AUTHORIZATION: "redact"
+      # NOTE: metrics
+      TRAEFIK_ACCESSLOG_OTLP: "true"
+      TRAEFIK_ACCESSLOG_OTLP_HTTP: "true"
+      TRAEFIK_ACCESSLOG_OTLP_HTTP_ENDPOINT: "http://prometheus:9090/api/v1/otlp/v1/metrics"
     labels:
       <<: *traefik
       # Dashboard
