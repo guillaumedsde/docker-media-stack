@@ -65,6 +65,7 @@ services:
       TRAEFIK_ENTRYPOINTS_WEB_HTTP_REDIRECTIONS_ENTRYPOINT_TO: "websecure"
       TRAEFIK_ENTRYPOINTS_WEBSECURE: "true"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS: ":443"
+      TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP3: "true"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_CERTRESOLVER: "le"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_DOMAINS_0_MAIN: "${root_domain}"
       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_TLS_DOMAINS_0_SANS: "*.${root_domain}"
@@ -150,6 +151,11 @@ services:
         host_ip: "0.0.0.0"
         protocol: tcp
         mode: host
+      - target: 443
+        published: 443
+        host_ip: "0.0.0.0"
+        protocol: udp
+        mode: host
       - target: 80
         published: 80
         host_ip: "::"
@@ -159,6 +165,11 @@ services:
         published: 443
         host_ip: "::"
         protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        host_ip: "::"
+        protocol: udp
         mode: host
     healthcheck:
       test:
