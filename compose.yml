@@ -428,8 +428,10 @@ services:
       - ALL
     environment:
       <<: *conf
+      PROMETHEUS_ENABLED: "true"
     networks:
       - flaresolverr
+      - prometheus-flaresolverr
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
@@ -1260,6 +1262,7 @@ services:
       - ALL
     networks:
       - prometheus
+      - prometheus-flaresolver
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
@@ -1624,6 +1627,9 @@ networks:
   prometheus:
     enable_ipv6: true
   grafana:
+    enable_ipv6: true
+    internal: true
+  prometheus-flaresolver:
     enable_ipv6: true
     internal: true
 
