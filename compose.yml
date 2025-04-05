@@ -626,6 +626,8 @@ services:
     volumes:
       - ${docker_data_folder}/bazarr:/config
       - ${data_folder}:/data
+    tmpfs:
+      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
     networks:
       - traefik
     labels:
