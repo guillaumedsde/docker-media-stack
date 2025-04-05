@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: "Flaresolverr"
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/flaresolverr_rev1.json
+      foldersFromFilesStructure: false
