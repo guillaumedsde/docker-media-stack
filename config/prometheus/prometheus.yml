@@ -5,6 +5,15 @@ scrape_configs:
   - job_name: node
     static_configs:
       - targets: ["host.docker.internal:9100"]
+  # NOTE: see https://github.com/FlareSolverr/FlareSolverr/blob/ce5369dd413cd71a81ce38a5ccd379f6c9352e23/README.md#prometheus-exporter
   - job_name: "flaresolverr_exporter"
     static_configs:
       - targets: ["flaresolverr:8192"]
+  # NOTE: see https://jellyfin.org/docs/general/networking/monitoring/#prometheus-metrics
+  - job_name: "jellyfin_exporter"
+    static_configs:
+      - targets: ["jellyfin:8096"]
+  # NOTE: see https://www.authelia.com/reference/guides/metrics/
+  - job_name: "authelia_exporter"
+    static_configs:
+      - targets: ["authelia:9959"]

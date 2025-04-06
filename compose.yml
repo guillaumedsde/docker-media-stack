@@ -754,6 +754,7 @@ services:
     networks:
       - traefik
       - lldap
+      - prometheus-jellyfin
     environment:
       <<: *conf
       # NOTE: required for read only root filesystem, see:
@@ -1265,6 +1266,8 @@ services:
     networks:
       - prometheus
       - prometheus-flaresolverr
+      - prometheus-jellyfin
+      - prometheus-authelia
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
@@ -1529,6 +1532,7 @@ services:
       - authelia-proxy
       - lldap
       - authelia
+      - prometheus-authelia
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_authelia-proxy"
@@ -1634,7 +1638,12 @@ networks:
   prometheus-flaresolverr:
     enable_ipv6: true
     internal: true
-
+  prometheus-jellyfin:
+    enable_ipv6: true
+    internal: true
+  prometheus-authelia:
+    enable_ipv6: true
+    internal: true
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:

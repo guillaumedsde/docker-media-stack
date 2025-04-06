@@ -88,4 +88,4 @@ theme: auto
 
 telemetry:
   metrics:
-    enabled: false
+    enabled: true
