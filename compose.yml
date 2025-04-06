@@ -243,10 +243,12 @@ services:
     networks:
       - watchtower
       - watchtower-socket-proxy
+      - prometheus-watchtower
     command:
       - "--cleanup"
       - "--schedule"
       - "0 0 5 * * *"
+      - "--http-api-metrics"
 
   watchtower-socket-proxy:
     <<: *socket-proxy
@@ -1273,6 +1275,7 @@ services:
       - prometheus-jellyfin
       - prometheus-authelia
       - prometheus-miniflux
+      - prometheus-watchtower
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
@@ -1650,6 +1653,9 @@ networks:
     enable_ipv6: true
     internal: true
   prometheus-miniflux:
+    enable_ipv6: true
+    internal: true
+  prometheus-watchtower:
     enable_ipv6: true
     internal: true
 
