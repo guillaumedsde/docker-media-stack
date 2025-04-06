@@ -773,6 +773,8 @@ services:
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
+      traefik.http.middlewares.jellyfin-deny-metrics.redirectregex.regex: "^https://jellyfin.${root_domain}/metrics$"
+      traefik.http.middlewares.jellyfin-deny-metrics.redirectregex.replacement: "https://jellyfin.${root_domain}/"
 
   jellyseer:
     <<: *common
