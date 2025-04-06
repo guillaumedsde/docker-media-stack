@@ -1021,12 +1021,16 @@ services:
     networks:
       - miniflux
       - miniflux-proxy
+      - prometheus-miniflux
     environment:
       BASE_URL: "https://miniflux.${root_domain}/"
       AUTH_PROXY_HEADER: "Remote-User"
       AUTH_PROXY_USER_CREATION: "true"
       RUN_MIGRATIONS: "1"
       DATABASE_URL: "postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable"
+      METRICS_COLLECTOR: "1"
+      # NOTE: be careful with this if removing forward auth
+      METRICS_ALLOWED_NETWORKS: "0.0.0.0"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
@@ -1268,6 +1272,7 @@ services:
       - prometheus-flaresolverr
       - prometheus-jellyfin
       - prometheus-authelia
+      - prometheus-miniflux
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
@@ -1644,6 +1649,10 @@ networks:
   prometheus-authelia:
     enable_ipv6: true
     internal: true
+  prometheus-miniflux:
+    enable_ipv6: true
+    internal: true
+
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:

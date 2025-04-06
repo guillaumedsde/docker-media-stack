@@ -1,0 +1,34 @@
+apiVersion: 1
+
+providers:
+  - &base_dashboard_definition
+    name: "Node Exporter"
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/node_export_full_v37.json
+      foldersFromFilesStructure: false
+  - <<: *base_dashboard_definition
+    name: "Traefik"
+    options:
+      path: /var/lib/grafana/dashboards/traefik_v9.json
+      foldersFromFilesStructure: false
+  - <<: *base_dashboard_definition
+    name: "Flaresolverr"
+    options:
+      path: /var/lib/grafana/dashboards/flaresolverr_rev1.json
+      foldersFromFilesStructure: false
+  - <<: *base_dashboard_definition
+    name: "Authelia"
+    options:
+      # NOTE: Gotten from:
+      #       https://github.com/authelia/authelia/blob/cd1d1690f7d7b5337845d6677bd08a6161fdf619/examples/grafana-dashboards/simple.json
+      path: /var/lib/grafana/dashboards/authelia.json
+      foldersFromFilesStructure: false
+  - <<: *base_dashboard_definition
+    name: "Miniflux"
+    options:
+      # NOTE: Gotten from:
+      #       https://github.com/miniflux/v2/blob/d20e8a4e2c55100cfa1bd6e0f8ed84a1c738c335/contrib/grafana/dashboard.json
+      path: /var/lib/grafana/dashboards/miniflux.json
+      foldersFromFilesStructure: false
