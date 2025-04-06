@@ -237,6 +237,10 @@ services:
       - ALL
     environment:
       DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_SCHEDULE: "0 0 5 * * *"
+      # TODO: set API key
+      # WATCHTOWER_HTTP_API_METRICS: "true"
     depends_on:
       watchtower-socket-proxy:
         condition: service_healthy
@@ -244,11 +248,6 @@ services:
       - watchtower
       - watchtower-socket-proxy
       - prometheus-watchtower
-    command:
-      - "--cleanup"
-      - "--schedule"
-      - "0 0 5 * * *"
-      - "--http-api-metrics"
 
   watchtower-socket-proxy:
     <<: *socket-proxy
@@ -1033,6 +1032,9 @@ services:
       METRICS_COLLECTOR: "1"
       # NOTE: be careful with this if removing forward auth
       METRICS_ALLOWED_NETWORKS: "0.0.0.0"
+      # TODO
+      # METRICS_USERNAME: "miniflux-metrics"
+      # METRICS_PASSWORD:
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
