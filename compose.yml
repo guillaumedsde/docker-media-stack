@@ -235,12 +235,14 @@ services:
     user: ${UID}:${GID}
     cap_drop:
       - ALL
+    secrets:
+      - watchtower-metrics-password
     environment:
       DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_SCHEDULE: "0 0 5 * * *"
-      # TODO: set API key
-      # WATCHTOWER_HTTP_API_METRICS: "true"
+      WATCHTOWER_HTTP_API_METRICS: "true"
+      WATCHTOWER_HTTP_API_TOKEN: "/run/secrets/watchtower-metrics-password"
     depends_on:
       watchtower-socket-proxy:
         condition: service_healthy
@@ -1023,6 +1025,8 @@ services:
       - miniflux
       - miniflux-proxy
       - prometheus-miniflux
+    secrets:
+      - miniflux-metrics-password
     environment:
       BASE_URL: "https://miniflux.${root_domain}/"
       AUTH_PROXY_HEADER: "Remote-User"
@@ -1032,9 +1036,8 @@ services:
       METRICS_COLLECTOR: "1"
       # NOTE: be careful with this if removing forward auth
       METRICS_ALLOWED_NETWORKS: "0.0.0.0"
-      # TODO
-      # METRICS_USERNAME: "miniflux-metrics"
-      # METRICS_PASSWORD:
+      METRICS_USERNAME: "miniflux-metrics"
+      METRICS_PASSWORD_FILE: "/run/secrets/miniflux-metrics-password"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
@@ -1281,6 +1284,9 @@ services:
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
+    secrets:
+      - miniflux-metrics-password
+      - watchtower-metrics-password
     volumes:
       - type: bind
         source: "./config/prometheus/prometheus.yml"
@@ -1665,3 +1671,9 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
+
+secrets:
+  miniflux-metrics-password:
+    environment: "MINIFLUX_METRICS_PASSWORD"
+  watchtower-metrics-password:
+    environment: "MINIFLUX_METRICS_PASSWORD"
