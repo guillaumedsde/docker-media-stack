@@ -27,8 +27,8 @@ scrape_configs:
   # NOTE: see https://containrrr.dev/watchtower/metrics/
   - job_name: "watchtower_exporter"
     metrics_path: "/v1/metrics"
-    basic_auth:
-      username: "watchtower-prometheus"
-      password_file: "/run/secrets/watchtower-metrics-password"
+    authorization:
+      type: Bearer
+      credentials_file: "/run/secrets/watchtower-metrics-password"
     static_configs:
       - targets: ["watchtower:8080"]
