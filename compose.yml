@@ -237,7 +237,7 @@ services:
       - ALL
     secrets:
       - source: watchtower-metrics-password
-        mode: "0440"
+        mode: "0400"
         uid: "${UID}"
         gid: "${GID}"
     environment:
@@ -245,7 +245,7 @@ services:
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_SCHEDULE: "0 0 5 * * *"
       WATCHTOWER_HTTP_API_METRICS: "true"
-      WATCHTOWER_HTTP_API_TOKEN: "/run/secrets/watchtower-metrics-password"
+      WATCHTOWER_HTTP_API_TOKEN: "/secrets/watchtower-metrics-password"
     depends_on:
       watchtower-socket-proxy:
         condition: service_healthy
@@ -1030,7 +1030,7 @@ services:
       - prometheus-miniflux
     secrets:
       - source: miniflux-metrics-password
-        mode: "0440"
+        mode: "0400"
         uid: "${UID}"
         gid: "${GID}"
     environment:
@@ -1292,11 +1292,11 @@ services:
       host.docker.internal: host-gateway
     secrets:
       - source: miniflux-metrics-password
-        mode: "0440"
+        mode: "0400"
         uid: "${UID}"
         gid: "${GID}"
       - source: watchtower-metrics-password
-        mode: "0440"
+        mode: "0400"
         uid: "${UID}"
         gid: "${GID}"
     volumes:
