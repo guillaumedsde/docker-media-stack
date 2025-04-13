@@ -1674,6 +1674,6 @@ volumes:
 
 secrets:
   miniflux-metrics-password:
-    environment: "MINIFLUX_METRICS_PASSWORD"
+    file: "./secret-miniflux-metrics-password"
   watchtower-metrics-password:
-    environment: "WATCHTOWER_METRICS_PASSWORD"
+    file: "./secret-watchtower-metrics-password"
