@@ -236,7 +236,8 @@ services:
     cap_drop:
       - ALL
     secrets:
-      - watchtower-metrics-password
+      - source: watchtower-metrics-password
+        mode: "0400"
     environment:
       DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
       WATCHTOWER_CLEANUP: "true"
@@ -1026,7 +1027,8 @@ services:
       - miniflux-proxy
       - prometheus-miniflux
     secrets:
-      - miniflux-metrics-password
+      - source: miniflux-metrics-password
+        mode: "0400"
     environment:
       BASE_URL: "https://miniflux.${root_domain}/"
       AUTH_PROXY_HEADER: "Remote-User"
