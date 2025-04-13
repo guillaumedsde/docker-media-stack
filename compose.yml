@@ -238,6 +238,8 @@ services:
     secrets:
       - source: watchtower-metrics-password
         mode: "0400"
+        uid: "${UID}"
+        gid: "${GID}"
     environment:
       DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
       WATCHTOWER_CLEANUP: "true"
@@ -1029,6 +1031,8 @@ services:
     secrets:
       - source: miniflux-metrics-password
         mode: "0400"
+        uid: "${UID}"
+        gid: "${GID}"
     environment:
       BASE_URL: "https://miniflux.${root_domain}/"
       AUTH_PROXY_HEADER: "Remote-User"
@@ -1289,8 +1293,12 @@ services:
     secrets:
       - source: miniflux-metrics-password
         mode: "0400"
+        uid: "${UID}"
+        gid: "${GID}"
       - source: watchtower-metrics-password
         mode: "0400"
+        uid: "${UID}"
+        gid: "${GID}"
     volumes:
       - type: bind
         source: "./config/prometheus/prometheus.yml"
