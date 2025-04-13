@@ -1287,8 +1287,10 @@ services:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
     secrets:
-      - miniflux-metrics-password
-      - watchtower-metrics-password
+      - source: miniflux-metrics-password
+        mode: "0400"
+      - source: watchtower-metrics-password
+        mode: "0400"
     volumes:
       - type: bind
         source: "./config/prometheus/prometheus.yml"
