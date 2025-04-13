@@ -237,7 +237,7 @@ services:
       - ALL
     secrets:
       - source: watchtower-metrics-password
-        mode: "0400"
+        mode: "0440"
         uid: "${UID}"
         gid: "${GID}"
     environment:
@@ -1030,7 +1030,7 @@ services:
       - prometheus-miniflux
     secrets:
       - source: miniflux-metrics-password
-        mode: "0400"
+        mode: "0440"
         uid: "${UID}"
         gid: "${GID}"
     environment:
@@ -1292,11 +1292,11 @@ services:
       host.docker.internal: host-gateway
     secrets:
       - source: miniflux-metrics-password
-        mode: "0400"
+        mode: "0440"
         uid: "${UID}"
         gid: "${GID}"
       - source: watchtower-metrics-password
-        mode: "0400"
+        mode: "0440"
         uid: "${UID}"
         gid: "${GID}"
     volumes:
