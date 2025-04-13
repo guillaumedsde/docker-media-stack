@@ -1678,6 +1678,6 @@ volumes:
 
 secrets:
   miniflux-metrics-password:
-    file: "./secret-miniflux-metrics-password"
+    file: "./.secret-miniflux-metrics-password"
   watchtower-metrics-password:
-    file: "./secret-watchtower-metrics-password"
+    file: "./.secret-watchtower-metrics-password"
