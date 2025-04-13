@@ -1676,4 +1676,4 @@ secrets:
   miniflux-metrics-password:
     environment: "MINIFLUX_METRICS_PASSWORD"
   watchtower-metrics-password:
-    environment: "MINIFLUX_METRICS_PASSWORD"
+    environment: "WATCHTOWER_METRICS_PASSWORD"
