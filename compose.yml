@@ -441,7 +441,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
-    image: ghcr.io/elfhosted/radarr:5.21.1.9799@sha256:c5a4213efe7cff3753ad330f9d5fcfd4d1f07bdc22f61acd87eb138d9df1bee6
+    image: ghcr.io/elfhosted/radarr:5.21.1.9799@sha256:b378ef19cfc47f4fd8586186b87d54f7d0b7bed819ceca379f1eafa066bbd9a7
     <<: *common
     cpu_count: 4
     mem_limit: 2G
