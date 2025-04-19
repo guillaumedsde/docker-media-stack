@@ -580,7 +580,7 @@ services:
   # readarr, webapp for downloading books through torrent client
   readarr:
     <<: *common
-    image: ghcr.io/elfhosted/readarr-develop:0.4.13.2760@sha256:88a56f6f79e301dcaf802c3e2790e604a5b81dd3b8b00efef1b89c6ff6d81c94
+    image: ghcr.io/elfhosted/readarr-develop:0.4.14.2782@sha256:d8afe222a5122d0200737f6794d160d5a150a0d921218a630cf04f70d1b2c5aa
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
