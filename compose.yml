@@ -1030,7 +1030,7 @@ services:
       DATABASE_URL: "postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable"
       METRICS_COLLECTOR: "1"
       # NOTE: be careful with this if removing forward auth
-      METRICS_ALLOWED_NETWORKS: "0.0.0.0/0"
+      METRICS_ALLOWED_NETWORKS: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
       METRICS_USERNAME: "miniflux-metrics"
       METRICS_PASSWORD: "miniflux-metrics"
     labels:
