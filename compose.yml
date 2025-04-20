@@ -1644,19 +1644,19 @@ networks:
     enable_ipv6: true
     internal: true
   prometheus-flaresolverr:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   prometheus-jellyfin:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   prometheus-authelia:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   prometheus-miniflux:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   prometheus-watchtower:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
 
 volumes:
