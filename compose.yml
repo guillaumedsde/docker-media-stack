@@ -1295,6 +1295,7 @@ services:
       <<: *traefik
       traefik.http.routers.prometheus.rule: Host(`prometheus.${root_domain}`)
       traefik.http.routers.prometheus.middlewares: authelia@docker
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_prometheus"
       # service
       traefik.http.services.prometheus.loadbalancer.server.port: "9090"
     healthcheck:
