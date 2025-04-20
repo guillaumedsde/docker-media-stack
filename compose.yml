@@ -1639,9 +1639,9 @@ networks:
     enable_ipv6: true
     internal: true
   prometheus:
-    enable_ipv6: true
+    enable_ipv6: false
   grafana:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   prometheus-flaresolverr:
     enable_ipv6: false
