@@ -235,17 +235,12 @@ services:
     user: ${UID}:${GID}
     cap_drop:
       - ALL
-    secrets:
-      - source: watchtower-metrics-password
-        mode: "0400"
-        uid: "${UID}"
-        gid: "${GID}"
     environment:
       DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_SCHEDULE: "0 0 5 * * *"
       WATCHTOWER_HTTP_API_METRICS: "true"
-      WATCHTOWER_HTTP_API_TOKEN: "/secrets/watchtower-metrics-password"
+      WATCHTOWER_HTTP_API_TOKEN: "watchtower-metrics"
     depends_on:
       watchtower-socket-proxy:
         condition: service_healthy
@@ -778,10 +773,9 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
+      traefik.http.routers.jellyfin.middlewares: "denyMetrics@file"
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
-      traefik.http.middlewares.jellyfin-deny-metrics.redirectregex.regex: "^https://jellyfin.${root_domain}/metrics$"
-      traefik.http.middlewares.jellyfin-deny-metrics.redirectregex.replacement: "https://jellyfin.${root_domain}/"
 
   jellyseer:
     <<: *common
@@ -1028,11 +1022,6 @@ services:
       - miniflux
       - miniflux-proxy
       - prometheus-miniflux
-    secrets:
-      - source: miniflux-metrics-password
-        mode: "0400"
-        uid: "${UID}"
-        gid: "${GID}"
     environment:
       BASE_URL: "https://miniflux.${root_domain}/"
       AUTH_PROXY_HEADER: "Remote-User"
@@ -1041,9 +1030,9 @@ services:
       DATABASE_URL: "postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable"
       METRICS_COLLECTOR: "1"
       # NOTE: be careful with this if removing forward auth
-      METRICS_ALLOWED_NETWORKS: "0.0.0.0"
+      METRICS_ALLOWED_NETWORKS: "0.0.0.0/0"
       METRICS_USERNAME: "miniflux-metrics"
-      METRICS_PASSWORD_FILE: "/run/secrets/miniflux-metrics-password"
+      METRICS_PASSWORD: "miniflux-metrics"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
@@ -1051,7 +1040,7 @@ services:
       # service
       traefik.http.services.miniflux.loadbalancer.server.port: "8080"
       # Forward auth
-      traefik.http.routers.miniflux.middlewares: authelia@docker
+      traefik.http.routers.miniflux.middlewares: authelia@docker,denyMetrics@file
 
   miniflux-db:
     <<: *common
@@ -1290,15 +1279,6 @@ services:
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
-    secrets:
-      - source: miniflux-metrics-password
-        mode: "0400"
-        uid: "${UID}"
-        gid: "${GID}"
-      - source: watchtower-metrics-password
-        mode: "0400"
-        uid: "${UID}"
-        gid: "${GID}"
     volumes:
       - type: bind
         source: "./config/prometheus/prometheus.yml"
@@ -1683,9 +1663,3 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
-
-secrets:
-  miniflux-metrics-password:
-    file: "./.secret-miniflux-metrics-password"
-  watchtower-metrics-password:
-    file: "./.secret-watchtower-metrics-password"

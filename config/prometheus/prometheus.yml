@@ -23,12 +23,12 @@ scrape_configs:
       - targets: ["miniflux:8080"]
     basic_auth:
       username: "miniflux-prometheus"
-      password_file: "/run/secrets/miniflux-metrics-password"
+      password: "miniflux-metrics"
   # NOTE: see https://containrrr.dev/watchtower/metrics/
   - job_name: "watchtower_exporter"
     metrics_path: "/v1/metrics"
     authorization:
       type: Bearer
-      credentials_file: "/run/secrets/watchtower-metrics-password"
+      credentials: "watchtower-metrics"
     static_configs:
       - targets: ["watchtower:8080"]

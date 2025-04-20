@@ -18,6 +18,10 @@ tls:
 
 http:
   middlewares:
+    denyMetrics:
+      redirectRegex:
+        regex: "^https://(.*)/metrics$"
+        replacement: "http://$${1}/"
     securityHeaders:
       # NOTE: all headers are case insensitive
       # NOTE: set to empty string to remove header (yaml null value does not work)
