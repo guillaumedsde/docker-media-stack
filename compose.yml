@@ -1209,6 +1209,53 @@ services:
       timeout: 1s
       retries: 5
 
+  welephant:
+    <<: *common
+    depends_on:
+      nextcloud-postgres:
+        condition: service_healthy
+      miniflux-db:
+        condition: service_healthy
+      tandoor-db:
+        condition: service_healthy
+      lldap-db:
+        condition: service_healthy
+      authelia-db:
+        condition: service_healthy
+    image: ghcr.io/guillaumedsde/welephant:latest
+    mem_limit: 500M
+    memswap_limit: 500M
+    cpu_count: 4
+    user: ${UID}:${GID}
+    read_only: true
+    cap_drop:
+      - ALL
+    volumes:
+      - type: bind
+        source: "${docker_data_folder}/welephant"
+        target: "/data"
+      - type: bind
+        source: "./config/welephant/crontab"
+        target: "/crontab"
+        read_only: true
+    networks:
+      - nextcloud
+      - miniflux
+      - tandoor
+      - lldap-db
+      - authelia
+    environment:
+      TZ: "${TZ}"
+      WELEPHANT_URI_NEXTCLOUD: psql://nextcloud:${NEXTCLOUD_DB_PASSWORD}@nextcloud-postgres/nextcloud
+      WELEPHANT_URI_MINIFLUX: psql://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux
+      WELEPHANT_URI_TANDOOR: psql://tandoor:${TANDOOR_DB_PASSWORD}@tandoor-db/tandoor
+      WELEPHANT_URI_LLDAP: psql://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap
+      WELEPHANT_URI_AUTHELIA: psql://authelia:${AUTHELIA_DB_PASSWORD}@authelia-db/authelia
+    entrypoint:
+      - /usr/bin/supercronic
+    command:
+      - /crontab
+
   ##################################################################
   # Monitoring
 
