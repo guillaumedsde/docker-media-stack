@@ -931,7 +931,7 @@ services:
       - ALL
     environment:
       POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
-      POSTGRES_USER: nextcloud
+      POSTGRES_USER: oc_admin
     tmpfs:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
       - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
@@ -1246,7 +1246,7 @@ services:
       - authelia
     environment:
       TZ: "${TZ}"
-      WELEPHANT_URI_NEXTCLOUD: postgres://nextcloud:${NEXTCLOUD_DB_PASSWORD}@nextcloud-postgres/nextcloud
+      WELEPHANT_URI_NEXTCLOUD: postgres://oc_admin:${NEXTCLOUD_DB_PASSWORD}@nextcloud-postgres/nextcloud
       WELEPHANT_URI_MINIFLUX: postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux
       WELEPHANT_URI_TANDOOR: postgres://tandoor:${TANDOOR_DB_PASSWORD}@tandoor-db/tandoor
       WELEPHANT_URI_LLDAP: postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap
