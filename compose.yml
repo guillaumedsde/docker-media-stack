@@ -374,7 +374,7 @@ services:
     # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
     network_mode: service:wireguard
-    image: ghcr.io/guillaumedsde/qbittorrent-distroless@sha256:5a3f42af70b379e598fe1aabce2122b75365b735e6e0fd2bf7ce2deba1525069
+    image: ghcr.io/guillaumedsde/qbittorrent-distroless@sha256:11819d37259a85d4610246f1ccddd6b7bc360aa67f3f930e3ebeb79df79e09d3
     labels:
       com.centurylinklabs.watchtower.depends-on: ${COMPOSE_PROJECT_NAME}-wireguard-1
     healthcheck:
