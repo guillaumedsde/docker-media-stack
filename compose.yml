@@ -1246,11 +1246,11 @@ services:
       - authelia
     environment:
       TZ: "${TZ}"
-      WELEPHANT_URI_NEXTCLOUD: psql://nextcloud:${NEXTCLOUD_DB_PASSWORD}@nextcloud-postgres/nextcloud
-      WELEPHANT_URI_MINIFLUX: psql://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux
-      WELEPHANT_URI_TANDOOR: psql://tandoor:${TANDOOR_DB_PASSWORD}@tandoor-db/tandoor
-      WELEPHANT_URI_LLDAP: psql://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap
-      WELEPHANT_URI_AUTHELIA: psql://authelia:${AUTHELIA_DB_PASSWORD}@authelia-db/authelia
+      WELEPHANT_URI_NEXTCLOUD: postgres://nextcloud:${NEXTCLOUD_DB_PASSWORD}@nextcloud-postgres/nextcloud
+      WELEPHANT_URI_MINIFLUX: postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux
+      WELEPHANT_URI_TANDOOR: postgres://tandoor:${TANDOOR_DB_PASSWORD}@tandoor-db/tandoor
+      WELEPHANT_URI_LLDAP: postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap
+      WELEPHANT_URI_AUTHELIA: postgres://authelia:${AUTHELIA_DB_PASSWORD}@authelia-db/authelia
     entrypoint:
       - /usr/bin/supercronic
     command:
