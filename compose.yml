@@ -528,7 +528,7 @@ services:
   # lidarr, webapp for downloading music through torrent client
   lidarr:
     <<: *common
-    image: ghcr.io/elfhosted/lidarr:2.10.3.4602@sha256:fbed293b810c6d957bb185f9584d2a7bdef44fba42cc06be2736f7b9c1f3f1cd
+    image: ghcr.io/elfhosted/lidarr:2.11.2.4629@sha256:d4be12579f7b1eecf497e969d9777a9888ae69c9d85ba0db76e133613a667bcc
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
