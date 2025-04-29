@@ -396,6 +396,8 @@ services:
       wireguard:
         restart: true
         condition: service_healthy
+    tmpfs:
+      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
