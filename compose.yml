@@ -1179,7 +1179,7 @@ services:
 
   robots:
     <<: *common
-    image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine-slim
+    image: docker.io/nginxinc/nginx-unprivileged:1.28-alpine-slim
     mem_limit: 200M
     memswap_limit: 200M
     cpu_count: 2
