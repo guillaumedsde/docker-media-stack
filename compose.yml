@@ -226,7 +226,7 @@ services:
   # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
   # NOTE watchtower also updates itself
   watchtower:
-    image: ghcr.io/containrrr/watchtower:1.7.1@sha256:f9086bfda061100361fc2bacf069585678d760d705cf390918ccdbda8a00980b
+    image: ghcr.io/containrrr/watchtower:1.7.1@sha256:6dd50763bbd632a83cb154d5451700530d1e44200b268a4e9488fefdfcf2b038
     <<: *common
     mem_limit: 100M
     memswap_limit: 100M
