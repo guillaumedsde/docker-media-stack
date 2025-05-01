@@ -438,8 +438,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
-    image: ghcr.io/home-operations/radarr:5.23.0@sha256:b307b45f11a81db36dd41f1d743f31692bb22be9356cfa3ea8b6831f909374fc
-    <<: *common
+    image: ghcr.io/home-operations/radarr:5.23.0.9907@sha256:b307b45f11a81db36dd41f1d743f31692bb22be9356cfa3ea8b6831f909374fc
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -485,7 +484,7 @@ services:
   # sonarr, webapp for downloading series through torrent client
   sonarr:
     <<: *common
-    image: ghcr.io/home-operations/sonarr:4.0@sha256:60686ca3be7b1f182f71c459b62450affd6de79d2d4baa90256f0fae76742132
+    image: ghcr.io/home-operations/sonarr:4.0.14.2938@sha256:60686ca3be7b1f182f71c459b62450affd6de79d2d4baa90256f0fae76742132
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -534,7 +533,7 @@ services:
   # lidarr, webapp for downloading music through torrent client
   lidarr:
     <<: *common
-    image: ghcr.io/home-operations/lidarr:2.11.2@sha256:c65e8e86eaf76b29e94957468810446ea31aa7ec6bc27e7a65ad211301875c0b
+    image: ghcr.io/home-operations/lidarr:2.11.2.4629@docker pull ghcr.io/home-operations/lidarr:2.11.2@sha256:c65e8e86eaf76b29e94957468810446ea31aa7ec6bc27e7a65ad211301875c0b
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -637,7 +636,7 @@ services:
         condition: service_healthy
       sonarr:
         condition: service_healthy
-    image: ghcr.io/home-operations/bazarr:1.5@sha256:065dfb442123962d93f1cdc1b425b836adbfe231704d86b08eb9f2f43892a4a6
+    image: ghcr.io/home-operations/bazarr:1.5.1@sha256:065dfb442123962d93f1cdc1b425b836adbfe231704d86b08eb9f2f43892a4a6
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
