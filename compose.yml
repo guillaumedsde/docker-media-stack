@@ -583,7 +583,7 @@ services:
   # readarr, webapp for downloading books through torrent client
   readarr:
     <<: *common
-    image: ghcr.io/home-operations/readarr:0.4.15.2787@sha256:278eae08e5e40c8e505fe5d8efa11be157e3d338e93cc28cc1903d1bd8426794
+    image: ghcr.io/home-operations/readarr:0.4.15.2787@sha256:919ff1f59157f760017a2ce525b22ab2586ca4c49bae728ed88c58f3ae17ed40
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
