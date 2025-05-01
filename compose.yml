@@ -484,7 +484,7 @@ services:
   # sonarr, webapp for downloading series through torrent client
   sonarr:
     <<: *common
-    image: ghcr.io/home-operations/sonarr:4.0.14.2938@sha256:60686ca3be7b1f182f71c459b62450affd6de79d2d4baa90256f0fae76742132
+    image: ghcr.io/home-operations/sonarr:4.0.14.2938@sha256:acd5416ab9c36d017687820a32f09d09a4e25a5754aa5ebeae2e7c63d7609c13
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
