@@ -1484,7 +1484,7 @@ services:
       traefik.http.routers.loki.middlewares: authelia@docker
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_loki"
       # service
-      traefik.http.services.loki.loadbalancer.server.port: "9090"
+      traefik.http.services.loki.loadbalancer.server.port: "3100"
     healthcheck:
       test:
         - CMD
