@@ -42,6 +42,8 @@ services:
         condition: service_healthy
       prometheus:
         condition: service_healthy
+      loki:
+        condition: service_healthy
     cap_drop:
       - ALL
     cap_add:
@@ -88,6 +90,9 @@ services:
       # NOTE: access log
       TRAEFIK_ACCESSLOG: "true"
       TRAEFIK_ACCESSLOG_ADDINTERNALS: "true"
+      TRAEFIK_ACCESSLOG_OTLP: "true"
+      TRAEFIK_ACCESSLOG_OTLP_HTTP: "true"
+      TRAEFIK_ACCESSLOG_OTLP_HTTP_ENDPOINT: "http://loki:3100/otlp"
       # NOTE: fields
       TRAEFIK_ACCESSLOG_FIELDS_DEFAULTMODE: "drop"
       TRAEFIK_ACCESSLOG_FIELDS_NAMES_CLIENTHOST: "keep"
@@ -136,6 +141,7 @@ services:
       - lldap
       - prometheus
       - grafana
+      - loki
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1437,6 +1443,50 @@ services:
         - --tries=1
         - --spider
         - http://localhost:3000/api/health
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+
+  loki:
+    <<: *common
+    image: docker.io/grafana/loki:3.5.0@sha256:4c431d2e6b9b38718694b31c5d56be7c80dc69c513215fde1aeb5b02cd4e2665
+    mem_limit: 500M
+    memswap_limit: 500M
+    cpu_count: 4
+    user: ${UID}:${GID}
+    read_only: true
+    cap_drop:
+      - ALL
+    networks:
+      - grafana
+      - loki
+    volumes:
+      - type: bind
+        source: "./config/loki/configuration.yml"
+        target: "/etc/loki/loki.yml"
+        read_only: true
+      - type: bind
+        source: "${docker_data_folder}/loki"
+        target: "/data"
+    command:
+      - "--config.file=/etc/loki/loki.yml"
+    labels:
+      <<: *traefik
+      traefik.http.routers.loki.rule: Host(`loki.${root_domain}`)
+      traefik.http.routers.loki.middlewares: authelia@docker
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_loki"
+      # service
+      traefik.http.services.loki.loadbalancer.server.port: "9090"
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --timeout=3
+        - --tries=1
+        - --spider
+        - http://localhost:3100/ready
       interval: 10s
       timeout: 5s
       retries: 8
