@@ -1,0 +1,12 @@
+apiVersion: 1
+prune: true
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    # Access mode - proxy (server in the UI) or direct (browser in the UI).
+    url: http://loki:3100
+    jsonData:
+      timeout: 60
+      maxLines: 1000
