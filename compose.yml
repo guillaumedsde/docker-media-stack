@@ -87,6 +87,8 @@ services:
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
       LEGO_EXPERIMENTAL_CNAME_SUPPORT: "true"
+      # NOTE: experimental features
+      TRAEFIK_EXPERIMENTAL_OTLPLOGS: "true"
       # NOTE: access log
       TRAEFIK_ACCESSLOG: "true"
       TRAEFIK_ACCESSLOG_ADDINTERNALS: "true"
