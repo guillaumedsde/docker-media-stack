@@ -887,12 +887,12 @@ services:
       HOOK_REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
       # NOTE: see https://www.php.net/manual/en/configuration.file.php
       PHP_INI_SCAN_DIR: "/tmp/php_conf_d:"
-      SMTP_HOST: smtp.sendgrid.net
+      SMTP_HOST: "${SMTP_HOSTNAME}"
       SMTP_SECURE: ssl
       SMTP_PORT: "465"
       SMTP_AUTHTYPE: login
-      SMTP_NAME: apikey
-      SMTP_PASSWORD: ${SENDGRID_PASS}
+      SMTP_NAME: "${SMTP_USERNAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
       MAIL_FROM_ADDRESS: nextcloud
       MAIL_DOMAIN: ${root_domain}
       PHP_UPLOAD_LIMIT: 1G
@@ -1512,11 +1512,11 @@ services:
       LLDAP_HTTP_URL: "https://lldap.${root_domain}"
       LLDAP_HTTP_PORT: "17170"
       LLDAP_SMTP_OPTIONS__ENABLE_PASSWORD_RESET: "true"
-      LLDAP_SMTP_OPTIONS__SERVER: "smtp.sendgrid.net"
+      LLDAP_SMTP_OPTIONS__SERVER: "${SMTP_HOSTNAME}"
       LLDAP_SMTP_OPTIONS__PORT: "465"
       LLDAP_SMTP_OPTIONS__SMTP_ENCRYPTION: TLS
-      LLDAP_SMTP_OPTIONS__USER: "apikey"
-      LLDAP_SMTP_OPTIONS__PASSWORD: "${SENDGRID_PASS}"
+      LLDAP_SMTP_OPTIONS__USER: "${SMTP_USERNAME}"
+      LLDAP_SMTP_OPTIONS__PASSWORD: "${SMTP_PASSWORD}"
       LLDAP_SMTP_OPTIONS__FROM: "lldap <lldap@${root_domain}>"
       LLDAP_SMTP_OPTIONS__TO: "${letsencrypt_email}"
     labels:
@@ -1574,7 +1574,9 @@ services:
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET: ${AUTHELIA_JWT_SECRET}
       AUTHELIA_DEFAULT_REDIRECTION_URL: https://${root_domain}
       # Notifier configuration
-      AUTHELIA_NOTIFIER_SMTP_PASSWORD: ${SENDGRID_PASS}
+      AUTHELIA_NOTIFIER_SMTP_ADDRESS: "smtp://${SMTP_HOSTNAME}:465"
+      AUTHELIA_NOTIFIER_SMTP_USERNAME: "${SMTP_USERNAME}"
+      AUTHELIA_NOTIFIER_SMTP_PASSWORD: "${SMTP_PASSWORD}"
       AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@${root_domain}>
       AUTHELIA_NOTIFIER_SMTP_STARTUP_CHECK_ADDRESS: ${letsencrypt_email}
       # LDAP backend configuration

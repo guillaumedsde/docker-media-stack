@@ -48,17 +48,11 @@ access_control:
 notifier:
   disable_startup_check: false
   smtp:
-    address: smtp://smtp.sendgrid.net:587
     timeout: 5s
-    username: apikey
     identifier: authelia
     subject: "[Authelia] {title}"
     disable_require_tls: false
     disable_html_emails: false
-    tls:
-      server_name: smtp.sendgrid.net
-      skip_verify: false
-      minimum_version: TLS1.2
 
 authentication_backend:
   refresh_interval: 5m
