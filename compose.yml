@@ -1769,6 +1769,9 @@ networks:
   prometheus-watchtower:
     enable_ipv6: false
     internal: true
+  loki:
+    enable_ipv6: false
+    internal: true
 
 volumes:
   robots-nginx-cache:
