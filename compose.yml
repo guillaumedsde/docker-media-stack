@@ -1394,6 +1394,7 @@ services:
     networks:
       - grafana
       - prometheus
+      - loki
     volumes:
       - type: bind
         source: "${docker_data_folder}/grafana"
