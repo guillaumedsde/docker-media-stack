@@ -311,7 +311,7 @@ services:
       net.ipv6.conf.all.disable_ipv6: 0
       net.ipv4.conf.all.src_valid_mark: 1
     tmpfs:
-      - /tmp:mode=770,noexec,size=5K,uid=0,gid=0
+      - /tmp/gluetun:mode=770,noexec,size=5K,uid=0,gid=0
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -393,7 +393,7 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
     tmpfs:
-      - /tmp/gluetun:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     read_only: true
     cpu_count: 6
     mem_limit: 10G
