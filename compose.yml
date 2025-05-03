@@ -132,7 +132,7 @@ services:
       - ${docker_data_folder}/traefik/data:/traefik
       - ./config/traefik/dynamic_configuration.yml:/etc/traefik/dynamic_configuration.yml:ro
     tmpfs:
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     networks:
       - traefik-socket-proxy
       - traefik
@@ -311,7 +311,7 @@ services:
       net.ipv6.conf.all.disable_ipv6: 0
       net.ipv4.conf.all.src_valid_mark: 1
     tmpfs:
-      - /tmp:mode=770,size=5K,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5K,uid=0,gid=0
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -393,7 +393,7 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
     tmpfs:
-      - /tmp:mode=777,size=5M,noexec,uid=0,gid=0
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     read_only: true
     cpu_count: 6
     mem_limit: 10G
@@ -427,7 +427,7 @@ services:
         restart: true
         condition: service_healthy
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/prowlarr:/config
       - ${docker_data_folder}/blackhole:/blackhole
@@ -482,7 +482,7 @@ services:
       prowlarr:
         condition: service_healthy
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/radarr:/config
       - ${data_folder}:/data
@@ -528,7 +528,7 @@ services:
       prowlarr:
         condition: service_healthy
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/sonarr:/config
       - ${data_folder}:/data
@@ -577,7 +577,7 @@ services:
       prowlarr:
         condition: service_healthy
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/lidarr:/config
       - ${data_folder}:/data
@@ -626,7 +626,7 @@ services:
       prowlarr:
         condition: service_healthy
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/readarr:/config
       - ${data_folder}:/data
@@ -680,7 +680,7 @@ services:
       - ${docker_data_folder}/bazarr:/config
       - ${data_folder}:/data
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     networks:
       - traefik
     labels:
@@ -770,7 +770,7 @@ services:
         condition: service_healthy
     tmpfs:
       - /config/data/transcodes:mode=770,size=4G,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: ${docker_data_folder}/jellyfin
@@ -836,7 +836,7 @@ services:
     volumes:
       - ${docker_data_folder}/jellyseer:/app/config
     tmpfs:
-      - /tmp:mode=770,size=50M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=50M,uid=${UID},gid=${GID}
     networks:
       - traefik
     environment:
@@ -889,7 +889,7 @@ services:
       - /run:mode=770,size=5M,uid=${NEXTCLOUD_UID},gid=${GID}
       # NOTE: /tmp needs to be proportional to max uploadable file size, see:
       #       https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/big_file_upload_configuration.html#system-configuration
-      - /tmp:mode=770,size=4000M,uid=${NEXTCLOUD_UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=4000M,uid=${NEXTCLOUD_UID},gid=${GID}
     volumes:
       - type: "bind"
         source: "${docker_data_folder}/nextcloud"
@@ -973,7 +973,7 @@ services:
       POSTGRES_USER: oc_admin
     tmpfs:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
     networks:
@@ -1029,7 +1029,7 @@ services:
     cap_drop:
       - ALL
     tmpfs:
-      - /tmp:mode=770,size=2000M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=2000M,uid=${UID},gid=${GID}
     command:
       - "-cpus=12"
       - "-enable-url-source"
@@ -1097,7 +1097,7 @@ services:
       POSTGRES_USER: miniflux
     tmpfs:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/miniflux-db:/var/lib/postgresql/data
     networks:
@@ -1145,7 +1145,7 @@ services:
       POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
     tmpfs:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/tandoor-db:/var/lib/postgresql/data
     networks:
@@ -1182,7 +1182,7 @@ services:
         source: "${docker_data_folder}/tandoor/mediafiles"
         target: "/opt/recipes/mediafiles"
     tmpfs:
-      - /tmp:mode=770,size=10M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     networks:
       - tandoor
     labels:
@@ -1219,7 +1219,7 @@ services:
     tmpfs:
       - /var/cache/nginx:mode=770,size=5M,uid=${UID},gid=${GID}
       - /var/run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: ./config/nginx/default.conf
@@ -1418,7 +1418,7 @@ services:
       - prometheus
       - loki
     tmpfs:
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: "${docker_data_folder}/grafana"
@@ -1621,7 +1621,7 @@ services:
       POSTGRES_PASSWORD: ${LLDAP_DB_PASSWORD}
     tmpfs:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/lldap-db:/var/lib/postgresql/data
     networks:
@@ -1708,7 +1708,7 @@ services:
       POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
     tmpfs:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
     networks:
