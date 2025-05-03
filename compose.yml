@@ -340,7 +340,7 @@ services:
       FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS}
       DNS_KEEP_NAMESERVER: "on"
       VERSION_INFORMATION: "off"
-      HEALTH_SUCCESS_WAIT_DURATION: "10m"
+      HEALTH_SUCCESS_WAIT_DURATION: "5m"
       # NOTE: gotten from:
       # https://github.com/qdm12/gluetun-wiki/blob/5809ed3a8d5229eeeb5dab574d04665be0fd9348/setup/advanced/vpn-port-forwarding.md#qbittorrent-example
       VPN_PORT_FORWARDING_UP_COMMAND: >-
