@@ -343,19 +343,17 @@ services:
       HEALTH_SUCCESS_WAIT_DURATION: "10m"
       # NOTE: gotten from:
       # https://github.com/qdm12/gluetun-wiki/blob/5809ed3a8d5229eeeb5dab574d04665be0fd9348/setup/advanced/vpn-port-forwarding.md#qbittorrent-example
-      VPN_PORT_FORWARDING_UP_COMMAND: 'wget --retry-connrefused --tries=12 -qO- --post-data=json={\"listen_port\":{{PORTS}}} http://127.0.0.1:8080/api/v2/app/setPreferences'
-      # VPN_PORT_FORWARDING_UP_COMMAND: >-
-      #   /bin/sh
-      #   -c
-      #   '
-      #   wget
-      #   -O-
-      #   --retry-connrefused
-      #   --post-data
-      #   "json={\"listen_port\":{{PORTS}}}"
-      #   http://127.0.0.1:8080/api/v2/app/setPreferences
-      #   2>&1
-      #   '
+      VPN_PORT_FORWARDING_UP_COMMAND: >-
+        /bin/sh
+        -c
+        'wget
+        -O-
+        --retry-connrefused
+        --tries=12
+        --post-data
+        "json={\"listen_port\":{{PORTS}}}"
+        http://127.0.0.1:8080/api/v2/app/setPreferences
+        2>&1'
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
