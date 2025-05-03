@@ -393,7 +393,7 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
     tmpfs:
-      - /tmp:mode=770,size=5M,uid=0,gid=0
+      - /tmp:mode=777,size=5M,noexec,uid=0,gid=0
     read_only: true
     cpu_count: 6
     mem_limit: 10G
