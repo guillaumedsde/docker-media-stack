@@ -27,6 +27,24 @@ access_control:
       resources: "^/healthcheck$"
       methods:
         - HEAD
+    # Allow grafana healthcheck endpoint access
+    - domain_regex: '^grafana\.{{ env "ROOT_DOMAIN" }}$'
+      policy: bypass
+      resources: "^/api/health$"
+      methods:
+        - HEAD
+    # Allow loki healthcheck endpoint access
+    - domain_regex: '^loki\.{{ env "ROOT_DOMAIN" }}$'
+      policy: bypass
+      resources: "^/ready$"
+      methods:
+        - HEAD
+    # Allow loki healthcheck endpoint access
+    - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" }}$'
+      policy: bypass
+      resources: "^/-/ready$"
+      methods:
+        - HEAD
     # Allow homer on LAN
     - domain_regex: '^home\.{{ env "ROOT_DOMAIN" }}$'
       networks:
