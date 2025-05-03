@@ -309,7 +309,7 @@ services:
       net.ipv6.conf.all.disable_ipv6: 0
       net.ipv4.conf.all.src_valid_mark: 1
     tmpfs:
-      - /tmp:mode=777,size=5K
+      - /tmp/gluetun:mode=770,size=5K,uid=0,gid=0
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
