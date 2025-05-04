@@ -308,8 +308,10 @@ services:
     mem_limit: 250M
     memswap_limit: 250M
     sysctls:
-      net.ipv6.conf.all.disable_ipv6: 0
       net.ipv4.conf.all.src_valid_mark: 1
+      net.ipv4.ip_forward: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.ipv6.conf.all.disable_ipv6: 0
     tmpfs:
       - /tmp/gluetun:mode=770,noexec,size=5K,uid=0,gid=0
     volumes:
@@ -333,7 +335,7 @@ services:
       VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
       VPN_TYPE: wireguard
       SERVER_COUNTRIES: ${VPN_SERVER_COUNTRIES}
-      WIREGUARD_MTU: "1200"
+      WIREGUARD_MTU: "1350"
       WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
       PORT_FORWARD_ONLY: "on"
       VPN_PORT_FORWARDING: "on"
@@ -341,7 +343,7 @@ services:
       FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS}
       DNS_KEEP_NAMESERVER: "on"
       VERSION_INFORMATION: "off"
-      HEALTH_SUCCESS_WAIT_DURATION: "5m"
+      HEALTH_SUCCESS_WAIT_DURATION: "15m"
       VPN_PORT_FORWARDING_UP_COMMAND: >-
         wget
         --retry-connrefused
