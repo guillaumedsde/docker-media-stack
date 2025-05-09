@@ -408,7 +408,7 @@ services:
 
   prowlarr:
     <<: *common
-    image: ghcr.io/home-operations/prowlarr:1.35.1.5034@sha256:866e9f26acc49b49ce18f650c145eb36cc5211fbf3fdfb3d629683319af8cb41
+    image: ghcr.io/home-operations/prowlarr:1.35.1.5034@sha256:f9c4e4c7dedcbc9ec9c9616cbaacc5ca908a063b86d4f052db0e83f27c48bf3f
     cpu_count: 4
     mem_limit: 3G
     memswap_limit: 3G
