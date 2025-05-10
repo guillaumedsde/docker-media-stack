@@ -278,6 +278,10 @@ services:
     mem_limit: 20M
     memswap_limit: 20M
     read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - MKNOD
     network_mode: "none"
     volumes:
       - type: bind
@@ -303,7 +307,7 @@ services:
     cap_add:
       - NET_ADMIN
       # NOTE: chown /tmp files
-      - CAP_CHOWN
+      - CHOWN
     cpu_count: 4
     mem_limit: 250M
     memswap_limit: 250M
