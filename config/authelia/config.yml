@@ -54,9 +54,18 @@ access_control:
         - HEAD
       policy: bypass
     # 2FA on admin apps
-    - domain_regex: '^(scrutiny|grafana|prometheus)\.{{ env "ROOT_DOMAIN" }}$'
-      domain: '{group}.{{ env "ROOT_DOMAIN" }}'
+    - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" }}$'
       policy: two_factor
+      subject: "group:scrutiny"
+    - domain_regex: '^grafana\.{{ env "ROOT_DOMAIN" }}$'
+      policy: two_factor
+      subject: "group:grafana"
+    - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" }}$'
+      policy: two_factor
+      subject: "group:prometheus"
+    - domain_regex: '^loki\.{{ env "ROOT_DOMAIN" }}$'
+      policy: two_factor
+      subject: "group:loki"
     # Default rule for other apps
     - domain:
         - '{group}.{{ env "ROOT_DOMAIN" }}'
