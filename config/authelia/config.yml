@@ -33,13 +33,7 @@ access_control:
       resources: "^/api/health$"
       methods:
         - HEAD
-    # Allow loki healthcheck endpoint access
-    - domain_regex: '^loki\.{{ env "ROOT_DOMAIN" }}$'
-      policy: bypass
-      resources: "^/ready$"
-      methods:
-        - HEAD
-    # Allow loki healthcheck endpoint access
+    # Allow prometheus healthcheck endpoint access
     - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: "^/-/ready$"
@@ -63,9 +57,6 @@ access_control:
     - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" }}$'
       policy: two_factor
       subject: "group:prometheus"
-    - domain_regex: '^loki\.{{ env "ROOT_DOMAIN" }}$'
-      policy: two_factor
-      subject: "group:loki"
     # Default rule for other apps
     - domain:
         - '{group}.{{ env "ROOT_DOMAIN" }}'

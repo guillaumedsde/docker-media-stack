@@ -1501,13 +1501,6 @@ services:
         target: "/data"
     command:
       - "--config.file=/etc/loki/loki.yml"
-    labels:
-      <<: *traefik
-      traefik.http.routers.loki.rule: Host(`loki.${root_domain}`)
-      traefik.http.routers.loki.middlewares: authelia@docker
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_loki"
-      # service
-      traefik.http.services.loki.loadbalancer.server.port: "3100"
     healthcheck:
       test:
         - CMD
