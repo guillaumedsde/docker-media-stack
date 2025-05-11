@@ -666,7 +666,7 @@ services:
         condition: service_healthy
       sonarr:
         condition: service_healthy
-    image: ghcr.io/home-operations/bazarr:1.5.1@sha256:0ac96948fd8dbf1c9d8ffa83ed441d2e77c6fc79f81600c8ea160172cf66740e
+    image: ghcr.io/home-operations/bazarr:1.5.1@sha256:7ff7af1a8588569f6d9a2870e3658650379ead5082d68c5e5a7c1f01e0814a86
     cpu_count: 2
     mem_limit: 500M
     memswap_limit: 500M
