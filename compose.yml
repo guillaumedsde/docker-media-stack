@@ -329,7 +329,10 @@ services:
         aliases:
           - qbittorrent
           - prowlarr
-      flaresolverr:
+          - flaresolverr
+      prometheus-flaresolverr:
+        aliases:
+          - flaresolverr
     healthcheck:
       retries: 25
       start_period: 30s
@@ -462,9 +465,9 @@ services:
     environment:
       <<: *conf
       PROMETHEUS_ENABLED: "true"
-    networks:
-      - flaresolverr
-      - prometheus-flaresolverr
+    network_mode: service:wireguard
+    labels:
+      com.centurylinklabs.watchtower.depends-on: ${COMPOSE_PROJECT_NAME}-wireguard-1
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
@@ -1748,8 +1751,6 @@ networks:
     enable_ipv6: true
   authelia-proxy:
     enable_ipv6: true
-  flaresolverr:
-    enable_ipv6: true
   traefik-socket-proxy:
     enable_ipv6: true
     internal: true
@@ -1777,7 +1778,6 @@ networks:
     internal: true
   prometheus-flaresolverr:
     enable_ipv6: false
-    internal: true
   prometheus-jellyfin:
     enable_ipv6: false
     internal: true
