@@ -458,8 +458,8 @@ services:
     # NOTE: default image UID is 1000
     user: 1000:1000
     cpu_count: 4
-    mem_limit: 4G
-    memswap_limit: 4G
+    mem_limit: 6G
+    memswap_limit: 6G
     cap_drop:
       - ALL
     environment:
