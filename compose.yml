@@ -872,7 +872,7 @@ services:
   nextcloud: &nextcloud
     <<: *common
     depends_on:
-      nextcloud-postgres:
+      nextcloud-db:
         condition: service_healthy
       nextcloud-redis:
         condition: service_healthy
@@ -914,7 +914,7 @@ services:
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
       POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
-      POSTGRES_HOST: nextcloud-postgres
+      POSTGRES_HOST: nextcloud-db
       # NOTE: HOOK_ prefix is for env var to be used with /docker-entrypoint-hooks.d/before-starting scripts
       HOOK_REDIS_HOST: nextcloud-redis
       HOOK_REDIS_HOST_PASSWORD: ${NEXTCLOUD_REDIS_PASS}
@@ -960,7 +960,7 @@ services:
     healthcheck: {}
 
   # database for nextcloud
-  nextcloud-postgres:
+  nextcloud-db:
     <<: *common
     image: docker.io/postgres:15-bookworm
     cpu_count: 2
@@ -978,7 +978,7 @@ services:
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
-      - ${docker_data_folder}/nextcloud-postgres:/var/lib/postgresql/data
+      - ${docker_data_folder}/nextcloud-db:/var/lib/postgresql/data
     networks:
       - nextcloud
     healthcheck: &postgres-healthcheck
@@ -1254,7 +1254,7 @@ services:
   welephant:
     <<: *common
     depends_on:
-      nextcloud-postgres:
+      nextcloud-db:
         condition: service_healthy
       miniflux-db:
         condition: service_healthy
@@ -1288,7 +1288,7 @@ services:
       - authelia
     environment:
       TZ: "${TZ}"
-      WELEPHANT_URI_NEXTCLOUD: postgres://oc_admin:${NEXTCLOUD_DB_PASSWORD}@nextcloud-postgres/nextcloud
+      WELEPHANT_URI_NEXTCLOUD: postgres://oc_admin:${NEXTCLOUD_DB_PASSWORD}@nextcloud-db/nextcloud
       WELEPHANT_URI_MINIFLUX: postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db/miniflux
       WELEPHANT_URI_TANDOOR: postgres://tandoor:${TANDOOR_DB_PASSWORD}@tandoor-db/tandoor
       WELEPHANT_URI_LLDAP: postgres://lldap:${LLDAP_DB_PASSWORD}@lldap-db/lldap
