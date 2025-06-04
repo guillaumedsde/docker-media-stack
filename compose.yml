@@ -453,7 +453,7 @@ services:
       start_period: 15s
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.3.21@sha256:f104ee51e5124d83cf3be9b37480649355d223f7d8f9e453d0d5ef06c6e3b31b
+    image: ghcr.io/flaresolverr/flaresolverr:v3.3.22@sha256:4cfcff3e93f86eab2131e263322f2ef0d25fc362d450f67acfb6bcda687748e9
     <<: *common
     # NOTE: default image UID is 1000
     user: 1000:1000
