@@ -1408,7 +1408,7 @@ services:
         condition: service_healthy
       loki:
         condition: service_healthy
-    image: docker.io/grafana/grafana:12.0.1@sha256:06dc8d60e184705e5dc00e051a6d92342a44010d7d5e538d0a36339e85abb9b7
+    image: docker.io/grafana/grafana:12.0.2@sha256:b5b59bfc7561634c2d7b136c4543d702ebcc94a3da477f21ff26f89ffd4214fa
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
