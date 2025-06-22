@@ -34,7 +34,7 @@ services:
   # reverse proxy
   traefik:
     image: docker.io/traefik:v3.4.1@sha256:cd40ab7bc1f047731d5b22595203812343efcb6538014c4e93221cfc3a77217a
-    user: formats${UID}:${GID}
+    user: ${UID}:${GID}
     depends_on:
       traefik-socket-proxy:
         condition: service_healthy
