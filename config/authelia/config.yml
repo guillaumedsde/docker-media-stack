@@ -104,6 +104,8 @@ telemetry:
 
 identity_providers:
   oidc:
+    jwks:
+      - key: '{{ env "NEXTCLOUD_OIDC_CERT" }}'
     clients:
       - client_id: "nextcloud"
         client_name: "Nextcloud"
