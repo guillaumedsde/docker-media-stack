@@ -101,3 +101,28 @@ theme: auto
 telemetry:
   metrics:
     enabled: true
+
+identity_providers:
+  oidc:
+    clients:
+      - client_id: "nextcloud"
+        client_name: "Nextcloud"
+        client_secret: '{{ env "NEXTCLOUD_OIDC_SECRET_DIGEST" }}'
+        public: false
+        authorization_policy: "one_factor"
+        require_pkce: true
+        pkce_challenge_method: "S256"
+        redirect_uris:
+          - 'https://cloud.{{ env "ROOT_DOMAIN" }}/apps/user_oidc/code'
+        scopes:
+          - "openid"
+          - "profile"
+          - "email"
+          - "groups"
+        response_types:
+          - "code"
+        grant_types:
+          - "authorization_code"
+        access_token_signed_response_alg: "none"
+        userinfo_signed_response_alg: "none"
+        token_endpoint_auth_method: "client_secret_post"
