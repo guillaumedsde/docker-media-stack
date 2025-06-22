@@ -759,7 +759,7 @@ services:
       traefik.http.routers.homer.middlewares: authelia@docker
 
   komga:
-    image: ghcr.io/gotson/komga:1.21.3@sha256:27d18658bbe3fbd9857e98a1603ffe63f6abbd758e50b0518a0cb31b2f535269
+    image: ghcr.io/gotson/komga:1.21.3@sha256:72dc9f81a0a528752e953028a7d3ca6a83f8eabe2a617e3c7e53cfa594c84256
     user: ${UID}:${GID}
     cpu_count: 2
     mem_limit: 1G
