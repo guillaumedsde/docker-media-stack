@@ -34,7 +34,7 @@ services:
   # reverse proxy
   traefik:
     image: docker.io/traefik:v3.4.1@sha256:cd40ab7bc1f047731d5b22595203812343efcb6538014c4e93221cfc3a77217a
-    user: ${UID}:${GID}
+    user: formats${UID}:${GID}
     depends_on:
       traefik-socket-proxy:
         condition: service_healthy
@@ -148,6 +148,7 @@ services:
       - prometheus
       - grafana
       - loki
+      - komga
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -756,6 +757,35 @@ services:
       traefik.http.services.homer.loadbalancer.server.port: "8080"
       # Forward auth
       traefik.http.routers.homer.middlewares: authelia@docker
+
+  komga:
+    image: ghcr.io/gotson/komga:1.21.3@sha256:27d18658bbe3fbd9857e98a1603ffe63f6abbd758e50b0518a0cb31b2f535269
+    user: ${UID}:${GID}
+    cpu_count: 2
+    mem_limit: 1G
+    memswap_limit: 1G
+    read_only: true
+    cap_drop:
+      - ALL
+    networks:
+      - komga
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/komga
+        target: /config
+      - type: bind
+        source: ${data_folder}/books
+        target: /data
+        read_only: true
+    environment:
+      <<: *conf
+    labels:
+      <<: *traefik
+      traefik.http.routers.komga.rule: Host(`komga.${root_domain}`)
+      # service
+      traefik.http.services.komga.loadbalancer.server.port: "25600"
+      # Forward auth
+      traefik.http.routers.komga.middlewares: authelia@docker
 
   # jellyfin media server
   jellyfin:
@@ -1793,6 +1823,8 @@ networks:
   loki:
     enable_ipv6: false
     internal: true
+  komga:
+    enable_ipv6: true
 
 volumes:
   robots-nginx-cache:
