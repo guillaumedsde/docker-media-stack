@@ -106,7 +106,7 @@ identity_providers:
   oidc:
     jwks:
       - key: |
-          {{- env "NEXTCLOUD_OIDC_CERT" | nindent 2 }}
+          {{- env "NEXTCLOUD_OIDC_CERT" | nindent 10 }}
     clients:
       - client_id: "nextcloud"
         client_name: "Nextcloud"
