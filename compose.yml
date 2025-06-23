@@ -19,7 +19,7 @@ x-conf: &conf
 
 # container restart policy
 x-common: &common
-  restart: always
+  restart: on-failure:5
   logging:
     driver: "local"
     options:
@@ -471,6 +471,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
+    <<: *common
     image: ghcr.io/home-operations/radarr:5.27.0.10101@sha256:f1a47717f5792d82becbe278c9502d756b898d63b2c637da131172c4adf1ffc7
     cpu_count: 4
     mem_limit: 2G
