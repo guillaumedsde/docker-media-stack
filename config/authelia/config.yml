@@ -113,6 +113,7 @@ identity_providers:
         client_secret: '{{ env "NEXTCLOUD_OIDC_SECRET_DIGEST" }}'
         public: false
         authorization_policy: "one_factor"
+        consent_mode: pre-configured
         pre_configured_consent_duration: "6 months"
         require_pkce: true
         pkce_challenge_method: "S256"
