@@ -84,8 +84,8 @@ authentication_backend:
 
 session:
   expiration: 24h
-  inactivity: 1M
-  remember_me: 2M
+  inactivity: 2 weeks
+  remember_me: 2 months
   redis:
     host: authelia-valkey
     port: 6379
