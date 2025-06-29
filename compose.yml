@@ -879,7 +879,7 @@ services:
         condition: service_healthy
       nextcloud-imaginary:
         condition: service_healthy
-      lldap:
+      authelia:
         condition: service_healthy
     mem_limit: 8G
     memswap_limit: 8G
@@ -906,10 +906,8 @@ services:
         target: "/docker-entrypoint-hooks.d/before-starting/redis_config_generator.sh"
         read_only: true
     networks:
-      - traefik
       - nextcloud
       - nextcloud-proxy
-      - lldap
     environment:
       <<: *conf
       POSTGRES_DB: nextcloud
