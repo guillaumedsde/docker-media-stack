@@ -1169,7 +1169,7 @@ services:
         condition: service_healthy
     environment:
       # see: https://github.com/TandoorRecipes/recipes/issues/3478#issue-2765281241
-      ALLOWED_HOSTS: "tandoor.${root_domain},127.0.0.1"
+      ALLOWED_HOSTS: "tandoor.${root_domain},127.0.0.1,::1"
       SECRET_KEY: ${TANDOOR_SECRET_KEY}
       DB_ENGINE: django.db.backends.postgresql
       POSTGRES_HOST: tandoor-db
@@ -1207,7 +1207,7 @@ services:
         - --timeout=3
         - --tries=1
         - --spider
-        - http://127.0.0.1:8080/openapi
+        - http://localhost:8080/openapi
       interval: 5s
       timeout: 4s
       retries: 4
