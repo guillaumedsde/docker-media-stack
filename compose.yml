@@ -1183,6 +1183,9 @@ services:
       - type: bind
         source: "${docker_data_folder}/tandoor/mediafiles"
         target: "/opt/recipes/mediafiles"
+      - type: bind
+        source: "${docker_data_folder}/tandoor/cookbook"
+        target: "/opt/recipes/cookbook"
     tmpfs:
       - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     networks:
