@@ -1168,8 +1168,11 @@ services:
       tandoor-db:
         condition: service_healthy
     environment:
+      TZ: "${TZ}"
+      SESSION_COOKIE_DOMAIN: "tandoor.${root_domain}"
       # see: https://github.com/TandoorRecipes/recipes/issues/3478#issue-2765281241
-      # ALLOWED_HOSTS: "tandoor.${root_domain},127.0.0.1,::1"
+      ALLOWED_HOSTS: "tandoor.${root_domain},127.0.0.1,::1"
+      FORWARDED_ALLOW_IPS: "*"
       SECRET_KEY: ${TANDOOR_SECRET_KEY}
       DB_ENGINE: django.db.backends.postgresql
       POSTGRES_HOST: tandoor-db
@@ -1178,6 +1181,8 @@ services:
       POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
       POSTGRES_DB: tandoor
       REMOTE_USER_AUTH: "1"
+      ENABLE_METRICS: "0"
+      GUNICORN_MEDIA: "1"
     volumes:
       - type: bind
         source: "${docker_data_folder}/tandoor/staticfiles"
@@ -1185,11 +1190,9 @@ services:
       - type: bind
         source: "${docker_data_folder}/tandoor/mediafiles"
         target: "/opt/recipes/mediafiles"
-      - type: bind
-        source: "${docker_data_folder}/tandoor/cookbook-static"
-        target: "/opt/recipes/cookbook/static"
     tmpfs:
       - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
+      - /opt/recipes/cookbook/static:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     networks:
       - tandoor
     labels:
