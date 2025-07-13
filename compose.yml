@@ -1191,6 +1191,7 @@ services:
         source: "${docker_data_folder}/tandoor/mediafiles"
         target: "/opt/recipes/mediafiles"
     tmpfs:
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
       - /opt/recipes/cookbook/static:mode=770,noexec,size=1M,uid=${UID},gid=${GID}
     networks:
       - tandoor
