@@ -1154,30 +1154,6 @@ services:
       - tandoor
     healthcheck: *postgres-healthcheck
 
-  build-tandoor-static:
-    image: *tandoor-image
-    cpu_count: 2
-    mem_limit: 750M
-    memswap_limit: 750M
-    read_only: true
-    volumes:
-      - *tandoor-static-volume
-    cap_drop:
-      - ALL
-    cap_add:
-      - CAP_CHOWN
-    environment:
-      STATIC_OWNER_UID: "${UID}"
-      STATIC_OWNER_GID: "${GID}"
-    entrypoint:
-      - /bin/ash
-      - -c
-      - |
-        set -euo pipefail
-        source venv/bin/activate
-        python manage.py collectstatic --noinput
-        chown -R "${STATIC_OWNER_UID}:${STATIC_OWNER_GID}" staticfiles
-
   tandoor:
     <<: *common
     image: &tandoor-image >-
@@ -1243,6 +1219,30 @@ services:
     #   timeout: 4s
     #   retries: 4
     #   start_period: 5s
+
+  build-tandoor-static:
+    image: *tandoor-image
+    cpu_count: 2
+    mem_limit: 750M
+    memswap_limit: 750M
+    read_only: true
+    volumes:
+      - *tandoor-static-volume
+    cap_drop:
+      - ALL
+    cap_add:
+      - CAP_CHOWN
+    environment:
+      STATIC_OWNER_UID: "${UID}"
+      STATIC_OWNER_GID: "${GID}"
+    entrypoint:
+      - /bin/ash
+      - -c
+      - |
+        set -euo pipefail
+        source venv/bin/activate
+        python manage.py collectstatic --noinput
+        chown -R "${STATIC_OWNER_UID}:${STATIC_OWNER_GID}" staticfiles
 
   robots:
     <<: *common
