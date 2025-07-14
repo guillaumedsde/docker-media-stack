@@ -1154,9 +1154,34 @@ services:
       - tandoor
     healthcheck: *postgres-healthcheck
 
+  build-tandoor-static:
+    image: *tandoor-image
+    cpu_count: 2
+    mem_limit: 750M
+    memswap_limit: 750M
+    read_only: true
+    volumes:
+      - *tandoor-static-volume
+    cap_drop:
+      - ALL
+    cap_add:
+      - CAP_CHOWN
+    environment:
+      STATIC_OWNER_UID: "${UID}"
+      STATIC_OWNER_GID: "${GID}"
+    entrypoint:
+      - /bin/ash
+      - -c
+      - |
+        set -euo pipefail
+        source venv/bin/activate
+        python manage.py collectstatic --noinput
+        chown -R "${STATIC_OWNER_UID}:${STATIC_OWNER_GID}" staticfiles
+
   tandoor:
     <<: *common
-    image: docker.io/vabene1111/recipes:1.5.34@sha256:7d083f3af3a2a58bb8bb5fe94d59a37e2076bc405cf9bd51c2e3eaa18d6baf5a
+    image: &tandoor-image >-
+      docker.io/vabene1111/recipes:1.5.34@sha256:7d083f3af3a2a58bb8bb5fe94d59a37e2076bc405cf9bd51c2e3eaa18d6baf5a
     cpu_count: 2
     mem_limit: 750M
     memswap_limit: 750M
@@ -1167,6 +1192,8 @@ services:
     depends_on:
       tandoor-db:
         condition: service_healthy
+      build-tandoor-static:
+        condition: service_completed_successfully
     environment:
       TZ: "${TZ}"
       SESSION_COOKIE_DOMAIN: "tandoor.${root_domain}"
@@ -1184,7 +1211,8 @@ services:
       ENABLE_METRICS: "0"
       GUNICORN_MEDIA: "1"
     volumes:
-      - type: bind
+      - &tandoor-static-volume
+        type: bind
         source: "${docker_data_folder}/tandoor/staticfiles"
         target: "/opt/recipes/staticfiles"
       - type: bind
