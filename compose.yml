@@ -1186,6 +1186,7 @@ services:
       REMOTE_USER_AUTH: "1"
       ENABLE_METRICS: "0"
       GUNICORN_MEDIA: "1"
+      DEBUG: "1"
     volumes:
       - &tandoor-static-volume
         type: bind
