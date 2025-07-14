@@ -1232,9 +1232,8 @@ services:
       - ALL
     cap_add:
       - CAP_CHOWN
-    environment:
-      STATIC_OWNER_UID: "${UID}"
-      STATIC_OWNER_GID: "${GID}"
+      - CAP_FOWNER
+      - CAP_DAC_OVERRIDE
     entrypoint:
       - /bin/ash
       - -c
@@ -1242,7 +1241,7 @@ services:
         set -euo pipefail
         source venv/bin/activate
         python manage.py collectstatic --noinput
-        chown -R "${STATIC_OWNER_UID}:${STATIC_OWNER_GID}" staticfiles
+        chown -R "${UID}:${GID}" staticfiles
 
   robots:
     <<: *common
