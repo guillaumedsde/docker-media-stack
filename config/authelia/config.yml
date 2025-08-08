@@ -39,6 +39,12 @@ access_control:
       resources: "^/-/ready$"
       methods:
         - HEAD
+    # Allow Scrutiny healthcheck endpoint access
+    - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" }}$'
+      policy: bypass
+      resources: "^/api/health$"
+      methods:
+        - HEAD
     # Allow homer on LAN
     - domain_regex: '^home\.{{ env "ROOT_DOMAIN" }}$'
       networks:
