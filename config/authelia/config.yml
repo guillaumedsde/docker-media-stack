@@ -45,6 +45,12 @@ access_control:
       resources: "^/api/health$"
       methods:
         - HEAD
+    # Allow Tandoor healthcheck endpoint access
+    - domain_regex: '^tandoor\.{{ env "ROOT_DOMAIN" }}$'
+      policy: bypass
+      resources: "^/openapi/$"
+      methods:
+        - HEAD
     # Allow homer on LAN
     - domain_regex: '^home\.{{ env "ROOT_DOMAIN" }}$'
       networks:
