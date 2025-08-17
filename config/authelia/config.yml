@@ -148,3 +148,4 @@ identity_providers:
 webauthn:
   disable: false
   enable_passkey_login: true
+  display_name: 'Authelia {{ env "ROOT_DOMAIN" }}'
