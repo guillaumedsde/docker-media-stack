@@ -50,6 +50,7 @@ services:
       - NET_BIND_SERVICE
     environment:
       TZ: ${TZ}
+      USER: "dockeruser"
       TRAEFIK_GLOBAL_CHECKNEWVERSION: "false"
       TRAEFIK_GLOBAL_SENDANONYMOUSUSAGE: "false"
       # NOTE: internal
@@ -86,7 +87,6 @@ services:
       OVH_APPLICATION_KEY: ${OVH_APPLICATION_KEY}
       OVH_APPLICATION_SECRET: ${OVH_APPLICATION_SECRET}
       OVH_CONSUMER_KEY: ${OVH_CONSUMER_KEY}
-      LEGO_EXPERIMENTAL_CNAME_SUPPORT: "true"
       # NOTE: experimental features
       TRAEFIK_EXPERIMENTAL_OTLPLOGS: "true"
       # NOTE: access log
