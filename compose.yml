@@ -1388,7 +1388,7 @@ services:
 
   prometheus:
     <<: *common
-    image: docker.io/prom/prometheus:v3.5.0@sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
+    image: docker.io/prom/prometheus:v3.6.0@sha256:76947e7ef22f8a698fc638f706685909be425dbe09bd7a2cd7aca849f79b5f64
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
