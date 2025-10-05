@@ -337,8 +337,8 @@ services:
         aliases:
           - flaresolverr
     healthcheck:
-      retries: 25
-      start_period: 30s
+      retries: 50
+      start_period: 60s
     environment:
       <<: *conf
       LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
