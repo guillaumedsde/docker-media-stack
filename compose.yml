@@ -1776,48 +1776,48 @@ services:
 
 networks:
   watchtower:
-    enable_ipv6: true
+    enable_ipv6: false
   traefik:
     enable_ipv6: true
   authelia:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   nextcloud:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   homer:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   nextcloud-proxy:
-    enable_ipv6: true
+    enable_ipv6: false
   robots:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   scrutiny:
-    enable_ipv6: true
+    enable_ipv6: false
   authelia-proxy:
-    enable_ipv6: true
+    enable_ipv6: false
   traefik-socket-proxy:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   watchtower-socket-proxy:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   librespeed:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   tandoor:
-    enable_ipv6: true
+    enable_ipv6: false
   miniflux:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   miniflux-proxy:
-    enable_ipv6: true
+    enable_ipv6: false
   lldap:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   lldap-db:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
   prometheus:
     enable_ipv6: false
@@ -1844,7 +1844,7 @@ networks:
     enable_ipv6: false
     internal: true
   jellyfin:
-    enable_ipv6: true
+    enable_ipv6: false
     internal: true
 
 volumes:
