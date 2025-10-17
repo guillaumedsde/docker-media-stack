@@ -1805,6 +1805,7 @@ networks:
     internal: true
   librespeed:
     enable_ipv6: true
+    internal: true
   tandoor:
     enable_ipv6: true
   miniflux:
@@ -1820,11 +1821,13 @@ networks:
     internal: true
   prometheus:
     enable_ipv6: false
+    internal: true
   grafana:
     enable_ipv6: false
     internal: true
   prometheus-flaresolverr:
     enable_ipv6: false
+    internal: true
   prometheus-jellyfin:
     enable_ipv6: false
     internal: true
