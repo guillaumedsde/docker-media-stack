@@ -496,6 +496,7 @@ services:
       - ${data_folder}:/data
     networks:
       - traefik
+      - jellyfin
     environment:
       <<: *conf
     labels:
@@ -542,6 +543,7 @@ services:
       - ${data_folder}:/data
     networks:
       - traefik
+      - jellyfin
     environment:
       <<: *conf
       # NOTE: fix for read-only filesystems, see:
@@ -591,6 +593,7 @@ services:
       - ${data_folder}:/data
     networks:
       - traefik
+      - jellyfin
     environment:
       <<: *conf
       # NOTE: fix for read-only filesystems, see:
@@ -846,6 +849,7 @@ services:
       - /tmp:mode=770,noexec,size=50M,uid=${UID},gid=${GID}
     networks:
       - traefik
+      - jellyfin
     environment:
       <<: *conf
     labels:
