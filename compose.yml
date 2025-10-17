@@ -151,6 +151,7 @@ services:
       - prometheus
       - grafana
       - loki
+      - jellyfin
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -799,8 +800,7 @@ services:
         target: /data/recipes
         read_only: true
     networks:
-      - traefik
-      - lldap
+      - jellyfin
       - prometheus-jellyfin
     environment:
       <<: *conf
@@ -817,7 +817,7 @@ services:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
     labels:
       <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_jellyfin"
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
       traefik.http.routers.jellyfin.middlewares: "denyMetrics@file"
       # service
@@ -1614,6 +1614,7 @@ services:
     networks:
       - "lldap"
       - "lldap-db"
+      - "jellyfin"
     environment:
       <<: *conf
       LLDAP_LDAP_HOST: "::"
@@ -1809,6 +1810,7 @@ networks:
     enable_ipv6: true
   lldap:
     enable_ipv6: true
+    internal: true
   lldap-db:
     enable_ipv6: true
     internal: true
@@ -1833,6 +1835,9 @@ networks:
     internal: true
   loki:
     enable_ipv6: false
+    internal: true
+  jellyfin:
+    enable_ipv6: true
     internal: true
 
 volumes:
