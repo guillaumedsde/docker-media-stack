@@ -1009,7 +1009,7 @@ services:
     memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
-    image: docker.io/valkey/valkey:8-alpine
+    image: docker.io/valkey/valkey:9-alpine
     cap_drop:
       - ALL
     networks:
@@ -1767,7 +1767,7 @@ services:
     user: ${UID}:${GID}
     cap_drop:
       - ALL
-    image: docker.io/valkey/valkey:8-alpine
+    image: docker.io/valkey/valkey:9-alpine
     healthcheck: *valkey-healthcheck
     volumes:
       - ${docker_data_folder}/authelia-redis:/data
