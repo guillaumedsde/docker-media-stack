@@ -1562,7 +1562,7 @@ services:
 
   node-exporter:
     <<: *common
-    image: docker.io/prom/node-exporter:v1.9.1@sha256:d00a542e409ee618a4edc67da14dd48c5da66726bbd5537ab2af9c1dfc442c8a
+    image: docker.io/prom/node-exporter:v1.10.2@sha256:3ac34ce007accad95afed72149e0d2b927b7e42fd1c866149b945b84737c62c3
     mem_limit: 250M
     memswap_limit: 250M
     cpu_count: 2
