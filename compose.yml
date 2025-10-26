@@ -313,8 +313,8 @@ services:
       # NOTE: chown /tmp files
       - CHOWN
     cpu_count: 4
-    mem_limit: 250M
-    memswap_limit: 250M
+    mem_limit: 500M
+    memswap_limit: 500M
     sysctls:
       net.ipv4.conf.all.src_valid_mark: 1
       net.ipv4.ip_forward: 1
