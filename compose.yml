@@ -780,8 +780,8 @@ services:
       lldap:
         condition: service_healthy
     tmpfs:
-      - /config/data/transcodes:mode=770,size=4G,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
+      - /config/data/transcodes:mode=770,size=6G,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=3G,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: ${docker_data_folder}/jellyfin
