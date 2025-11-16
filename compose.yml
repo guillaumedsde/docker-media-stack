@@ -744,7 +744,7 @@ services:
   # homer is a homepage container
   homer:
     <<: *common
-    image: docker.io/b4bz/homer:v25.10.1@sha256:d65c7d55f1c4621fb371e0d771f54bfc3f9bca1855ada559d72203ff6cfc5f93
+    image: docker.io/b4bz/homer:v25.11.1@sha256:5c3a0fb561e0d09d00d3392684420186622fae45af70b2c3680b80961ddeeb6c
     user: ${UID}:${GID}
     cpu_count: 2
     mem_limit: 100M
