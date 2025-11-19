@@ -394,6 +394,9 @@ services:
       wireguard:
         restart: true
         condition: service_healthy
+    environment:
+      QBT_CONFIG_PATH: "/config"
+      QBT_DOWNLOADS_PATH: "/data/download/other"
     volumes:
       - ${docker_data_folder}/qbittorrent:/config
       - ${data_folder}:/data
@@ -411,7 +414,7 @@ services:
     # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
     network_mode: service:wireguard
-    image: ghcr.io/guillaumedsde/qbittorrent-distroless@sha256:f7861bc8cde30a90249ad58bea82ae73fb3d6a17c8a5eeb398e9b47184cc06c4
+    image: "docker.io/qbittorrentofficial/qbittorrent-nox:5.1.3-1@sha256:cf3ba4cfb86c99a684808dea299135036f07e57b1ddccd5bff9f85301c3f75dd"
     labels:
       com.centurylinklabs.watchtower.depends-on: ${COMPOSE_PROJECT_NAME}-wireguard-1
     healthcheck:
