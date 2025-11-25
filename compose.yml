@@ -201,7 +201,7 @@ services:
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
-    image: ghcr.io/wollomatic/socket-proxy:1.10.0@sha256:fdb66a52687bd9586e5f4a645bb29f94fd35ecee938a96ac3317a34436218d97
+    image: ghcr.io/wollomatic/socket-proxy:1.10.1@sha256:8ab5c5d6cdc4bd93b259969534ef0791508817e3cd1e2e2834b9c5984d6ffb34
     cpu_count: 2
     mem_limit: 50M
     memswap_limit: 50M
