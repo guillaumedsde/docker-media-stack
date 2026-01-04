@@ -4,13 +4,13 @@ access_control:
   default_policy: deny
   rules:
     # Allow *arr calendar access
-    - domain_regex: '^(movies|series|music|books)\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^(movies|series|music)\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: '^/feed(/v.)*/calendar/.+\.ics(\?.*)*$'
       methods:
         - GET
     # Allow *arr ping endpoint access
-    - domain_regex: '^(movies|series|music|books|prowlarr)\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^(movies|series|music|prowlarr)\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
       resources: "^/ping$"
       methods:

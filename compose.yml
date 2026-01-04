@@ -631,55 +631,6 @@ services:
       retries: 4
       start_period: 5s
 
-  # readarr, webapp for downloading books through torrent client
-  readarr:
-    <<: *common
-    image: ghcr.io/home-operations/readarr:0.4.18.2805@sha256:8f7551205fbdccd526db23a38a6fba18b0f40726e63bb89be0fb2333ff4ee4cd
-    cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
-    read_only: true
-    user: ${UID}:${GID}
-    cap_drop:
-      - ALL
-    depends_on:
-      qbittorrent:
-        condition: service_healthy
-      prowlarr:
-        condition: service_healthy
-    tmpfs:
-      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
-    volumes:
-      - ${docker_data_folder}/readarr:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-    environment:
-      <<: *conf
-      # NOTE: fix for read-only filesystems, see:
-      #       https://stackoverflow.com/questions/74447989/failed-to-create-coreclr-hresult-0x80004005#comment131446515_74447989
-      COMPlus_EnableDiagnostics: "0"
-    labels:
-      <<: *traefik
-      traefik.http.routers.readarr.rule: Host(`books.${root_domain}`)
-      # service
-      traefik.http.services.readarr.loadbalancer.server.port: "8787"
-      # Forward auth
-      traefik.http.routers.readarr.middlewares: authelia@docker
-    healthcheck:
-      test:
-        - CMD
-        - wget
-        - --quiet
-        - --timeout=3
-        - --tries=1
-        - --spider
-        - http://localhost:8787/ping
-      interval: 5s
-      timeout: 4s
-      retries: 4
-      start_period: 5s
-
   # bazarr, webapp for downloading subtitles
   bazarr:
     <<: *common
