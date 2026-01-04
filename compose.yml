@@ -1537,7 +1537,7 @@ services:
   loki:
     <<: *common
     # NOTE: loki >3.5.8 don't have wget which complicates healthchecks
-    image: docker.io/grafana/loki:3.5.8@sha256:00981fd9455db8589c3aa6d06744af3138c4b2c32fdec62101e92c7a704b2642
+    image: docker.io/grafana/loki:3.6.3@sha256:cd6e176883a90c21755f0315688668991634143423f75bdedfef41441b0fdc3c
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
