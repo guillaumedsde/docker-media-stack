@@ -305,7 +305,7 @@ services:
     depends_on:
       wireguard-tun-device-creator:
         condition: service_completed_successfully
-    image: docker.io/qmcgaw/gluetun:v3.41.0@sha256:6b54856716d0de56e5bb00a77029b0adea57284cf5a466f23aad5979257d3045
+    image: docker.io/qmcgaw/gluetun:v3.40.3@sha256:ef4a44819a60469682c7b5e69183e6401171891feaa60186652d292c59e41b30
     cap_drop:
       - ALL
     cap_add:
