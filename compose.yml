@@ -323,7 +323,7 @@ services:
       net.ipv6.conf.all.forwarding: 1
       net.ipv6.conf.all.disable_ipv6: 0
     tmpfs:
-      - /tmp/gluetun:mode=750,noexec,size=5K,uid=1001,gid=1001
+      - /tmp/gluetun:mode=755,noexec,size=5K,uid=0,gid=0
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
