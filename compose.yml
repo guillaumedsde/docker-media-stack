@@ -1147,7 +1147,7 @@ services:
       SESSION_COOKIE_DOMAIN: "tandoor.${root_domain}"
       # see: https://github.com/TandoorRecipes/recipes/issues/3478#issue-2765281241
       ALLOWED_HOSTS: "tandoor.${root_domain},127.0.0.1,::1"
-      FORWARDED_ALLOW_IPS: "*"
+      FORWARDED_ALLOW_IPS: "${DOCKER_POOL_CIDR:-172.16.0.0/12}"
       SECRET_KEY: "${TANDOOR_SECRET_KEY}"
       DB_ENGINE: django.db.backends.postgresql
       POSTGRES_HOST: tandoor-db
