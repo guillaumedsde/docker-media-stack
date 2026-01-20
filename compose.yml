@@ -312,6 +312,8 @@ services:
       - NET_ADMIN
       # NOTE: chown /tmp files
       - CHOWN
+      # NOTE: allow root to read /tmp/gluetun
+      - DAC_READ_SEARCH
     cpu_count: 4
     mem_limit: 500M
     memswap_limit: 500M
@@ -321,7 +323,7 @@ services:
       net.ipv6.conf.all.forwarding: 1
       net.ipv6.conf.all.disable_ipv6: 0
     tmpfs:
-      - /tmp/gluetun:mode=777,noexec,size=5K,uid=0,gid=0
+      - /tmp/gluetun:mode=750,noexec,size=5K,uid=1001,gid=1001
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
