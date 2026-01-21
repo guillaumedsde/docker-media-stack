@@ -30,6 +30,10 @@ x-common: &common
 x-traefik: &traefik
   traefik.enable: "true"
 
+# see https://github.com/renovatebot/renovate/issues/34369#issuecomment-2674092131
+x-tandoor-image: &tandoor-image
+  image: ghcr.io/tandoorrecipes/recipes:2.3.6@sha256:350d3f47da31b35e8b8533bee9e8195b8f21b340ab4b31f099b802dfa8189755
+
 services:
   # reverse proxy
   traefik:
@@ -1128,8 +1132,7 @@ services:
 
   tandoor:
     <<: *common
-    image: &tandoor-image >-
-      ghcr.io/tandoorrecipes/recipes:2.3.6@sha256:350d3f47da31b35e8b8533bee9e8195b8f21b340ab4b31f099b802dfa8189755
+    <<: *tandoor-image
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -1201,7 +1204,8 @@ services:
       start_period: 5s
 
   tandoor-setup:
-    image: *tandoor-image
+    <<: *common
+    <<: *tandoor-image
     cpu_count: 2
     mem_limit: 750M
     memswap_limit: 750M
