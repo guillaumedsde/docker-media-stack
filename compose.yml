@@ -1131,8 +1131,7 @@ services:
     healthcheck: *postgres-healthcheck
 
   tandoor:
-    <<: *common
-    <<: *tandoor-image
+    <<: [*common, *tandoor-image]
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
@@ -1204,8 +1203,7 @@ services:
       start_period: 5s
 
   tandoor-setup:
-    <<: *common
-    <<: *tandoor-image
+    <<: [*common, *tandoor-image]
     cpu_count: 2
     mem_limit: 750M
     memswap_limit: 750M
