@@ -1142,7 +1142,7 @@ services:
         condition: service_healthy
       build-tandoor-static:
         condition: service_completed_successfully
-    environment:
+    environment: &tandoor-env
       TZ: "${TZ}"
       SESSION_COOKIE_DOMAIN: "tandoor.${root_domain}"
       # see: https://github.com/TandoorRecipes/recipes/issues/3478#issue-2765281241
@@ -1206,6 +1206,7 @@ services:
     mem_limit: 750M
     memswap_limit: 750M
     read_only: true
+    environment: *tandoor-env
     volumes:
       - *tandoor-static-volume
     cap_drop:
