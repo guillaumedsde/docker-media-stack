@@ -1129,7 +1129,7 @@ services:
   tandoor:
     <<: *common
     image: &tandoor-image >-
-      ghcr.io/tandoorrecipes/recipes:1.5.35@sha256:6e77bd6582ef2c9c05ef018e679fa60509a33b9c63f5dba7e2dcbb77cbc78a3f
+      ghcr.io/tandoorrecipes/recipes:2.3.6@sha256:350d3f47da31b35e8b8533bee9e8195b8f21b340ab4b31f099b802dfa8189755
     cpu_count: 2
     mem_limit: 750M
     memswap_limit: 750M
