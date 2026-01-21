@@ -1158,7 +1158,7 @@ services:
       REMOTE_USER_AUTH: "1"
       ENABLE_METRICS: "0"
       GUNICORN_MEDIA: "1"
-      DEBUG: "1"
+      # DEBUG: "1"
     volumes:
       - &tandoor-static-volume
         type: bind
@@ -1170,6 +1170,15 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
       - /opt/recipes/cookbook/static:mode=770,noexec,size=1M,uid=${UID},gid=${GID}
+    entrypoint:
+      - gunicorn
+    command:
+      - "--bind=0.0.0.0:8080"
+      - "--workers=8"
+      - "--threads=8"
+      - "--access-logfile=-"
+      - "--error-logfile=-"
+      - "recipes.wsgi"
     networks:
       - tandoor
     labels:
