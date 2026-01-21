@@ -1140,7 +1140,7 @@ services:
     depends_on:
       tandoor-db:
         condition: service_healthy
-      build-tandoor-static:
+      tandoo-setup:
         condition: service_completed_successfully
     environment: &tandoor-env
       TZ: "${TZ}"
@@ -1200,7 +1200,7 @@ services:
       retries: 4
       start_period: 5s
 
-  build-tandoor-static:
+  tandoo-setup:
     image: *tandoor-image
     cpu_count: 2
     mem_limit: 750M
