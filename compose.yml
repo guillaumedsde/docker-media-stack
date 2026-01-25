@@ -703,7 +703,7 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
-      traefik.http.routers.bazarr.middlewares: authelia@@docker
+      traefik.http.routers.bazarr.middlewares: authelia@docker
       # service
       traefik.http.services.bazarr.loadbalancer.server.port: "6767"
     healthcheck:
@@ -1088,7 +1088,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
       traefik.http.routers.miniflux.rule: Host(`miniflux.${root_domain}`)
-      traefik.http.routers.miniflux.middlewares: authelia@docker,denyMetrics@file
+      traefik.http.routers.miniflux.middlewares: denyMetrics@file,authelia@docker
       # service
       traefik.http.services.miniflux.loadbalancer.server.port: "8080"
 
