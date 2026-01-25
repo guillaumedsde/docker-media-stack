@@ -269,6 +269,12 @@ services:
         read_only: true
     networks:
       - anubis
+    healthcheck:
+      test: ["CMD", "anubis", "--healthcheck"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 500ms
     labels:
       <<: *traefik
       traefik.http.routers.anubis.rule: Host(`anubis.${root_domain}`)
@@ -1681,6 +1687,8 @@ services:
       authelia-valkey:
         condition: service_healthy
       lldap:
+        condition: service_healthy
+      anubis:
         condition: service_healthy
     image: docker.io/authelia/authelia:4.39.15@sha256:d23ee3c721d465b4749cc58541cda4aebe5aa6f19d7b5ce0afebb44ebee69591
     cpu_count: 4
