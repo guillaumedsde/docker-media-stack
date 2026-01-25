@@ -2,9 +2,10 @@ bots:
   - import: (data)/common/keep-internet-working.yaml
   - import: (data)/services/uptime-robot.yaml
   - name: authelia-oidc-allow
-    all:
-      - path.matches('^/(api/oidc/.*|jwks\.json)$')
-      - host.startsWith("authelia.")
+    expression:
+      all:
+        - path.matches('^/(api/oidc/.*|jwks\.json)$')
+        - host.startsWith("authelia.")
     action: ALLOW
   - name: catch-all-challenge
     path_regex: .*
