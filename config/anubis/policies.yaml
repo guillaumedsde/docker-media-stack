@@ -4,8 +4,8 @@ bots:
   - name: authelia-oidc-allow
     expression:
       all:
-        - path.matches('^/(api/oidc/.*|jwks\.json)$')
-        - host.startsWith("authelia.")
+        - 'path.matches("^/(api/oidc/.*|jwks\.json)$")'
+        - 'host.startsWith("authelia.")'
     action: ALLOW
   - name: catch-all-challenge
     path_regex: .*
