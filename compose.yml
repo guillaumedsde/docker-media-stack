@@ -255,6 +255,7 @@ services:
       - ALL
     environment:
       BIND: ":8080"
+      TARGET: " "
       PUBLIC_URL: "https://anubis.${root_domain}"
       COOKIE_DOMAIN: "${root_domain}"
       REDIRECT_DOMAINS: "${root_domain},*.${root_domain}"
