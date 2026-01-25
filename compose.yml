@@ -1738,7 +1738,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_authelia-proxy"
       traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
-      traefik.http.routers.authelia.middlewares: anubis@docker
+      # traefik.http.routers.authelia.middlewares: anubis@docker
       # service
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
       traefik.http.middlewares.authelia.forwardauth.address: "http://authelia:9091/api/authz/forward-auth"
