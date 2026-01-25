@@ -130,7 +130,7 @@ services:
       # Dashboard
       traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`)
       traefik.http.routers.dashboard.service: api@internal
-      traefik.http.routers.dashboard.middlewares: authelia@docker
+      traefik.http.routers.dashboard.middlewares: anubis@docker,authelia@docker
       # Healthcheck
       traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
       traefik.http.routers.ping.service: ping@internal
@@ -406,16 +406,14 @@ services:
       # Router
       traefik.http.routers.prowlarr.rule: Host(`prowlarr.${root_domain}`)
       traefik.http.routers.prowlarr.service: prowlarr
-      # Forward auth
-      traefik.http.routers.prowlarr.middlewares: authelia@docker
+      traefik.http.routers.prowlarr.middlewares: anubis@docker,authelia@docker
       # qBittorrent
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
       # router
       traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
       traefik.http.routers.qbittorrent.service: qbittorrent
-      # Forward auth
-      traefik.http.routers.qbittorrent.middlewares: authelia@docker
+      traefik.http.routers.qbittorrent.middlewares: anubis@docker,authelia@docker
       # Disable watchtower for this container because of these issues
       # https://github.com/containrrr/watchtower/issues/188
       # https://github.com/containrrr/watchtower/issues/1013
@@ -547,10 +545,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.radarr.rule: Host(`movies.${root_domain}`)
+      traefik.http.routers.radarr.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.radarr.loadbalancer.server.port: "7878"
-      # Forward auth
-      traefik.http.routers.radarr.middlewares: authelia@docker
     healthcheck:
       test:
         - CMD
@@ -597,10 +594,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.sonarr.rule: Host(`series.${root_domain}`)
+      traefik.http.routers.sonarr.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.sonarr.loadbalancer.server.port: "8989"
-      # Forward auth
-      traefik.http.routers.sonarr.middlewares: authelia@docker
     healthcheck:
       test:
         - CMD
@@ -647,10 +643,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.lidarr.rule: Host(`music.${root_domain}`)
+      traefik.http.routers.lidarr.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.lidarr.loadbalancer.server.port: "8686"
-      # Forward auth
-      traefik.http.routers.lidarr.middlewares: authelia@docker
     healthcheck:
       test:
         - CMD
@@ -693,10 +688,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
+      traefik.http.routers.bazarr.middlewares: anubis@docker,authelia@@docker
       # service
       traefik.http.services.bazarr.loadbalancer.server.port: "6767"
-      # Forward auth
-      traefik.http.routers.bazarr.middlewares: authelia@docker
     healthcheck:
       test:
         - CMD
@@ -756,10 +750,8 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.homer.rule: Host(`home.${root_domain}`) || Host(`${root_domain}`)
-      # service
+      traefik.http.routers.homer.middlewares: "anubis@docker,authelia@docker"
       traefik.http.services.homer.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.homer.middlewares: authelia@docker
 
   # jellyfin media server
   jellyfin:
@@ -818,7 +810,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_jellyfin"
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
-      traefik.http.routers.jellyfin.middlewares: "denyMetrics@file"
+      traefik.http.routers.jellyfin.middlewares: "denyMetrics@file,anubis@docker"
       # service
       traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
@@ -854,10 +846,9 @@ services:
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.replacement: "https://jellyseer.${root_domain}/"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.permanent: "false"
       traefik.http.routers.jellyseer.rule: Host(`jellyseer.${root_domain}`) || Host(`ombi.${root_domain}`)
+      traefik.http.routers.jellyseer.middlewares: ombi-jellyseer-redirect,anubis@docker
       # service
       traefik.http.services.jellyseer.loadbalancer.server.port: "5055"
-      # Forward auth
-      traefik.http.routers.jellyseer.middlewares: ombi-jellyseer-redirect
     healthcheck:
       test:
         - CMD
@@ -936,7 +927,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_nextcloud-proxy"
       traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
-      traefik.http.routers.nextcloud.middlewares: nextcloud-redirectregex
+      traefik.http.routers.nextcloud.middlewares: anubis@docker,nextcloud-redirectregex
       # service
       traefik.http.services.nextcloud.loadbalancer.server.port: "80"
       traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
@@ -1082,10 +1073,9 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
       traefik.http.routers.miniflux.rule: Host(`miniflux.${root_domain}`)
+      traefik.http.routers.miniflux.middlewares: anubis@docker,authelia@docker,denyMetrics@file
       # service
       traefik.http.services.miniflux.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.miniflux.middlewares: authelia@docker,denyMetrics@file
 
   miniflux-db:
     <<: *common
@@ -1130,10 +1120,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.librespeed.rule: Host(`librespeed.${root_domain}`)
+      traefik.http.routers.librespeed.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.librespeed.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.librespeed.middlewares: authelia@docker
 
   tandoor-db:
     <<: *common
@@ -1212,10 +1201,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.tandoor.rule: Host(`tandoor.${root_domain}`)
+      traefik.http.routers.tandoor.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.tandoor.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.tandoor.middlewares: authelia@docker
     healthcheck:
       test:
         - CMD
@@ -1383,10 +1371,9 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.scrutiny.rule: Host(`scrutiny.${root_domain}`)
+      traefik.http.routers.scrutiny.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.scrutiny.loadbalancer.server.port: "8080"
-      # Forward auth
-      traefik.http.routers.scrutiny.middlewares: authelia@docker
     healthcheck:
       test:
         - CMD
@@ -1433,7 +1420,7 @@ services:
     labels:
       <<: *traefik
       traefik.http.routers.prometheus.rule: Host(`prometheus.${root_domain}`)
-      traefik.http.routers.prometheus.middlewares: authelia@docker
+      traefik.http.routers.prometheus.middlewares: anubis@docker,authelia@docker
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_prometheus"
       # service
       traefik.http.services.prometheus.loadbalancer.server.port: "9090"
@@ -1514,7 +1501,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_grafana"
       traefik.http.routers.grafana.rule: Host(`grafana.${root_domain}`)
-      traefik.http.routers.grafana.middlewares: authelia@docker
+      traefik.http.routers.grafana.middlewares: anubis@docker,authelia@docker
       # service
       traefik.http.services.grafana.loadbalancer.server.port: "3000"
     healthcheck:
@@ -1651,6 +1638,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
       traefik.http.routers.lldap.rule: "Host(`lldap.${root_domain}`)"
+      traefik.http.routers.lldap.middlewares: anubis@docker
       # service
       traefik.http.services.lldap.loadbalancer.server.port: "17170"
 
@@ -1735,6 +1723,7 @@ services:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_authelia-proxy"
       traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
+      traefik.http.routers.authelia.middlewares: anubis@docker
       # service
       traefik.http.services.authelia.loadbalancer.server.port: "9091"
       traefik.http.middlewares.authelia.forwardauth.address: http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/'
