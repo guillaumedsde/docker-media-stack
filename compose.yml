@@ -48,6 +48,8 @@ services:
         condition: service_healthy
       loki:
         condition: service_healthy
+      anubis:
+        condition: service_healthy
     cap_drop:
       - ALL
     cap_add:
@@ -1687,8 +1689,6 @@ services:
       authelia-valkey:
         condition: service_healthy
       lldap:
-        condition: service_healthy
-      anubis:
         condition: service_healthy
     image: docker.io/authelia/authelia:4.39.15@sha256:d23ee3c721d465b4749cc58541cda4aebe5aa6f19d7b5ce0afebb44ebee69591
     cpu_count: 4
