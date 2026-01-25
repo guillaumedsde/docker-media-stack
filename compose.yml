@@ -260,6 +260,13 @@ services:
       COOKIE_DOMAIN: "${root_domain}"
       REDIRECT_DOMAINS: "${root_domain},*.${root_domain}"
       USE_SIMPLIFIED_EXPLANATION: "true"
+      COOKIE_EXPIRATION_TIME: "72h"
+      POLICY_FNAME: "/policies.yaml"
+    volumes:
+      - type: bind
+        source: "./config/anubis/policies.yaml"
+        target: "/policies.yaml"
+        read_only: true
     networks:
       - anubis
     labels:

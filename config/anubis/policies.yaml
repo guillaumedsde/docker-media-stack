@@ -1,0 +1,13 @@
+bots:
+  - import: (data)/common/keep-internet-working.yaml
+  - import: (data)/services/uptime-robot.yaml
+  - name: catch-all-challenge
+    path_regex: .*
+    action: CHALLENGE
+
+status_codes:
+  CHALLENGE: 403
+  DENY: 403
+
+openGraph:
+  enabled: false
