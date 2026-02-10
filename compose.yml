@@ -1535,8 +1535,7 @@ services:
 
   loki:
     <<: *common
-    # NOTE: loki >3.5.8 don't have wget which complicates healthchecks
-    image: docker.io/grafana/loki:3.5.8@sha256:00981fd9455db8589c3aa6d06744af3138c4b2c32fdec62101e92c7a704b2642
+    image: docker.io/grafana/loki:3.6.5@sha256:847c287ada0e12603910589f42038c5cdaaad04e248bd1dc6c6e0920a235f427
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
@@ -1559,13 +1558,9 @@ services:
       - "--config.file=/etc/loki/loki.yml"
     healthcheck:
       test:
-        - CMD
-        - wget
-        - --quiet
-        - --timeout=3
-        - --tries=1
-        - --spider
-        - http://localhost:3100/ready
+        - "CMD"
+        - "/usr/bin/loki"
+        - "-health"
       interval: 10s
       timeout: 5s
       retries: 8
