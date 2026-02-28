@@ -1536,7 +1536,7 @@ services:
 
   loki:
     <<: *common
-    image: docker.io/grafana/loki:3.6.6@sha256:434c7effbd66dbf69c2665fe4b2125549ecf7b45039ac28595d4034031cf47ce
+    image: docker.io/grafana/loki:3.6.7@sha256:3c8fd3570dd9219951a60d3f919c7f31923d10baee578b77bc26c4a0b32d092d
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
