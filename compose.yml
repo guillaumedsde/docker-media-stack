@@ -894,7 +894,7 @@ services:
     mem_limit: 8G
     memswap_limit: 8G
     cpu_count: 8
-    image: docker.io/nextcloud:32.0-apache
+    image: docker.io/nextcloud:33.0-apache
     user: ${NEXTCLOUD_UID}:${GID}
     cap_drop:
       - ALL
