@@ -24,11 +24,3 @@ scrape_configs:
     basic_auth:
       username: "miniflux-metrics"
       password: "miniflux-metrics"
-  # NOTE: see https://containrrr.dev/watchtower/metrics/
-  - job_name: "watchtower_exporter"
-    metrics_path: "/v1/metrics"
-    authorization:
-      type: Bearer
-      credentials: "watchtower-metrics"
-    static_configs:
-      - targets: ["watchtower:8080"]

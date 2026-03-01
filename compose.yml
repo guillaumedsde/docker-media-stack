@@ -285,44 +285,6 @@ services:
       # Middleware
       traefik.http.middlewares.anubis.forwardauth.address: "http://anubis:8080/.within.website/x/cmd/anubis/api/check"
 
-  # watchtower container to update images
-  # NOTE to update the containers images' watchtower needs to restart the containers this implies some downtime when it does
-  # NOTE watchtower also updates itself
-  watchtower:
-    image: ghcr.io/containrrr/watchtower:1.7.1@sha256:6dd50763bbd632a83cb154d5451700530d1e44200b268a4e9488fefdfcf2b038
-    <<: *common
-    mem_limit: 100M
-    memswap_limit: 100M
-    cpu_count: 2
-    read_only: true
-    user: ${UID}:${GID}
-    cap_drop:
-      - ALL
-    environment:
-      DOCKER_HOST: "tcp://watchtower-socket-proxy:2375"
-      WATCHTOWER_CLEANUP: "true"
-      WATCHTOWER_SCHEDULE: "0 0 5 * * *"
-      WATCHTOWER_HTTP_API_METRICS: "true"
-      WATCHTOWER_HTTP_API_TOKEN: "watchtower-metrics"
-    depends_on:
-      watchtower-socket-proxy:
-        condition: service_healthy
-    networks:
-      - watchtower
-      - watchtower-socket-proxy
-      - prometheus-watchtower
-
-  watchtower-socket-proxy:
-    <<: *socket-proxy
-    command:
-      - "-allowfrom=watchtower"
-      # NOTE: https://github.com/wollomatic/socket-proxy/blob/6ba2fa6112fb9a115e99de0634b15f1fbe1fb513/examples/docker-compose/watchtower/compose.yaml#L9-L12
-      - '-allowGET=/v1\..{2}/(containers/.*|images/.*)'
-      - '-allowPOST=/v1\..{2}/(containers/.*|images/.*|networks/.*)'
-      - '-allowDELETE=/v1\..{2}/(containers/.*|images/.*)'
-    networks:
-      - watchtower-socket-proxy
-
   wireguard-tun-device-creator:
     image: docker.io/busybox:1-musl
     cpu_count: 2
@@ -429,10 +391,6 @@ services:
       traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
       traefik.http.routers.qbittorrent.service: qbittorrent
       traefik.http.routers.qbittorrent.middlewares: authelia@docker
-      # Disable watchtower for this container because of these issues
-      # https://github.com/containrrr/watchtower/issues/188
-      # https://github.com/containrrr/watchtower/issues/1013
-      com.centurylinklabs.watchtower.enable: "false"
 
   # Torrent client
   qbittorrent:
@@ -462,8 +420,6 @@ services:
     #       container is defined in the same compose file
     network_mode: service:wireguard
     image: "ghcr.io/qbittorrent/docker-qbittorrent-nox:5.1.4-1@sha256:211e3b36fe8627437901da62ff8563648a32d0566de9d8e0fc7e5279061c51b8"
-    labels:
-      com.centurylinklabs.watchtower.depends-on: ${COMPOSE_PROJECT_NAME}-wireguard-1
     healthcheck:
       start_period: 30s
       retries: 10
@@ -498,8 +454,6 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
     environment:
       <<: *conf
-    labels:
-      com.centurylinklabs.watchtower.depends-on: ${COMPOSE_PROJECT_NAME}-wireguard-1
     healthcheck:
       test:
         - CMD
@@ -515,8 +469,12 @@ services:
       start_period: 15s
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:7962759d99d7e125e108e0f5e7f3cdbcd36161776d058d1d9b7153b92ef1af9e
     <<: *common
+    image: ghcr.io/flaresolverr/flaresolverr:v3.4.6@sha256:7962759d99d7e125e108e0f5e7f3cdbcd36161776d058d1d9b7153b92ef1af9e
+    depends_on:
+      wireguard:
+        restart: true
+        condition: service_healthy
     # NOTE: default image UID is 1000
     user: 1000:1000
     cpu_count: 4
@@ -528,8 +486,6 @@ services:
       <<: *conf
       PROMETHEUS_ENABLED: "true"
     network_mode: service:wireguard
-    labels:
-      com.centurylinklabs.watchtower.depends-on: ${COMPOSE_PROJECT_NAME}-wireguard-1
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
@@ -1417,7 +1373,6 @@ services:
       - prometheus-jellyfin
       - prometheus-authelia
       - prometheus-miniflux
-      - prometheus-watchtower
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
@@ -1784,8 +1739,6 @@ services:
       - authelia
 
 networks:
-  watchtower:
-    enable_ipv6: false
   traefik:
     enable_ipv6: true
   authelia:
@@ -1807,9 +1760,6 @@ networks:
   authelia-proxy:
     enable_ipv6: false
   traefik-socket-proxy:
-    enable_ipv6: false
-    internal: true
-  watchtower-socket-proxy:
     enable_ipv6: false
     internal: true
   librespeed:
@@ -1844,9 +1794,6 @@ networks:
     enable_ipv6: false
     internal: true
   prometheus-miniflux:
-    enable_ipv6: false
-    internal: true
-  prometheus-watchtower:
     enable_ipv6: false
     internal: true
   loki:

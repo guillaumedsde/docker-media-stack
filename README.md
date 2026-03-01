@@ -2,7 +2,6 @@
 
 This is a docker-compose stack for multiple applications protected by **Authelia** Oauth with an **OpenLDAP** backend for authentication.
 The **traefik** reverse proxy allows for automatic SSL certificate creation for all services with **letsencrypt**.
-**Watchtower** handles docker image updates on a daily basis.
 
 For a full list of applications, see the services defined in the `compose.yml` file.
 
