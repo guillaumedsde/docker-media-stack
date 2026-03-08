@@ -391,10 +391,6 @@ services:
   # Torrent client
   qbittorrent:
     <<: *common
-    depends_on:
-      wireguard:
-        restart: true
-        condition: service_healthy
     environment:
       QBT_CONFIG_PATH: "/config"
       QBT_DOWNLOADS_PATH: "/data/download/other"
