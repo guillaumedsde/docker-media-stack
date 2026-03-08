@@ -348,12 +348,9 @@ services:
       prometheus-flaresolverr:
         aliases:
           - flaresolverr
-    healthcheck:
-      retries: 50
-      start_period: 60s
     environment:
       <<: *conf
-      LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
+      LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-debug}
       VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
       VPN_TYPE: "wireguard"
       SERVER_COUNTRIES: ${VPN_SERVER_COUNTRIES}
