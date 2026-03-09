@@ -322,10 +322,6 @@ services:
       - NET_ADMIN
       # NOTE: allow ping
       - CAP_NET_RAW
-      # NOTE: chown /tmp files
-      # - CHOWN
-      # NOTE: allow root to read /tmp/gluetun
-      # - DAC_READ_SEARCH
     cpu_count: 4
     mem_limit: 500M
     memswap_limit: 500M
@@ -335,7 +331,7 @@ services:
       net.ipv6.conf.all.forwarding: 1
       net.ipv6.conf.all.disable_ipv6: 0
     tmpfs:
-      - /tmp/gluetun:mode=777,noexec,size=5K,uid=${UID},gid=${GID}
+      - /tmp/gluetun:mode=777,uid=${UID},gid=0
     volumes:
       - type: bind
         source: ${docker_data_folder}/gluetun
@@ -361,7 +357,9 @@ services:
       SERVER_COUNTRIES: ${VPN_SERVER_COUNTRIES}
       WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
       WIREGUARD_IMPLEMENTATION: "kernelspace"
-      DNS_UPSTREAM_RESOLVERS: "libredns"
+      PUBLICIP_ENABLED: "false"
+      PUBLICIP_FILE: "/gluetun/ip"
+      VPN_PORT_FORWARDING_STATUS_FILE: ""
       VERSION_INFORMATION: "off"
       DNS_UPDATE_PERIOD: "0"
       BLOCK_MALICIOUS: "off"
