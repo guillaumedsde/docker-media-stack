@@ -318,7 +318,10 @@ services:
     cap_drop:
       - ALL
     cap_add:
+      # Manage firewall rules
       - NET_ADMIN
+      # NOTE: allow ping
+      - CAP_NET_RAW
       # NOTE: chown /tmp files
       - CHOWN
       # NOTE: allow root to read /tmp/gluetun
