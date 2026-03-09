@@ -323,9 +323,9 @@ services:
       # NOTE: allow ping
       - CAP_NET_RAW
       # NOTE: chown /tmp files
-      - CHOWN
+      # - CHOWN
       # NOTE: allow root to read /tmp/gluetun
-      - DAC_READ_SEARCH
+      # - DAC_READ_SEARCH
     cpu_count: 4
     mem_limit: 500M
     memswap_limit: 500M
@@ -362,9 +362,6 @@ services:
       WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
       WIREGUARD_IMPLEMENTATION: "kernelspace"
       DNS_UPSTREAM_RESOLVERS: "libredns"
-      PUBLICIP_ENABLED: "false"
-      PUBLICIP_FILE: ""
-      VPN_PORT_FORWARDING_STATUS_FILE: ""
       VERSION_INFORMATION: "off"
       DNS_UPDATE_PERIOD: "0"
       BLOCK_MALICIOUS: "off"
