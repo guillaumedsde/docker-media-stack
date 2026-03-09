@@ -322,6 +322,7 @@ services:
       - NET_ADMIN
       # NOTE: allow ping
       - CAP_NET_RAW
+      - CHOWN
     cpu_count: 4
     mem_limit: 500M
     memswap_limit: 500M
