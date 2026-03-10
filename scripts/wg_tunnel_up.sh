@@ -18,11 +18,11 @@ wget "http://localhost:8080/api/v2/app/shutdown" \
     --no-verbose \
     --retry-connrefused
 
-PROWLARR_API_KEY=$(cat /run/secrets/PROWLARR_API_KEY | tr '\n' '')
+PROWLARR_API_KEY=$(cat /run/secrets/PROWLARR_API_KEY)
 
 # Restart Prowlarr
 wget "http://localhost:9696/api/v1/system/restart" \
-    --header "X-Api-Key: $(PROWLARR_API_KEY)"  \
+    --header "X-Api-Key: ${PROWLARR_API_KEY}"  \
     --method POST \
     --no-verbose \
     --retry-connrefused
