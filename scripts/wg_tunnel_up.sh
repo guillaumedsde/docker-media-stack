@@ -15,6 +15,7 @@ wget "http://localhost:8080/api/v2/app/setPreferences" \
 # Restart qbittorrent
 wget "http://localhost:8080/api/v2/app/shutdown" \
     --method POST \
+    --output-document - \
     --no-verbose \
     --retry-connrefused
 
@@ -24,5 +25,6 @@ PROWLARR_API_KEY=$(cat /run/secrets/PROWLARR_API_KEY)
 wget "http://localhost:9696/api/v1/system/restart" \
     --header "X-Api-Key: ${PROWLARR_API_KEY}"  \
     --method POST \
+    --output-document - \
     --no-verbose \
     --retry-connrefused
