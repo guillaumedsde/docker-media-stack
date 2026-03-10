@@ -373,9 +373,7 @@ services:
       PORT_FORWARD_ONLY: "on"
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: >-
-        /bin/sh -c '
-        /wg_tunnel_up.sh "{{VPN_INTERFACE}}" "{{PORT}}"
-        '
+        /bin/sh /wg_tunnel_up.sh "{{VPN_INTERFACE}}" "{{PORT}}"
       VPN_PORT_FORWARDING_DOWN_COMMAND: >-
         /bin/sh -c '
         wget -O- -nv --retry-connrefused --post-data
