@@ -337,6 +337,10 @@ services:
       - type: bind
         source: ${docker_data_folder}/gluetun
         target: /gluetun
+      - type: bind
+        source: "./scripts/wg_tunnel_up.sh"
+        target: /wg_tunnel_up.sh
+        read_only: true
     devices:
       - "${docker_data_folder}/gluetun/tun:/dev/net/tun"
     networks:
@@ -348,6 +352,8 @@ services:
       prometheus-flaresolverr:
         aliases:
           - flaresolverr
+    secrets:
+      - PROWLARR_API_KEY
     environment:
       <<: *conf
       PUID: "${UID}"
@@ -368,13 +374,14 @@ services:
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: >-
         /bin/sh -c '
-        wget
-        -O-
-        -nv
-        --retry-connrefused
-        --post-data
-        "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:8080/api/v2/app/setPreferences' VPN_PORT_FORWARDING_DOWN_COMMAND=/bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}"
-        http://127.0.0.1:8080/api/v2/app/setPreferences'
+        /wg_tunnel_up.sh "{{VPN_INTERFACE}}" "{{PORT}}"
+        '
+      VPN_PORT_FORWARDING_DOWN_COMMAND: >-
+        /bin/sh -c '
+        wget -O- -nv --retry-connrefused --post-data
+        "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}"
+        http://127.0.0.1:8080/api/v2/app/setPreferences
+        '
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik"
@@ -396,6 +403,10 @@ services:
   # Torrent client
   qbittorrent:
     <<: *common
+    # Since the qbittorrent API offers no way to restart
+    # we use the API to shutdown and docker here takes
+    # care of starting it again if it shuts down.
+    restart: always
     depends_on:
       wireguard:
         restart: true
@@ -1810,3 +1821,7 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
+
+secrets:
+  PROWLARR_API_KEY:
+    environment: PROWLARR_API_KEY
