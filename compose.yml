@@ -437,6 +437,10 @@ services:
 
   prowlarr:
     <<: *common
+    # Since the qbittorrent API offers no way to restart
+    # we use the API to shutdown and docker here takes
+    # care of starting it again if it shuts down.
+    restart: always
     image: ghcr.io/home-operations/prowlarr:2.3.3.5296@sha256:77af331ea53601fe4b8cc865d0bd3dc6eb73903a04483b49f7d5f78ee723510e
     cpu_count: 4
     mem_limit: 3G
