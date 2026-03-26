@@ -32,7 +32,7 @@ x-traefik: &traefik
 
 # see https://github.com/renovatebot/renovate/issues/34369#issuecomment-2674092131
 x-tandoor-image: &tandoor-image
-  image: ghcr.io/tandoorrecipes/recipes:2.5.3@sha256:baf93da858fc8d02aa819fc5529e4c6d41b7e2e8f379a2334d9fcb13a162da26
+  image: ghcr.io/tandoorrecipes/recipes:2.6.0@sha256:12cb44ef5e73b8618a6c7eb05b472ae8706d2b4a7e246dbacf9ec6ba3dd2c00b
 
 services:
   # reverse proxy
