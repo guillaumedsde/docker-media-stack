@@ -1380,6 +1380,7 @@ services:
       - prometheus-jellyfin
       - prometheus-authelia
       - prometheus-miniflux
+      - node-exporter
     extra_hosts:
       # NOTE: make host accessible to scrape node-exporter metrics
       host.docker.internal: host-gateway
@@ -1547,10 +1548,10 @@ services:
         read_only: true
         bind:
           propagation: "rslave"
-    network_mode: host
+    networks:
+      - node-exporter
     command:
       - "--path.rootfs=/host"
-      - "--web.listen-address=127.0.0.1:9100"
     healthcheck:
       test:
         - CMD
@@ -1802,6 +1803,9 @@ networks:
     enable_ipv6: false
     internal: true
   prometheus-miniflux:
+    enable_ipv6: false
+    internal: true
+  node-exporter:
     enable_ipv6: false
     internal: true
   loki:
