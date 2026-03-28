@@ -1550,6 +1550,7 @@ services:
     network_mode: host
     command:
       - "--path.rootfs=/host"
+      - "--web.listen-address=127.0.0.1:9100"
     healthcheck:
       test:
         - CMD
