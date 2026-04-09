@@ -735,7 +735,7 @@ services:
   jellyfin:
     <<: *common
     image: docker.io/jellyfin/jellyfin:10.11.8@sha256:1694ff069f0c9dafb283c36765175606866769f5d72f2ed56b6a0f1be922fc37
-    user: ${UID}:${GID}
+    user: ${UID}:${RENDER_GROUP_GID}
     cpu_count: 15
     mem_limit: 8G
     memswap_limit: 8G
@@ -745,6 +745,8 @@ services:
     depends_on:
       lldap:
         condition: service_healthy
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
     tmpfs:
       - /config/data/transcodes:mode=770,size=6G,uid=${UID},gid=${GID}
       - /tmp:mode=770,noexec,size=3G,uid=${UID},gid=${GID}
