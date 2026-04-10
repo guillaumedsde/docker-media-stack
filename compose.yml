@@ -1116,8 +1116,8 @@ services:
       - "/opt/recipes/venv/bin/gunicorn"
     command:
       - "--bind=[::]:8080"
-      - "--workers=4"
-      - "--threads=4"
+      - "--workers=2"
+      - "--threads=8"
       - "--access-logfile=-"
       - "--error-logfile=-"
       - "recipes.wsgi"
