@@ -1554,7 +1554,7 @@ services:
       LLDAP_SMTP_OPTIONS__USER: "${SMTP_USERNAME}"
       LLDAP_SMTP_OPTIONS__PASSWORD: "${SMTP_PASSWORD}"
       LLDAP_SMTP_OPTIONS__FROM: "lldap <lldap@${root_domain}>"
-      LLDAP_SMTP_OPTIONS__TO: "${letsencrypt_email}"
+      LLDAP_SMTP_OPTIONS__TO: "${ADMIN_EMAIL}"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
@@ -1618,7 +1618,7 @@ services:
       AUTHELIA_NOTIFIER_SMTP_USERNAME: "${SMTP_USERNAME}"
       AUTHELIA_NOTIFIER_SMTP_PASSWORD: "${SMTP_PASSWORD}"
       AUTHELIA_NOTIFIER_SMTP_SENDER: Authelia <authelia@${root_domain}>
-      AUTHELIA_NOTIFIER_SMTP_STARTUP_CHECK_ADDRESS: ${letsencrypt_email}
+      AUTHELIA_NOTIFIER_SMTP_STARTUP_CHECK_ADDRESS: ${ADMIN_EMAIL}
       # LDAP backend configuration
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_BASE_DN: ${LLDAP_LDAP_BASE_DN}
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USER: "uid=authelia,ou=people,${LLDAP_LDAP_BASE_DN}"
