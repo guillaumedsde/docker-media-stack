@@ -1133,7 +1133,8 @@ services:
       test:
         - CMD
         - wget
-        - '--header="accept: application/json"'
+        - --header
+        - "Accept: application/json"
         - --quiet
         - --timeout=3
         - --tries=1
