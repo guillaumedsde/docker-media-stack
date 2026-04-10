@@ -589,56 +589,6 @@ services:
       retries: 4
       start_period: 5s
 
-  # lidarr, webapp for downloading music through torrent client
-  lidarr:
-    <<: *common
-    # NOTE: having DB migration issues on newer versions
-    image: ghcr.io/home-operations/lidarr:3.1.2.4902@sha256:dab0e07502a34436fc50c3e789388f0a29f8cbf681fb7a02ed703ad7c368a22c
-    cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
-    read_only: true
-    user: ${UID}:${GID}
-    cap_drop:
-      - ALL
-    depends_on:
-      qbittorrent:
-        condition: service_healthy
-      prowlarr:
-        condition: service_healthy
-    tmpfs:
-      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
-    volumes:
-      - ${docker_data_folder}/lidarr:/config
-      - ${data_folder}:/data
-    networks:
-      - traefik
-      - jellyfin
-    environment:
-      <<: *conf
-      # NOTE: fix for read-only filesystems, see:
-      #       https://stackoverflow.com/questions/74447989/failed-to-create-coreclr-hresult-0x80004005#comment131446515_74447989
-      COMPlus_EnableDiagnostics: "0"
-    labels:
-      <<: *traefik
-      traefik.http.routers.lidarr.rule: Host(`music.${root_domain}`)
-      traefik.http.routers.lidarr.middlewares: authelia@docker
-      # service
-      traefik.http.services.lidarr.loadbalancer.server.port: "8686"
-    healthcheck:
-      test:
-        - CMD
-        - wget
-        - --quiet
-        - --timeout=3
-        - --tries=1
-        - --spider
-        - http://localhost:8686/ping
-      interval: 5s
-      timeout: 4s
-      retries: 4
-      start_period: 5s
-
   # bazarr, webapp for downloading subtitles
   bazarr:
     <<: *common
@@ -706,9 +656,6 @@ services:
       UN_RADARR_0_URL: http://radarr:7878
       UN_RADARR_0_API_KEY: ${RADARR_API_KEY}
       UN_RADARR_0_PATH: /data/download/series
-      UN_LIDARR_0_URL: http://lidarr:8686
-      UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
-      UN_LIDARR_0_PATH: /data/download/music
 
   # homer is a homepage container
   homer:
@@ -762,10 +709,6 @@ services:
       - type: bind
         source: ${data_folder}/series
         target: /data/series
-        read_only: true
-      - type: bind
-        source: ${data_folder}/music
-        target: /data/music
         read_only: true
       - type: bind
         source: "${data_folder}/Recettes de cuisine"
