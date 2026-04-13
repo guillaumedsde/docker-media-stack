@@ -740,7 +740,7 @@ services:
 
   jellyseer:
     <<: *common
-    image: ghcr.io/seerr-team/seerr:v3.1.0@sha256:b9f69006ccba2f5dab3f6ccbc74fbd04372a53fd9fdeb519d00634d111b340c6
+    image: ghcr.io/seerr-team/seerr:v3.1.1@sha256:21b77e973b74319394f0a1daaccc134880e9932a7397ff60ee201a4fca460794
     user: ${UID}:${GID}
     init: true
     cpu_count: 2
