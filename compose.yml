@@ -263,7 +263,7 @@ services:
         target: /etc/crowdsec
       - type: bind
         source: ./config/crowdsec/config.yaml
-        target: /etc/crowdsec/config.yaml
+        target: /config.yaml
         read_only: true
     tmpfs:
       - /staging:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
@@ -273,6 +273,11 @@ services:
         host_ip: "127.0.0.1"
         protocol: tcp
         mode: host
+    environment:
+      TZ: "${TZ}"
+      DISABLE_ONLINE_API: "true"
+      DISABLE_AGENT: "true"
+      CONFIG_FILE: "/config.yaml"
 
   anubis:
     image: ghcr.io/techarohq/anubis:v1.25.0@sha256:5cf4c0d6c7ea01a356c6685a779971bdd28d6a5a4a6719201f73a9c4ae108db0
