@@ -256,8 +256,11 @@ services:
       - ALL
     volumes:
       - type: bind
-        source: ${docker_data_folder}/crowdsec
+        source: ${docker_data_folder}/crowdsec/data
         target: /var/lib/crowdsec/data/
+      - type: bind
+        source: ${docker_data_folder}/crowdsec/config
+        target: /etc/crowdsec
     ports:
       - target: 8080
         published: 8080
