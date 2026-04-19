@@ -245,6 +245,26 @@ services:
       timeout: 5s
       retries: 2
 
+  crowdsec:
+    image: ghcr.io/crowdsecurity/crowdsec:v1.7.7-slim@sha256:04da4be237751c2eb3ed838686f81171e152d4acd67bf5eb879c9df62c3afd37
+    mem_limit: 250M
+    memswap_limit: 250M
+    cpu_count: 2
+    read_only: true
+    user: ${UID}:${GID}
+    cap_drop:
+      - ALL
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/crowdsec
+        target: /var/lib/crowdsec/data/
+    ports:
+      - target: 8080
+        published: 8080
+        host_ip: "127.0.0.1"
+        protocol: tcp
+        mode: host
+
   anubis:
     image: ghcr.io/techarohq/anubis:v1.25.0@sha256:5cf4c0d6c7ea01a356c6685a779971bdd28d6a5a4a6719201f73a9c4ae108db0
     <<: *common
