@@ -261,6 +261,9 @@ services:
       - type: bind
         source: ${docker_data_folder}/crowdsec/config
         target: /etc/crowdsec
+    tmpfs:
+      - /staging:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+
     ports:
       - target: 8080
         published: 8080
