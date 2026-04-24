@@ -1302,7 +1302,7 @@ services:
   # Monitoring
 
   scrutiny:
-    image: ghcr.io/analogj/scrutiny:v0.9.0-omnibus@sha256:caccc84d6bcee87bff70805860d3a514d521a0034951b81465a55302b93cd7db
+    image: ghcr.io/analogj/scrutiny:v0.9.1-omnibus@sha256:bf68c1469b780616e0efda19d3ae7f4f713b357240ccc50e17e3496da4923dc7
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
