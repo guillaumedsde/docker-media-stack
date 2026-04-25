@@ -269,13 +269,13 @@ services:
         read_only: true
     labels:
       <<: *traefik
-      traefik.http.routers.robots.rule: >-
+      traefik.http.routers.honeycut.rule: >-
         !(
           Host(`${root_domain}`)
           || HostRegexp(`{subhost:[a-z]+}.${root_domain}`)
         )
       # service
-      traefik.http.services.robots.loadbalancer.server.port: "8080"
+      traefik.http.services.honeycut.loadbalancer.server.port: "8080"
 
   anubis:
     image: ghcr.io/techarohq/anubis:v1.25.0@sha256:5cf4c0d6c7ea01a356c6685a779971bdd28d6a5a4a6719201f73a9c4ae108db0
