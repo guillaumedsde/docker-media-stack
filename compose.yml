@@ -260,7 +260,7 @@ services:
       COUIC_SOCKET_PATH: "/var/run/couic/couic.sock"
       REAL_IP_HEADER_NAME: "X-Forwarded-For"
     secrets:
-      - COUIC_API_KEY
+      - COUIC_API_TOKEN
     networks:
       - honeycut
     volumes:
