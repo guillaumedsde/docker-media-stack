@@ -269,12 +269,8 @@ services:
         read_only: true
     labels:
       <<: *traefik
-      traefik.http.routers.honeycut.priority: "9223372036854774807"
-      traefik.http.routers.honeycut.rule: >-
-        !(
-          Host(`${root_domain}`)
-          || HostRegexp(`{subhost:[a-z]+}.${root_domain}`)
-        )
+      traefik.http.routers.honeycut.rule: "!HostRegexp(`[a-z]+.${root_domain}`) && ! Host(`${root_domain}`)"
+      traefik.http.routers.honeycut.priority: "-1"
       # service
       traefik.http.services.honeycut.loadbalancer.server.port: "8080"
 
@@ -1235,7 +1231,7 @@ services:
       - robots
     labels:
       <<: *traefik
-      traefik.http.routers.robots.rule: ( Host(`${root_domain}`) || HostRegexp(`{subhost:[a-z]+}.${root_domain}`) ) && Path(`/robots.txt`)
+      traefik.http.routers.robots.rule: ( Host(`${root_domain}`) || HostRegexp(`[a-z]+.${root_domain}`) ) && Path(`/robots.txt`)
       # service
       traefik.http.services.robots.loadbalancer.server.port: "8080"
     healthcheck:
