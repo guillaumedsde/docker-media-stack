@@ -259,8 +259,7 @@ services:
     environment:
       COUIC_SOCKET_PATH: "/var/run/couic/couic.sock"
       REAL_IP_HEADER_NAME: "X-Forwarded-For"
-    secrets:
-      - COUIC_API_TOKEN
+      COUIC_API_TOKEN: "${COUIC_API_TOKEN}"
     networks:
       - honeycut
     volumes:
@@ -1809,5 +1808,3 @@ volumes:
 secrets:
   PROWLARR_API_KEY:
     environment: PROWLARR_API_KEY
-  COUIC_API_TOKEN:
-    environment: COUIC_API_TOKEN
