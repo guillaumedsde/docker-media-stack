@@ -253,7 +253,7 @@ services:
     memswap_limit: 100M
     cpu_count: 2
     read_only: true
-    user: ${UID}:${GID}
+    user: ${UID}:${COUIC_GID}
     cap_drop:
       - ALL
     environment:
