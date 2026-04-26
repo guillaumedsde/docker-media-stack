@@ -265,8 +265,8 @@ services:
       - honeycut
     volumes:
       - type: bind
-        source: "/var/run/couic/couic.sock"
-        target: "/var/run/couic/couic.sock"
+        source: "/var/run/couic"
+        target: "/var/run/couic"
         read_only: true
     labels:
       <<: *traefik
