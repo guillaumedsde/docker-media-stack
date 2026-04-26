@@ -260,6 +260,7 @@ services:
       COUIC_SOCKET_PATH: "/var/run/couic/couic.sock"
       REAL_IP_HEADER_NAME: "X-Forwarded-For"
       COUIC_API_TOKEN: "${COUIC_API_TOKEN}"
+      BAN_DURATION_SECONDS: "604800" # 7 days
       DRY_RUN: "false"
     networks:
       - honeycut
