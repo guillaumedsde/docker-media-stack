@@ -270,7 +270,7 @@ services:
         read_only: true
     labels:
       <<: *traefik
-      traefik.http.routers.honeycut.rule: "!HostRegexp(`[a-z]+.${root_domain}`) && ! Host(`${root_domain}`)"
+      traefik.http.routers.honeycut.rule: "${HONEYCUT_TRAEFIK_RULE}"
       traefik.http.routers.honeycut.priority: "-1"
       # service
       traefik.http.services.honeycut.loadbalancer.server.port: "8080"
