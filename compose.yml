@@ -247,7 +247,7 @@ services:
       retries: 2
 
   honeycut:
-    image: ghcr.io/guillaumedsde/honeycut:main@sha256:68e5dc5dcb5023884c12f7fd7553016cc7650fb3fb26c012a2bcc317d5f76c68
+    image: ghcr.io/guillaumedsde/honeycut:main@sha256:f214dfeb936ce010f3d34ad2391165f98bf2e8bb65b84b4f10e6565b26692aa0
     <<: *common
     mem_limit: 100M
     memswap_limit: 100M
