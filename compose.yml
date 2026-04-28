@@ -1740,7 +1740,6 @@ networks:
     enable_ipv6: false
     internal: true
   nextcloud-proxy:
-    enable_ipv6: false
   robots:
     enable_ipv6: false
     internal: true
