@@ -1734,10 +1734,12 @@ networks:
     enable_ipv6: false
     internal: true
   nextcloud:
+    enable_ipv6: true
   homer:
     enable_ipv6: false
     internal: true
   nextcloud-proxy:
+    enable_ipv6: true
   robots:
     enable_ipv6: false
     internal: true
