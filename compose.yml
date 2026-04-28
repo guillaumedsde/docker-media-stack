@@ -1734,8 +1734,6 @@ networks:
     enable_ipv6: false
     internal: true
   nextcloud:
-    enable_ipv6: false
-    internal: true
   homer:
     enable_ipv6: false
     internal: true
