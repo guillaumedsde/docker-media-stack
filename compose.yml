@@ -1308,6 +1308,7 @@ services:
       - SYS_RAWIO
     devices:
       - /dev/sda
+      - /dev/sdb
       - /dev/sdc
       - /dev/sdd
       - /dev/sde
@@ -1315,10 +1316,9 @@ services:
       - /dev/sdg
       - /dev/sdh
       - /dev/sdi
+      - /dev/sdj
+      - /dev/sdk
       - /dev/sdl
-      - /dev/sdm
-      - /dev/sdn
-      - /dev/sdo
     volumes:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
