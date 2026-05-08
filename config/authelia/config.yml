@@ -51,14 +51,6 @@ access_control:
       resources: "^/openapi/$"
       methods:
         - HEAD
-    # Allow homer on LAN
-    - domain_regex: '^home\.{{ env "ROOT_DOMAIN" }}$'
-      networks:
-        - "192.168.0.0/24"
-      methods:
-        - GET
-        - HEAD
-      policy: bypass
     # 2FA on admin apps
     - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" }}$'
       policy: two_factor
