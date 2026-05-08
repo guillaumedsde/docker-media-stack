@@ -975,7 +975,7 @@ services:
 
   nextcloud-imaginary:
     <<: *common
-    image: docker.io/nextcloud/aio-imaginary:20250306_093458@sha256:be5df22530a03b5cd2dd8ec507f4651c076b407fee21cca7f578e459b16d0d7a
+    image: docker.io/nextcloud/aio-imaginary:20260409_094910@sha256:0af7ab7b5ae3f71f5121196163051aa78585b80a7b58026f79fc9e47814cf84b
     cpu_count: 12
     mem_limit: 4G
     memswap_limit: 4G
@@ -1559,7 +1559,7 @@ services:
     depends_on:
       lldap-db:
         condition: service_healthy
-    image: "ghcr.io/lldap/lldap:2026-03-04-alpine-rootless@sha256:ab74ea93446da7b332cd8b4bffab4f1fb405ac09ed7a9e7484167ec668fc77d5"
+    image: "ghcr.io/lldap/lldap:v0.6.3-alpine-rootless@sha256:356dc844b8486135d0e1a795ed80e977a00bd0dc8417b85bc4a525ecd53e98b2"
     cpu_count: 2
     mem_limit: "250M"
     memswap_limit: "250M"
