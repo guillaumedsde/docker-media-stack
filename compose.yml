@@ -1410,8 +1410,8 @@ services:
       loki:
         condition: service_healthy
     image: docker.io/grafana/grafana:13.0.1@sha256:0f86bada30d65ef9d0183b90c1e2682ac92d53d95da8bed322b984ea78a4a73a
-    mem_limit: 1G
-    memswap_limit: 1G
+    mem_limit: 2G
+    memswap_limit: 2G
     cpu_count: 4
     user: ${UID}:${GID}
     read_only: true
