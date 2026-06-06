@@ -697,7 +697,7 @@ services:
   # jellyfin media server
   jellyfin:
     <<: *common
-    image: docker.io/jellyfin/jellyfin:10.11.8@sha256:1694ff069f0c9dafb283c36765175606866769f5d72f2ed56b6a0f1be922fc37
+    image: docker.io/jellyfin/jellyfin:10.11.11@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db
     user: ${UID}:${RENDER_GROUP_GID}
     cpu_count: 15
     mem_limit: 8G
