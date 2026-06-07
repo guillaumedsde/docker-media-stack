@@ -147,7 +147,7 @@ services:
     networks:
       traefik:
         # NOTE hardcode IP address for reverse proxy trust
-        ipv4_address: "${TRAEFIK_NETWORK_IPV4_ADDR:-172.31.255.1}"
+        ipv4_address: "${TRAEFIK_NETWORK_IPV4_ADDR:-10.255.255.254}"
       traefik-socket-proxy:
       homer:
       nextcloud-proxy:
@@ -1719,7 +1719,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "${TRAEFIK_NET_CIDR:-172.31.255.0/24}"
+        - subnet: "${TRAEFIK_NET_CIDR:-10.255.255.0/24}"
   authelia:
     enable_ipv6: false
     internal: true
