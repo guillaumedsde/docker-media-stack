@@ -145,23 +145,25 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     networks:
-      - traefik-socket-proxy
-      - traefik
-      - homer
-      - nextcloud-proxy
-      - robots
-      - scrutiny
-      - authelia-proxy
-      - librespeed
-      - tandoor
-      - miniflux-proxy
-      - lldap
-      - prometheus
-      - grafana
-      - loki
-      - jellyfin
-      - anubis
-      - honeycut
+      traefik:
+        # NOTE hardcode IP address for reverse proxy trust
+        ipv4_address: "${TRAEFIK_NETWORK_IPV4_ADDR:-172.31.255.1}"
+      traefik-socket-proxy:
+      homer:
+      nextcloud-proxy:
+      robots:
+      scrutiny:
+      authelia-proxy:
+      librespeed:
+      tandoor:
+      miniflux-proxy:
+      lldap:
+      prometheus:
+      grafana:
+      loki:
+      jellyfin:
+      anubis:
+      honeycut:
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1713,17 +1715,21 @@ services:
 
 networks:
   traefik:
-    enable_ipv6: true
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+        - subnet: "${TRAEFIK_NET_CIDR:-172.31.255.0/24}"
   authelia:
     enable_ipv6: false
     internal: true
   nextcloud:
-    enable_ipv6: true
+    enable_ipv6: false
   homer:
     enable_ipv6: false
     internal: true
   nextcloud-proxy:
-    enable_ipv6: true
+    enable_ipv6: false
   robots:
     enable_ipv6: false
     internal: true
