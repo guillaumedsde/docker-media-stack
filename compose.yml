@@ -458,7 +458,7 @@ services:
     # we use the API to shutdown and docker here takes
     # care of starting it again if it shuts down.
     restart: always
-    image: ghcr.io/home-operations/prowlarr:2.4.0.5391@sha256:91af7cbc8e357dede960033c9ecfb3a65e145d90d4e495e13adb2fbc6a546807
+    image: ghcr.io/home-operations/prowlarr:2.4.0.5397@sha256:8a140c9104c754a272f5e0d1dfcb32a06f07946a431a45c1083a16344f531748
     cpu_count: 4
     mem_limit: 3G
     memswap_limit: 3G
