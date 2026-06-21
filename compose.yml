@@ -367,8 +367,6 @@ services:
         aliases: *wireguard-aliases
       wireguard-sonarr:
         aliases: *wireguard-aliases
-    secrets:
-      - PROWLARR_API_KEY
     environment:
       <<: *conf
       PUID: "${UID}"
@@ -1798,7 +1796,3 @@ volumes:
   robots-nginx-cache:
   robots-nginx-pid:
   robots-nginx-conf:
-
-secrets:
-  PROWLARR_API_KEY:
-    environment: PROWLARR_API_KEY
