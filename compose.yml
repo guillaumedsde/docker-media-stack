@@ -20,6 +20,8 @@ x-conf: &conf
 # container restart policy
 x-common: &common
   restart: on-failure:5
+  # Disable DNS search domain
+  dns_search: [""]
   logging:
     driver: "local"
     options:
