@@ -145,9 +145,6 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     networks:
-      traefik:
-        # NOTE hardcode IP address for reverse proxy trust
-        ipv4_address: "${TRAEFIK_NETWORK_IPV4_ADDR:-10.255.255.254}"
       traefik-socket-proxy:
       homer:
       nextcloud-proxy:
@@ -164,6 +161,10 @@ services:
       jellyfin:
       anubis:
       honeycut:
+      traefik-sonarr:
+      traefik-radarr:
+      traefik-bazarr:
+      traefik-jellyseer:
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -356,14 +357,15 @@ services:
     devices:
       - "${docker_data_folder}/gluetun/tun:/dev/net/tun"
     networks:
-      traefik:
-        aliases:
+      prometheus-flaresolverr:
+        aliases: &wireguard-aliases
           - qbittorrent
           - prowlarr
           - flaresolverr
-      prometheus-flaresolverr:
-        aliases:
-          - flaresolverr
+      wireguard-radarr:
+        aliases: *wireguard-aliases
+      fs:
+        aliases: *wireguard-aliases
     secrets:
       - PROWLARR_API_KEY
     environment:
@@ -533,12 +535,15 @@ services:
       - ${docker_data_folder}/radarr:/config
       - ${data_folder}:/data
     networks:
-      - traefik
-      - jellyfin
+      - jellyfin-radarr
+      - wireguard-radarr
+      - traefik-radarr
+      - bazarr-radarr
     environment:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-radarr"
       traefik.http.routers.radarr.rule: Host(`movies.${root_domain}`)
       traefik.http.routers.radarr.middlewares: authelia@docker
       # service
@@ -579,8 +584,10 @@ services:
       - ${docker_data_folder}/sonarr:/config
       - ${data_folder}:/data
     networks:
-      - traefik
-      - jellyfin
+      - traefik-sonarr
+      - wireguard-sonarr
+      - jellyfin-sonarr
+      - bazarr-sonarr
     environment:
       <<: *conf
       # NOTE: fix for read-only filesystems, see:
@@ -588,6 +595,7 @@ services:
       COMPlus_EnableDiagnostics: "0"
     labels:
       <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-sonarr"
       traefik.http.routers.sonarr.rule: Host(`series.${root_domain}`)
       traefik.http.routers.sonarr.middlewares: authelia@docker
       # service
@@ -630,9 +638,12 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     networks:
-      - traefik
+      - traefik-bazarr
+      - bazarr-sonarr
+      - bazarr-radarr
     labels:
       <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-bazarr"
       traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
       traefik.http.routers.bazarr.middlewares: authelia@docker
       # service
@@ -711,6 +722,9 @@ services:
     networks:
       - jellyfin
       - prometheus-jellyfin
+      - jellyfin-radarr
+      - jellyfin-sonarr
+      - jellyseer-jellyfin
     environment:
       <<: *conf
       # NOTE: required for read only root filesystem, see:
@@ -755,12 +769,13 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=50M,uid=${UID},gid=${GID}
     networks:
-      - traefik
-      - jellyfin
+      - traefik-jellyseer
+      - jellyseer-jellyfin
     environment:
       <<: *conf
     labels:
       <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_jellyseer-jellyfin"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.regex: "^https?://ombi.${root_domain}/(.*)"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.replacement: "https://jellyseer.${root_domain}/"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.permanent: "false"
@@ -1691,12 +1706,6 @@ services:
       - authelia
 
 networks:
-  traefik:
-    enable_ipv6: false
-    ipam:
-      driver: default
-      config:
-        - subnet: "${TRAEFIK_NET_CIDR:-10.255.255.0/24}"
   authelia:
     enable_ipv6: false
     internal: true
@@ -1764,7 +1773,24 @@ networks:
     internal: true
   honeycut:
     internal: true
-
+  traefik-radarr:
+  wireguard-radarr:
+    internal: true
+  jellyfin-radarr:
+    internal: true
+  traefik-sonarr:
+  wireguard-sonarr:
+    internal: true
+  jellyfin-sonarr:
+    internal: true
+  traefik-bazarr:
+  bazarr-sonarr:
+    internal: true
+  bazarr-radarr:
+    internal: true
+  traefik-jellyseer:
+  jellyseer-jellyfin:
+    internal: true
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
