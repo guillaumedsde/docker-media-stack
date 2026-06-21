@@ -542,6 +542,7 @@ services:
       - wireguard-radarr
       - traefik-radarr
       - bazarr-radarr
+      - jellyseer-radarr
     environment:
       <<: *conf
     labels:
@@ -591,6 +592,7 @@ services:
       - wireguard-sonarr
       - jellyfin-sonarr
       - bazarr-sonarr
+      - jellyseer-sonarr
     environment:
       <<: *conf
       # NOTE: fix for read-only filesystems, see:
@@ -774,11 +776,13 @@ services:
     networks:
       - traefik-jellyseer
       - jellyseer-jellyfin
+      - jellyseer-radarr
+      - jellyseer-sonarr
     environment:
       <<: *conf
     labels:
       <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_jellyseer-jellyfin"
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-jellyseer"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.regex: "^https?://ombi.${root_domain}/(.*)"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.replacement: "https://jellyseer.${root_domain}/"
       traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.permanent: "false"
@@ -1796,7 +1800,10 @@ networks:
     internal: true
   wireguard-internet:
   traefik-wireguard:
-
+  jellyseer-radarr:
+    internal: true
+  jellyseer-sonarr:
+    internal: true
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
