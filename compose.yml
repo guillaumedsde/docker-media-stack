@@ -364,7 +364,7 @@ services:
           - flaresolverr
       wireguard-radarr:
         aliases: *wireguard-aliases
-      fs:
+      wireguard-sonarr:
         aliases: *wireguard-aliases
     secrets:
       - PROWLARR_API_KEY
