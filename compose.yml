@@ -1293,7 +1293,6 @@ services:
     cap_add:
       - SYS_RAWIO
     devices:
-      - /dev/sda
       - /dev/sdb
       - /dev/sdc
       - /dev/sdd
@@ -1301,10 +1300,11 @@ services:
       - /dev/sdf
       - /dev/sdg
       - /dev/sdh
-      - /dev/sdi
-      - /dev/sdj
       - /dev/sdk
       - /dev/sdl
+      - /dev/sdm
+      - /dev/sdn
+      - /dev/sdo
     volumes:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
