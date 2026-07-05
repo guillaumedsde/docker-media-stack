@@ -391,6 +391,7 @@ services:
       PORT_FORWARD_ONLY: "on"
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: '/bin/sh /wg_tunnel_up.sh "{{VPN_INTERFACE}}" "{{PORT}}"'
+      HEALTH_RESTART_VPN: "off"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-wireguard"
