@@ -1292,19 +1292,6 @@ services:
     cpu_count: 2
     cap_add:
       - SYS_RAWIO
-    devices:
-      - /dev/sdb
-      - /dev/sdc
-      - /dev/sdd
-      - /dev/sde
-      - /dev/sdf
-      - /dev/sdg
-      - /dev/sdh
-      - /dev/sdk
-      - /dev/sdl
-      - /dev/sdm
-      - /dev/sdn
-      - /dev/sdo
     volumes:
       - /run/udev:/run/udev:ro
       - ${docker_data_folder}/scrutiny/scrutiny:/opt/scrutiny/config
