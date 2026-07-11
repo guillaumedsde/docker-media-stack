@@ -34,12 +34,12 @@ x-traefik: &traefik
 
 # see https://github.com/renovatebot/renovate/issues/34369#issuecomment-2674092131
 x-tandoor-image: &tandoor-image
-  image: ghcr.io/tandoorrecipes/recipes:2.6.13@sha256:6906bf495066503bc533c1af8ceeafa49eb8de0df5dcdbc81c24e25c33f32981
+  image: ghcr.io/tandoorrecipes/recipes:2.6.12@sha256:4acba5bbff2d8bf721f0bed859be497491617217dec0323072ed70c27e2f5c9b
 
 services:
   # reverse proxy
   traefik:
-    image: docker.io/traefik:v3.7.7@sha256:1cb3845d7a05e1473c9086351426597e911db49db382b6e4769f9b0744962ac8
+    image: docker.io/traefik:v3.7.7@sha256:397ef7fbae48bfef5cdc452041703c97846897c5d8206fa57c767b19212909d1
     hostname: traefik
     user: ${UID}:${GID}
     depends_on:
@@ -176,32 +176,14 @@ services:
     ports:
       - target: 80
         published: 80
-        host_ip: "0.0.0.0"
         protocol: tcp
         mode: host
       - target: 443
         published: 443
-        host_ip: "0.0.0.0"
         protocol: tcp
         mode: host
       - target: 443
         published: 443
-        host_ip: "0.0.0.0"
-        protocol: udp
-        mode: host
-      - target: 80
-        published: 80
-        host_ip: "::"
-        protocol: tcp
-        mode: host
-      - target: 443
-        published: 443
-        host_ip: "::"
-        protocol: tcp
-        mode: host
-      - target: 443
-        published: 443
-        host_ip: "::"
         protocol: udp
         mode: host
     healthcheck:
@@ -218,7 +200,7 @@ services:
 
   traefik-socket-proxy: &socket-proxy
     <<: *common
-    image: ghcr.io/wollomatic/socket-proxy:1.12.3@sha256:9e781fbe79315355d08901832f639119aa332ac27ee6157fc7f2fab5193c8600
+    image: ghcr.io/wollomatic/socket-proxy:1.12.2@sha256:bc08381bae4c2a2050f774f15d63629caf3d884c5f02fa57ff5f76a960b2ccb8
     cpu_count: 2
     mem_limit: 50M
     memswap_limit: 50M
@@ -1343,7 +1325,7 @@ services:
 
   prometheus:
     <<: *common
-    image: docker.io/prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893
+    image: docker.io/prom/prometheus:v3.13.0@sha256:c6b27ea434f8389bfe233fbc7be381cf50587c286e871bc842008f5a1b1908a7
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
@@ -1509,7 +1491,7 @@ services:
 
   node-exporter:
     <<: *common
-    image: docker.io/prom/node-exporter:v1.12.0@sha256:9b0ade5e607f9dbedb0a8e11151b6011ae5bd79304c261804cfdd2cadf200a80
+    image: docker.io/prom/node-exporter:v1.11.1@sha256:e9cff4fc67b1818f8c97adb115b9f12c9a54b533de86765d4a0effc01b357205
     mem_limit: 250M
     memswap_limit: 250M
     cpu_count: 2
