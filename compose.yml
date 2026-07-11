@@ -403,12 +403,17 @@ services:
       traefik.http.routers.prowlarr.service: prowlarr
       traefik.http.routers.prowlarr.middlewares: authelia@docker
       # qBittorrent
+      # https://github.com/qbittorrent/qBittorrent/wiki/Traefik-Reverse-Proxy-for-Web-UI
       # service
       traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
+      traefik.http.services.qbittorrent.loadbalancer.passhostheader: "false"
       # router
       traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
       traefik.http.routers.qbittorrent.service: qbittorrent
-      traefik.http.routers.qbittorrent.middlewares: authelia@docker
+      traefik.http.routers.qbittorrent.middlewares: authelia@docker,qb-headers@docker
+      traefik.http.middlewares.qb-headers.headers.customrequestheaders.X-Frame-Options: "SAMEORIGIN"
+      traefik.http.middlewares.qb-headers.headers.customrequestheaders.Referer: ""
+      traefik.http.middlewares.qb-headers.headers.customrequestheaders.Origin: ""
 
   # Torrent client
   qbittorrent:
