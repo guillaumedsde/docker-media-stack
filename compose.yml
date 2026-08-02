@@ -39,7 +39,7 @@ x-tandoor-image: &tandoor-image
 services:
   # reverse proxy
   traefik:
-    image: docker.io/traefik:v3.7.7@sha256:397ef7fbae48bfef5cdc452041703c97846897c5d8206fa57c767b19212909d1
+    image: docker.io/traefik:v3.7.10@sha256:9c3b91d5fb7770853ca5c1124a23c34bf2d9b47ffaebeab2614cbaf410dcb2ac
     hostname: traefik
     user: ${UID}:${GID}
     depends_on:
