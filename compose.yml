@@ -268,7 +268,7 @@ services:
       traefik.http.services.honeycut.loadbalancer.server.port: "8080"
 
   anubis:
-    image: ghcr.io/techarohq/anubis:v1.25.0@sha256:5cf4c0d6c7ea01a356c6685a779971bdd28d6a5a4a6719201f73a9c4ae108db0
+    image: ghcr.io/techarohq/anubis:v1.27.0@sha256:8828275668b7bc675679f100970f9714f731388fbbf66ae94de8aca952e3fc4a
     <<: *common
     mem_limit: 100M
     memswap_limit: 100M
