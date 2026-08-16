@@ -1709,7 +1709,6 @@ services:
 networks:
   authelia:
     enable_ipv6: false
-    internal: true
   nextcloud:
     enable_ipv6: false
   homer:
