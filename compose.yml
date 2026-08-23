@@ -169,6 +169,7 @@ services:
       traefik-bazarr:
       traefik-jellyseer:
       traefik-wireguard:
+      traefik-maintainerr:
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -372,6 +373,8 @@ services:
       wireguard-sonarr:
         aliases: *wireguard-aliases
       traefik-wireguard:
+      maintainerr-qbittorrent:
+        aliases: *wireguard-aliases
     environment:
       <<: *conf
       PUID: "${UID}"
@@ -550,6 +553,7 @@ services:
       - traefik-radarr
       - bazarr-radarr
       - jellyseer-radarr
+      - maintainerr-radarr
     environment:
       <<: *conf
     labels:
@@ -600,6 +604,7 @@ services:
       - jellyfin-sonarr
       - bazarr-sonarr
       - jellyseer-sonarr
+      - maintainerr-sonarr
     environment:
       <<: *conf
       # NOTE: fix for read-only filesystems, see:
@@ -674,6 +679,50 @@ services:
       retries: 4
       start_period: 5s
 
+    maintainerr:
+      <<: *common
+      image: ghcr.io/maintainerr/maintainerr:3.24@sha256:ae50e7bcf3947857d7afc19f0395e81c8571146002eac18686520858bc919922
+      cpu_count: 4
+      mem_limit: 2G
+      memswap_limit: 2G
+      read_only: true
+      user: ${UID}:${GID}
+      cap_drop:
+        - ALL
+      depends_on:
+        jellyfin:
+          condition: service_healthy
+        radarr:
+          condition: service_healthy
+        sonarr:
+          condition: service_healthy
+        jellyseer:
+          condition: service_healthy
+        qbittorrent:
+          condition: service_healthy
+      tmpfs:
+        - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
+      volumes:
+        - type: bind
+          source: ${docker_data_folder}/maintainerr
+          target: /opt/data
+      networks:
+        - traefik-maintainerr
+        - maintainerr-radarr
+        - maintainerr-sonarr
+        - maintainerr-jellyfin
+        - maintainerr-seer
+        - maintainerr-qbittorrent
+      environment:
+        <<: *conf
+      labels:
+        <<: *traefik
+        traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-maintainerr"
+        traefik.http.routers.maintainerr.rule: Host(`maintainerr.${root_domain}`)
+        traefik.http.routers.maintainerr.middlewares: authelia@docker
+        # service
+        traefik.http.services.maintainerr.loadbalancer.server.port: "6246"
+
   # homer is a homepage container
   homer:
     <<: *common
@@ -737,6 +786,7 @@ services:
       - jellyfin-radarr
       - jellyfin-sonarr
       - jellyseer-jellyfin
+      - maintainerr-jellyfin
     environment:
       <<: *conf
       # NOTE: required for read only root filesystem, see:
@@ -785,6 +835,7 @@ services:
       - jellyseer-jellyfin
       - jellyseer-radarr
       - jellyseer-sonarr
+      - maintainerr-seer
     environment:
       <<: *conf
     labels:
@@ -1796,6 +1847,17 @@ networks:
   jellyseer-radarr:
     internal: true
   jellyseer-sonarr:
+    internal: true
+  traefik-maintainerr:
+  maintainerr-radarr:
+    internal: true
+  maintainerr-sonarr:
+    internal: true
+  maintainerr-jellyfin:
+    internal: true
+  maintainerr-seer:
+    internal: true
+  maintainerr-qbittorrent:
     internal: true
 volumes:
   robots-nginx-cache:
