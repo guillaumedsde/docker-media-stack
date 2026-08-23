@@ -679,49 +679,49 @@ services:
       retries: 4
       start_period: 5s
 
-    maintainerr:
-      <<: *common
-      image: ghcr.io/maintainerr/maintainerr:3.24@sha256:ae50e7bcf3947857d7afc19f0395e81c8571146002eac18686520858bc919922
-      cpu_count: 4
-      mem_limit: 2G
-      memswap_limit: 2G
-      read_only: true
-      user: ${UID}:${GID}
-      cap_drop:
-        - ALL
-      depends_on:
-        jellyfin:
-          condition: service_healthy
-        radarr:
-          condition: service_healthy
-        sonarr:
-          condition: service_healthy
-        jellyseer:
-          condition: service_healthy
-        qbittorrent:
-          condition: service_healthy
-      tmpfs:
-        - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
-      volumes:
-        - type: bind
-          source: ${docker_data_folder}/maintainerr
-          target: /opt/data
-      networks:
-        - traefik-maintainerr
-        - maintainerr-radarr
-        - maintainerr-sonarr
-        - maintainerr-jellyfin
-        - maintainerr-seer
-        - maintainerr-qbittorrent
-      environment:
-        <<: *conf
-      labels:
-        <<: *traefik
-        traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-maintainerr"
-        traefik.http.routers.maintainerr.rule: Host(`maintainerr.${root_domain}`)
-        traefik.http.routers.maintainerr.middlewares: authelia@docker
-        # service
-        traefik.http.services.maintainerr.loadbalancer.server.port: "6246"
+  maintainerr:
+    <<: *common
+    image: ghcr.io/maintainerr/maintainerr:3.24@sha256:ae50e7bcf3947857d7afc19f0395e81c8571146002eac18686520858bc919922
+    cpu_count: 4
+    mem_limit: 2G
+    memswap_limit: 2G
+    read_only: true
+    user: ${UID}:${GID}
+    cap_drop:
+      - ALL
+    depends_on:
+      jellyfin:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+      jellyseer:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_healthy
+    tmpfs:
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/maintainerr
+        target: /opt/data
+    networks:
+      - traefik-maintainerr
+      - maintainerr-radarr
+      - maintainerr-sonarr
+      - maintainerr-jellyfin
+      - maintainerr-seer
+      - maintainerr-qbittorrent
+    environment:
+      <<: *conf
+    labels:
+      <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-maintainerr"
+      traefik.http.routers.maintainerr.rule: Host(`maintainerr.${root_domain}`)
+      traefik.http.routers.maintainerr.middlewares: authelia@docker
+      # service
+      traefik.http.services.maintainerr.loadbalancer.server.port: "6246"
 
   # homer is a homepage container
   homer:
