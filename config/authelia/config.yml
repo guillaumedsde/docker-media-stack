@@ -15,6 +15,12 @@ access_control:
       resources: "^/ping$"
       methods:
         - HEAD
+    # Allow Maintainerr healthcheck endpoint access
+    - domain_regex: '^maintainerr\.{{ env "ROOT_DOMAIN" }}$'
+      policy: bypass
+      resources: "^/api/health/ready$"
+      methods:
+        - HEAD
     # Allow qbittorrent healthcheck endpoint access
     - domain_regex: '^torrent\.{{ env "ROOT_DOMAIN" }}$'
       policy: bypass
