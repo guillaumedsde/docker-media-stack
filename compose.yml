@@ -715,6 +715,7 @@ services:
       - maintainerr-qbittorrent
     environment:
       <<: *conf
+      TELEMETRY: "off"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-maintainerr"
