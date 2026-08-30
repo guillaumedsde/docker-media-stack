@@ -681,7 +681,7 @@ services:
 
   maintainerr:
     <<: *common
-    image: ghcr.io/maintainerr/maintainerr:3.25@sha256:43ee282d68f4597a492cd2b977fd30a64690b9a5a5799df4cdf77219bf3321d5
+    image: ghcr.io/maintainerr/maintainerr:3.26@sha256:1a8ec146fe917fbfa0ba1449c428e24fad6c37c54e92904bd6e80f73f7e373f3
     cpu_count: 4
     mem_limit: 2G
     memswap_limit: 2G
