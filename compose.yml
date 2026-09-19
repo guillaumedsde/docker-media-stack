@@ -170,6 +170,7 @@ services:
       traefik-jellyseer:
       traefik-wireguard:
       traefik-maintainerr:
+      traefik-cleanuparr:
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -375,6 +376,8 @@ services:
       traefik-wireguard:
       maintainerr-qbittorrent:
         aliases: *wireguard-aliases
+      cleanuparr-qbittorrent:
+        aliases: *wireguard-aliases
     environment:
       <<: *conf
       PUID: "${UID}"
@@ -554,6 +557,7 @@ services:
       - bazarr-radarr
       - jellyseer-radarr
       - maintainerr-radarr
+      - cleanuparr-radarr
     environment:
       <<: *conf
     labels:
@@ -605,6 +609,7 @@ services:
       - bazarr-sonarr
       - jellyseer-sonarr
       - maintainerr-sonarr
+      - cleanuparr-sonarr
     environment:
       <<: *conf
       # NOTE: fix for read-only filesystems, see:
@@ -723,6 +728,84 @@ services:
       traefik.http.routers.maintainerr.middlewares: authelia@docker
       # service
       traefik.http.services.maintainerr.loadbalancer.server.port: "6246"
+
+  cleanuparr:
+    <<: *common
+    image: ghcr.io/cleanuparr/cleanuparr:2.10.6@sha256:739e6cb501958458a634db62700c3527a95d06293cb7bb4c0b946445bf80978a
+    depends_on:
+      cleanuparr-db:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_healthy
+    cpu_count: 4
+    mem_limit: 2G
+    memswap_limit: 2G
+    read_only: true
+    user: ${UID}:${GID}
+    cap_drop:
+      - ALL
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/cleanuparr
+        target: /config
+    networks:
+      - cleanuparr-db
+      - traefik-cleanuparr
+      - cleanuparr-radarr
+      - cleanuparr-sonarr
+      - cleanuparr-qbittorrent
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -sSf
+        - http://localhost:11011/health/ready
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 5s
+    environment:
+      DATABASE_PROVIDER: postgres
+      POSTGRES_HOST: cleanuparr-db
+      POSTGRES_USER: cleanuparr
+      POSTGRES_PASS: "${CLEANUPARR_DB_PASSWORD}"
+      POSTGRES_DB: cleanuparr
+    labels:
+      <<: *traefik
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-cleanuparr"
+      traefik.http.routers.cleanuparr.rule: Host(`cleanuparr.${root_domain}`)
+      traefik.http.routers.cleanuparr.middlewares: authelia@docker
+      # service
+      traefik.http.services.cleanuparr.loadbalancer.server.port: "11011"
+
+  cleanuparr-db:
+    <<: *common
+    image: docker.io/postgres:18-trixie
+    cpu_count: 2
+    mem_limit: 2G
+    memswap_limit: 2G
+    shm_size: 128mb
+    user: ${UID}:${GID}
+    read_only: true
+    cap_drop:
+      - ALL
+    environment:
+      POSTGRES_PASSWORD: ${CLEANUPARR_DB_PASSWORD}
+      POSTGRES_USER: cleanuparr
+    tmpfs:
+      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/cleanuparr-db
+        target: /var/lib/postgresql/data
+    networks:
+      - cleanuparr-db
+    healthcheck: *postgres-healthcheck
 
   # homer is a homepage container
   homer:
@@ -1859,6 +1942,15 @@ networks:
   maintainerr-seer:
     internal: true
   maintainerr-qbittorrent:
+    internal: true
+  traefik-cleanuparr:
+  cleanuparr-db:
+    internal: true
+  cleanuparr-radarr:
+    internal: true
+  cleanuparr-sonarr:
+    internal: true
+  cleanuparr-qbittorrent:
     internal: true
 volumes:
   robots-nginx-cache:
