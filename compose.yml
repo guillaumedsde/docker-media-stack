@@ -761,7 +761,7 @@ services:
         - CMD
         - curl
         - -sSf
-        - http://localhost:11011/health/ready
+        - http://localhost:11011/health
       interval: 5s
       timeout: 4s
       retries: 4
@@ -1946,6 +1946,10 @@ networks:
   maintainerr-qbittorrent:
     internal: true
   traefik-cleanuparr:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.253.0/24
   cleanuparr-db:
     internal: true
   cleanuparr-radarr:
