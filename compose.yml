@@ -783,8 +783,8 @@ services:
         source: ${docker_data_folder}/cleanuparr
         target: /config
       - type: bind
-        source: ${data_folder}/download
-        target: /data/download
+        source: ${data_folder}
+        target: /data
     networks:
       - cleanuparr-db
       - traefik-cleanuparr
