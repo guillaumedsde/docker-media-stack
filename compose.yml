@@ -435,8 +435,9 @@ services:
     stop_grace_period: 90s
     stop_signal: SIGINT
     entrypoint:
-      - qbittorrent-nox
+      - /scripts/configure_qbittorrent_auth.sh
     command:
+      - qbittorrent-nox
       - --profile=/config
       - --confirm-legal-notice
     volumes:
@@ -444,6 +445,7 @@ services:
       - ${data_folder}:/data
       - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
+      - ./scripts/configure_qbittorrent_auth.sh:/scripts/configure_qbittorrent_auth.sh:ro
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     read_only: true
@@ -453,6 +455,7 @@ services:
     user: ${UID}:${GID}
     cap_drop:
       - ALL
+
     # NOTE: use `services:` instead of `containers:` because the
     #       container is defined in the same compose file
     network_mode: service:wireguard
