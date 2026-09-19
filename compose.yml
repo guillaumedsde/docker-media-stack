@@ -438,10 +438,25 @@ services:
       - --profile=/config
       - --confirm-legal-notice
     volumes:
-      - ${docker_data_folder}/qbittorrent:/config
-      - ${data_folder}:/data
-      - ${docker_data_folder}/blackhole:/blackhole
-      - /etc/localtime:/etc/localtime:ro
+      - type: bind
+        source: ${docker_data_folder}/qbittorrent
+        target: /config
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: bind
+        source: ${docker_data_folder}/blackhole
+        target: /blackhole
+      - type: bind
+        source: ${data_folder}/download
+        target: /data/download
+      - type: bind
+        source: ${data_folder}/software
+        target: /data/software
+      - type: bind
+        source: ${data_folder}/games
+        target: /data/games
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     read_only: true
@@ -765,6 +780,9 @@ services:
       - type: bind
         source: ${docker_data_folder}/cleanuparr
         target: /config
+      - type: bind
+        source: ${data_folder}/download
+        target: /data/download
     networks:
       - cleanuparr-db
       - traefik-cleanuparr
