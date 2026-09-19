@@ -1926,6 +1926,10 @@ networks:
     internal: true
   wireguard-internet:
   traefik-wireguard:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.254.0/24
   jellyseer-radarr:
     internal: true
   jellyseer-sonarr:
