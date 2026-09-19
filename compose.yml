@@ -827,7 +827,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${CLEANUPARR_DB_PASSWORD}
       POSTGRES_USER: cleanuparr
-    tmpfs:
+    tmpfs: &postgresql-tmpfs
       - /run:mode=770,size=5M,uid=${UID},gid=${GID}
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     volumes:
@@ -1093,9 +1093,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
       POSTGRES_USER: nextcloud
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+    tmpfs: *postgresql-tmpfs
     volumes:
       - ${docker_data_folder}/nextcloud-db:/var/lib/postgresql/data
     networks:
@@ -1205,9 +1203,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${MINIFLUX_DB_PASSWORD}
       POSTGRES_USER: miniflux
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+    tmpfs: *postgresql-tmpfs
     volumes:
       - ${docker_data_folder}/miniflux-db:/var/lib/postgresql/data
     networks:
@@ -1252,9 +1248,7 @@ services:
     environment:
       POSTGRES_USER: tandoor
       POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+    tmpfs: *postgresql-tmpfs
     volumes:
       - ${docker_data_folder}/tandoor-db:/var/lib/postgresql/data
     networks:
@@ -1756,9 +1750,7 @@ services:
     environment:
       POSTGRES_USER: lldap
       POSTGRES_PASSWORD: ${LLDAP_DB_PASSWORD}
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+    tmpfs: *postgresql-tmpfs
     volumes:
       - ${docker_data_folder}/lldap-db:/var/lib/postgresql/data
     networks:
@@ -1847,9 +1839,7 @@ services:
     environment:
       POSTGRES_USER: authelia
       POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
-    tmpfs:
-      - /run:mode=770,size=5M,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
+    tmpfs: *postgresql-tmpfs
     volumes:
       - ${docker_data_folder}/authelia-db:/var/lib/postgresql/data
     networks:
