@@ -802,7 +802,7 @@ services:
     volumes:
       - type: bind
         source: ${docker_data_folder}/cleanuparr-db
-        target: /var/lib/postgresql/data
+        target: /var/lib/postgresql
     networks:
       - cleanuparr-db
     healthcheck: &postgres-healthcheck
