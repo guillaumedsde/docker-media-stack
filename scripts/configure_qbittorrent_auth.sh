@@ -6,10 +6,10 @@
 set -eux
 
 # Path to qbittorrent configuration file
-CONFIG_FILE="/config/qBittorrent.conf"
+CONFIG_FILE="/config/qBittorrent/config/qBittorrent.conf"
 
 # Create config directory if it doesn't exist
-mkdir -p "/config"
+mkdir -p "/config/qBittorrent/config"
 
 # Create a basic config file if it doesn't exist
 touch "$CONFIG_FILE"
