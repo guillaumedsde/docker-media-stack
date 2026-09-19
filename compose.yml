@@ -558,6 +558,7 @@ services:
       - cleanuparr-radarr
     environment:
       <<: *conf
+      RADARR__AUTH__METHOD: "external"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-radarr"
@@ -1907,11 +1908,19 @@ networks:
   honeycut:
     internal: true
   traefik-radarr:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.252.0/24
   wireguard-radarr:
     internal: true
   jellyfin-radarr:
     internal: true
   traefik-sonarr:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.251.0/24
   wireguard-sonarr:
     internal: true
   jellyfin-sonarr:
