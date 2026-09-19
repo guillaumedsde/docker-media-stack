@@ -434,8 +434,6 @@ services:
         condition: service_healthy
     stop_grace_period: 90s
     stop_signal: SIGINT
-    entrypoint:
-      - /scripts/configure_qbittorrent_auth.sh
     command:
       - --profile=/config
       - --confirm-legal-notice
@@ -444,7 +442,6 @@ services:
       - ${data_folder}:/data
       - ${docker_data_folder}/blackhole:/blackhole
       - /etc/localtime:/etc/localtime:ro
-      - ./scripts/configure_qbittorrent_auth.sh:/scripts/configure_qbittorrent_auth.sh:ro,exec
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     read_only: true
