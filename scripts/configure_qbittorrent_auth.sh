@@ -3,7 +3,7 @@
 # Simple script to configure qbittorrent authentication bypass for traefik
 # This script runs before qbittorrent starts and updates the configuration
 
-set -eu
+set -eux
 
 # Path to qbittorrent configuration file
 CONFIG_FILE="/config/qBittorrent.conf"
@@ -42,4 +42,4 @@ echo "AuthSubnetWhitelist=$traefik_ip" >> "$CONFIG_FILE"
 echo "AuthSubnetWhitelistEnabled=true" >> "$CONFIG_FILE"
 
 # Start qbittorrent with the original command
-exec "$@"
+exec qbittorrent-nox "$@"
