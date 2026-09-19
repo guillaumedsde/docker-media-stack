@@ -494,6 +494,11 @@ services:
       - ${docker_data_folder}/blackhole:/blackhole
     environment:
       <<: *conf
+      PROWLARR__APP__INSTANCENAME: prowlarr.${root_domain}
+      PROWLARR__SERVER__TRUSTEDNETWORKS: "172.16.254.0/24"
+      PROWLARR__AUTH__METHOD: "External"
+      PROWLARR__SERVER__ALLOWEDHOSTS: "prowlarr, prowlarr.${root_domain}"
+      PROWLARR__LOG__ANALYTICSENABLED: "False"
     healthcheck:
       test:
         - CMD
@@ -558,7 +563,11 @@ services:
       - cleanuparr-radarr
     environment:
       <<: *conf
-      RADARR__AUTH__METHOD: "external"
+      RADARR__APP__INSTANCENAME: "movies.${root_domain}"
+      RADARR__SERVER__TRUSTEDNETWORKS: "172.16.252.0/24"
+      RADARR__AUTH__METHOD: "External"
+      RADARR__SERVER__ALLOWEDHOSTS: "radarr, movies.${root_domain}"
+      RADARR__LOG__ANALYTICSENABLED: "False"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-radarr"
@@ -614,6 +623,11 @@ services:
       # NOTE: fix for read-only filesystems, see:
       #       https://stackoverflow.com/questions/74447989/failed-to-create-coreclr-hresult-0x80004005#comment131446515_74447989
       COMPlus_EnableDiagnostics: "0"
+      SONARR__APP__INSTANCENAME: series.${root_domain}
+      SONARR__SERVER__TRUSTEDNETWORKS: "172.16.251.0/24"
+      SONARR__AUTH__METHOD: "External"
+      SONARR__SERVER__ALLOWEDHOSTS: "sonarr, series.${root_domain}"
+      SONARR__LOG__ANALYTICSENABLED: "False"
     labels:
       <<: *traefik
       traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-sonarr"
