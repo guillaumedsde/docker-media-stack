@@ -21,6 +21,7 @@ as the Traefik forward auth provider
 
 ## Coding instructions
 
+- Use the IDE's tooling and avoid shell commands whenever possible.
 - avoid code reuse using environment variables and YAML anchors whenever possible
 - prefer long syntax whenever possible (port binds, volume/bind mounts etc...)
 - prefer configuring applications using environment variables or CLI arguments
