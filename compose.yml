@@ -805,7 +805,19 @@ services:
         target: /var/lib/postgresql/data
     networks:
       - cleanuparr-db
-    healthcheck: *postgres-healthcheck
+    healthcheck: &postgres-healthcheck
+      test:
+        - "CMD-SHELL"
+        - >-
+          pg_isready
+          --username="$${POSTGRES_USER}"
+          --dbname="$${POSTGRES_USER}"
+          --host=localhost
+          --port=5432
+      start_period: 5s
+      interval: 5s
+      timeout: 4s
+      retries: 5
 
   # homer is a homepage container
   homer:
@@ -1057,19 +1069,7 @@ services:
       - ${docker_data_folder}/nextcloud-db:/var/lib/postgresql/data
     networks:
       - nextcloud
-    healthcheck: &postgres-healthcheck
-      test:
-        - "CMD-SHELL"
-        - >-
-          pg_isready
-          --username="$${POSTGRES_USER}"
-          --dbname="$${POSTGRES_USER}"
-          --host=localhost
-          --port=5432
-      start_period: 5s
-      interval: 5s
-      timeout: 4s
-      retries: 5
+    healthcheck: *postgres-healthcheck
 
   # cache for nextcloud
   nextcloud-redis:
