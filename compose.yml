@@ -906,7 +906,7 @@ services:
         target: /data/series
         read_only: true
       - type: bind
-        source: "${data_folder}/Recettes de cuisine"
+        source: "${user_data_folder}/family/Recettes de cuisine"
         target: /data/recipes
         read_only: true
     networks:
@@ -1023,6 +1023,10 @@ services:
       - type: "bind"
         source: "${user_data_folder}"
         target: "/data/users"
+      - type: "bind"
+        source: "${data_folder}"
+        target: "${data_folder}"
+        read_only: true
       - type: "bind"
         source: "./config/nextcloud/redis_config_generator.sh"
         target: "/docker-entrypoint-hooks.d/before-starting/redis_config_generator.sh"
