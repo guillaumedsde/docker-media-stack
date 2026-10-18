@@ -1123,7 +1123,7 @@ services:
   nextcloud-imaginary:
     <<: *common
     image: docker.io/nextcloud/aio-imaginary@sha256:ad144635b5ae068c35b3ebd3e9eef5265a91bbe522a2e656dfccd314dbba5a8f
-    cpu_count: 12
+    cpu_count: 6
     mem_limit: 4G
     memswap_limit: 4G
     read_only: true
@@ -1135,7 +1135,7 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=2000M,uid=${UID},gid=${GID}
     command:
-      - "-cpus=12"
+      - "-cpus=6"
       - "-enable-url-source"
       - "-concurrency=50"
     networks:
