@@ -4,79 +4,79 @@ access_control:
   default_policy: deny
   rules:
     # Allow *arr calendar access
-    - domain_regex: '^(movies|series)\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^(movies|series)\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: '^/feed(/v.)*/calendar/.+\.ics(\?.*)*$'
       methods:
         - GET
     # Allow *arr ping endpoint access
-    - domain_regex: '^(movies|series|prowlarr)\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^(movies|series|prowlarr)\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/ping$"
       methods:
         - HEAD
     # Allow cleanuparr health endpoint access
-    - domain_regex: '^cleanuparr\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^cleanuparr\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/health/ready$"
       methods:
         - HEAD
     # Allow Maintainerr healthcheck endpoint access
-    - domain_regex: '^maintainerr\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^maintainerr\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/api/health/ready$"
       methods:
         - HEAD
     # Allow qbittorrent healthcheck endpoint access
-    - domain_regex: '^torrent\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^torrent\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/api/v2/app/version$"
       methods:
         - HEAD
     # Allow miniflux healthcheck endpoint access
-    - domain_regex: '^miniflux\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^miniflux\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/healthcheck$"
       methods:
         - HEAD
     # Allow grafana healthcheck endpoint access
-    - domain_regex: '^grafana\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^grafana\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/api/health$"
       methods:
         - HEAD
     # Allow prometheus healthcheck endpoint access
-    - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/-/ready$"
       methods:
         - HEAD
     # Allow Scrutiny healthcheck endpoint access
-    - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/api/health$"
       methods:
         - HEAD
     # Allow Tandoor healthcheck endpoint access
-    - domain_regex: '^tandoor\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^tandoor\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: bypass
       resources: "^/openapi/$"
       methods:
         - HEAD
     # 2FA on admin apps
-    - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: two_factor
       subject: "group:scrutiny"
-    - domain_regex: '^grafana\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^grafana\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: two_factor
       subject: "group:grafana"
-    - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" }}$'
+    - domain_regex: '^prometheus\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: two_factor
       subject: "group:prometheus"
     # Default rule for other apps
-    - domain:
-        - '{group}.{{ env "ROOT_DOMAIN" }}'
-        - '{{ env "ROOT_DOMAIN" }}'
+    - domain_regex:
+        - '^(?P<Group>[a-z0-9-]+)\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
+        - '^{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: one_factor
 
 regulation:
