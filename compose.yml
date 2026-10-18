@@ -1424,7 +1424,7 @@ services:
         condition: service_healthy
       authelia-db:
         condition: service_healthy
-    image: ghcr.io/guillaumedsde/welephant:latest
+    image: ghcr.io/guillaumedsde/welephant:latest@sha256:c0a05d6ca22eabc68ae45e33ece59664caf02c06f49429e2eb78e0b0a4f0b8d9
     mem_limit: 500M
     memswap_limit: 500M
     cpu_count: 4
