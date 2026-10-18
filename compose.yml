@@ -1815,6 +1815,7 @@ services:
       AUTHELIA_AUTHENTICATION_BACKEND_LDAP_USERS_FILTER: "(&({username_attribute}={input})(objectclass=person)(memberOf=cn=family,ou=groups,${LLDAP_LDAP_BASE_DN}))"
       # Session configuration
       AUTHELIA_SESSION_DOMAIN: ${root_domain}
+      AUTHELIA_SESSION_REDIS_PASSWORD: ${AUTHELIA_REDIS_PASS}
       # Storage configuration
       AUTHELIA_STORAGE_ENCRYPTION_KEY: ${AUTHELIA_DB_ENCRYPTION_KEY}
       AUTHELIA_STORAGE_POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWORD}
@@ -1874,6 +1875,12 @@ services:
     cap_drop:
       - ALL
     image: docker.io/valkey/valkey:9-alpine
+    # NOTE: require authentication, the network is shared with other containers
+    #       (welephant, authelia-db) which should not be able to flush the
+    #       authelia session store
+    environment:
+      REDISCLI_AUTH: "${AUTHELIA_REDIS_PASS}"
+      VALKEY_EXTRA_FLAGS: "--requirepass ${AUTHELIA_REDIS_PASS}"
     healthcheck: *valkey-healthcheck
     volumes:
       - ${docker_data_folder}/authelia-redis:/data
