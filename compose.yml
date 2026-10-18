@@ -164,7 +164,7 @@ services:
       prometheus:
       grafana:
       loki:
-      jellyfin:
+      traefik-jellyfin:
       anubis:
       honeycut:
       traefik-sonarr:
@@ -905,7 +905,10 @@ services:
         target: /data/recipes
         read_only: true
     networks:
-      - jellyfin
+      - traefik-jellyfin
+      # NOTE: dedicated jellyfin/lldap link, keeps lldap off the
+      #       traefik ingress network
+      - jellyfin-lldap
       - prometheus-jellyfin
       - jellyfin-radarr
       - jellyfin-sonarr
@@ -926,7 +929,7 @@ services:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
     labels:
       <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_jellyfin"
+      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-jellyfin"
       traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
       traefik.http.routers.jellyfin.middlewares: "denyMetrics@file"
       # service
@@ -1726,7 +1729,7 @@ services:
     networks:
       - "lldap"
       - "lldap-db"
-      - "jellyfin"
+      - "jellyfin-lldap"
     environment:
       <<: *conf
       LLDAP_LDAP_HOST: "::"
@@ -1974,7 +1977,16 @@ networks:
   loki:
     enable_ipv6: false
     internal: true
-  jellyfin:
+  traefik-jellyfin:
+    enable_ipv6: false
+    internal: true
+    # NOTE: subnet pinned so that jellyfin's "known proxies" can be
+    #       configured with a stable traefik address
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.247.0/24
+  jellyfin-lldap:
     enable_ipv6: false
     internal: true
   anubis:
