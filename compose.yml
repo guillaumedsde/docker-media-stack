@@ -20,6 +20,9 @@ x-conf: &conf
 # container restart policy
 x-common: &common
   restart: on-failure:5
+  # NOTE: prevent processes from gaining privileges through setuid/setcap
+  security_opt:
+    - no-new-privileges
   # Disable DNS search domain
   dns_search: [""]
   logging:
@@ -312,6 +315,8 @@ services:
     mem_limit: 20M
     memswap_limit: 20M
     read_only: true
+    security_opt:
+      - no-new-privileges
     cap_drop:
       - ALL
     cap_add:
