@@ -79,6 +79,12 @@ access_control:
         - '{{ env "ROOT_DOMAIN" }}'
       policy: one_factor
 
+regulation:
+  # NOTE: ban repeated failed login attempts, max_retries must be 3 or greater
+  max_retries: 4
+  find_time: 2m
+  ban_time: 30m
+
 notifier:
   disable_startup_check: false
   smtp:
