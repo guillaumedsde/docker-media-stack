@@ -1883,6 +1883,9 @@ services:
 networks:
   authelia:
     enable_ipv6: false
+    # NOTE: database/valkey network, authelia egress (SMTP etc...) goes
+    #       through the authelia-proxy network
+    internal: true
   nextcloud:
     enable_ipv6: false
   homer:
