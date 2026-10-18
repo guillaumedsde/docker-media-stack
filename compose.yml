@@ -1580,6 +1580,11 @@ services:
       GF_SERVER_ROOT_URL: "https://grafana.${root_domain}"
       GF_AUTH_PROXY_ENABLED: "true"
       GF_AUTH_PROXY_HEADER_NAME: "Remote-User"
+      # NOTE: only trust the Remote-User header coming from Traefik on the
+      #       dedicated grafana network (see networks.grafana below),
+      #       otherwise any container able to reach grafana could impersonate
+      #       any user using a spoofed Remote-User header
+      GF_AUTH_PROXY_WHITELIST_IPS: "172.16.248.0/24"
       GF_AUTH_PROXY_HEADER_ENABLE_LOGIN_TOKEN: "false"
       GF_AUTH_DISABLE_SIGNOUT_MENU: "true"
       GF_USERS_AUTO_ASSIGN_ORG: "true"
@@ -1916,6 +1921,12 @@ networks:
   grafana:
     enable_ipv6: false
     internal: true
+    # NOTE: subnet pinned, referenced by grafana's
+    #       GF_AUTH_PROXY_WHITELIST_IPS environment variable
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.248.0/24
   prometheus-flaresolverr:
     enable_ipv6: false
     internal: true
