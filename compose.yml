@@ -1898,6 +1898,9 @@ networks:
     internal: true
   scrutiny:
     enable_ipv6: false
+    # NOTE: scrutiny (omnibus: webapp + influxdb + collector) has no
+    #       external egress needs, the collector reads local devices via udev
+    internal: true
   authelia-proxy:
     enable_ipv6: false
   traefik-socket-proxy:
