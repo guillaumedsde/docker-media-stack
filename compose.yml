@@ -1130,7 +1130,7 @@ services:
 
   nextcloud-imaginary:
     <<: *common
-    image: docker.io/nextcloud/aio-imaginary@sha256:ad144635b5ae068c35b3ebd3e9eef5265a91bbe522a2e656dfccd314dbba5a8f
+    image: docker.io/nextcloud/aio-imaginary@sha256:15d3b439849a675d7b646db6796654ae238dd9c84ea089258d19c2fa69999cdf
     cpu_count: 6
     mem_limit: 4G
     memswap_limit: 4G
