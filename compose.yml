@@ -1172,14 +1172,19 @@ services:
       - prometheus-miniflux
     environment:
       BASE_URL: "https://miniflux.${root_domain}/"
+      # NOTE: only trust the Remote-User header coming from Traefik on the
+      #       dedicated proxy network (see networks.miniflux-proxy below),
+      #       otherwise any container able to reach miniflux could impersonate
+      #       any user using a spoofed Remote-User header
       AUTH_PROXY_HEADER: "Remote-User"
-      TRUSTED_REVERSE_PROXY_NETWORKS: "${DOCKER_POOL_CIDR:-172.16.0.0/12}"
+      TRUSTED_REVERSE_PROXY_NETWORKS: "172.16.250.0/24"
       AUTH_PROXY_USER_CREATION: "true"
       RUN_MIGRATIONS: "1"
       DATABASE_URL: "postgres://miniflux:${MINIFLUX_DB_PASSWORD}@miniflux-db:5432/miniflux?sslmode=disable"
       METRICS_COLLECTOR: "1"
-      # NOTE: be careful with this if removing forward auth
-      METRICS_ALLOWED_NETWORKS: "${DOCKER_POOL_CIDR:-172.16.0.0/12}"
+      # NOTE: only allow metrics scraping from prometheus on the dedicated
+      #       prometheus-miniflux network
+      METRICS_ALLOWED_NETWORKS: "172.16.249.0/24"
       METRICS_USERNAME: "miniflux-metrics"
       METRICS_PASSWORD: "miniflux-metrics"
     labels:
@@ -1893,6 +1898,12 @@ networks:
     internal: true
   miniflux-proxy:
     enable_ipv6: false
+    # NOTE: subnet pinned, referenced by miniflux's
+    #       TRUSTED_REVERSE_PROXY_NETWORKS environment variable
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.250.0/24
   lldap:
     enable_ipv6: false
     internal: true
@@ -1917,6 +1928,12 @@ networks:
   prometheus-miniflux:
     enable_ipv6: false
     internal: true
+    # NOTE: subnet pinned, referenced by miniflux's
+    #       METRICS_ALLOWED_NETWORKS environment variable
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.249.0/24
   node-exporter:
     enable_ipv6: false
     internal: true
