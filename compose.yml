@@ -756,7 +756,7 @@ services:
 
   cleanuparr:
     <<: *common
-    image: ghcr.io/cleanuparr/cleanuparr:2.10.11@sha256:2cafbd3d7a5127c22f830b0c4ea321303a9da642991707085d4a5a85e5ef021b
+    image: ghcr.io/cleanuparr/cleanuparr:2.10.12@sha256:77e35be96a19b23fa3c8a996995c441c16d8b581a92742c2bb82eb319b6cca77
     depends_on:
       cleanuparr-db:
         condition: service_healthy
