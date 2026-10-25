@@ -1004,7 +1004,7 @@ services:
     mem_limit: 8G
     memswap_limit: 8G
     cpu_count: 8
-    image: docker.io/nextcloud:35.0-apache
+    image: docker.io/nextcloud:35.0.2-apache@sha256:89af7ee7a96ff5e9668280566209268ae6b2d02327f6ef6d56f6d68228cf9431
     user: ${NEXTCLOUD_UID}:${GID}
     cap_drop:
       - ALL
@@ -1112,7 +1112,7 @@ services:
     memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
-    image: docker.io/valkey/valkey:9-alpine
+    image: docker.io/valkey/valkey:9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
     cap_drop:
       - ALL
     networks:
@@ -1877,7 +1877,7 @@ services:
     user: ${UID}:${GID}
     cap_drop:
       - ALL
-    image: docker.io/valkey/valkey:9-alpine
+    image: docker.io/valkey/valkey:9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
     # NOTE: require authentication, the network is shared with other containers
     #       (welephant, authelia-db) which should not be able to flush the
     #       authelia session store
