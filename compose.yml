@@ -227,10 +227,9 @@ services:
       - "-allowhealthcheck"
     command:
       - "-allowfrom=traefik"
-      # NOTE: https://github.com/wollomatic/traefik-hardened/blob/b2bfcad2a1bf727f2fea33d3d68d3eca9bb1f8da/docker-compose.yaml#L12
+      # NOTE: https://github.com/wollomatic/traefik-hardened/blob/da4ae73cff183dbce880354dd1ac6a08e4a6875b/docker-compose.yaml#L12
       - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
       - '-allowHEAD=/_ping'
-
     networks:
       - traefik-socket-proxy
     healthcheck:
