@@ -1350,6 +1350,8 @@ services:
     memswap_limit: 750M
     read_only: true
     environment: *tandoor-env
+    tmpfs:
+      - /tmp:mode=770,noexec,size=10M,uid=${UID},gid=${GID}
     volumes:
       - *tandoor-static-volume
     networks:
