@@ -1488,25 +1488,25 @@ services:
       - traefik-llama-cpp
     environment:
       XDG_CACHE_HOME: "/data/.cache"
+      LLAMA_ARG_MODELS_MAX: "1"
       LLAMA_ARG_THREADS: "4"
-      LLAMA_ARG_CTX_SIZE: "32768"
+      LLAMA_ARG_CTX_SIZE: "98304"
       LLAMA_ARG_IMAGE_MAX_TOKENS: "2048"
       LLAMA_ARG_N_PARALLEL: "2"
+      LLAMA_ARG_KV_UNIFIED: "1"
       LLAMA_ARG_N_GPU_LAYERS: "all"
       LLAMA_ARG_FIT: "off"
       LLAMA_ARG_FLASH_ATTN: "on"
       LLAMA_ARG_CACHE_RAM: "512"
       LLAMA_ARG_CACHE_TYPE_K: "q8_0"
       LLAMA_ARG_CACHE_TYPE_V: "q8_0"
-      LLAMA_ARG_UBATCH_SIZE: "512"
+      LLAMA_ARG_UBATCH_SIZE: "1024"
       LLAMA_ARG_BATCH: "2048"
       LLAMA_ARG_IMAGE_MIN_TOKENS: "1024"
       LLAMA_CACHE: "/data"
       LLAMA_ARG_HF_REPO: "lmstudio-community/Qwen3.5-4B-GGUF:Q4_K_M"
       LLAMA_ARG_HOST: "0.0.0.0"
       LLAMA_ARG_CORS_ORIGINS: "localhost"
-      # LLAMA_ARG_UI_CONFIG:
-      LLAMA_ARG_MODELS_MAX: "1"
     labels:
       <<: *traefik
       traefik.http.routers.llama-cpp.rule: Host(`chat.${root_domain}`)
