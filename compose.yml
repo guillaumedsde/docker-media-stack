@@ -1470,8 +1470,7 @@ services:
   llama-cpp:
     <<: *common
     # v0.9.0
-    image: >
-      ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
+    image: ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
     user: ${UID}:${RENDER_GROUP_GID}
     cpu_count: 6
     mem_limit: 2G
