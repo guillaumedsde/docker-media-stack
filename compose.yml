@@ -1466,6 +1466,35 @@ services:
     command:
       - /crontab
 
+  ollama:
+    <<: *common
+    image: docker.io/ollama/ollama:0.40.16@sha256:910d0d8107b538fb0894e63163eb195de0cc7aefcbc666dc62d3b18f71124592
+    user: ${UID}:${RENDER_GROUP_GID}
+    cpu_count: 3
+    mem_limit: 2G
+    memswap_limit: 2G
+    read_only: true
+    cap_drop:
+      - ALL
+    devices:
+      - /dev/dri/${RENDER_DEVICE:-renderD129}:/dev/dri/${RENDER_DEVICE:-renderD129}
+    volumes:
+      - type: bind
+        source: ${docker_data_folder}/ollama
+        target: /.ollama
+    networks:
+      - openwebui-ollama
+    environment:
+      OLLAMA_HOST: "0.0.0.0:11434"
+      OLLAMA_NOHISTORY: "1"
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: "15m"
+      OLLAMA_MAX_QUEUE: "256"
+      OLLAMA_NUM_PARALLEL: "4"
+      OLLAMA_KV_CACHE_TYPE: "q8_0"
+      OLLAMA_FLASH_ATTENTION: "1"
+
   ##################################################################
   # Monitoring
 
@@ -2056,6 +2085,7 @@ networks:
     internal: true
   cleanuparr-qbittorrent:
     internal: true
+  openwebui-ollama:
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
