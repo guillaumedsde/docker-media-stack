@@ -1493,7 +1493,6 @@ services:
       LLAMA_ARG_N_PARALLEL: "1"
       LLAMA_ARG_N_GPU_LAYERS: "all"
       LLAMA_ARG_FIT: "off"
-      LLAMA_ARG_SPEC_DRAFT_N_CPU_MOE: "0"
       LLAMA_ARG_FLASH_ATTN: "on"
       LLAMA_ARG_CACHE_TYPE_K: "q8_0"
       LLAMA_ARG_CACHE_TYPE_V: "q8_0"
@@ -1508,7 +1507,7 @@ services:
       traefik.http.routers.llama-cpp.rule: Host(`chat.${root_domain}`)
       traefik.http.routers.llama-cpp.middlewares: authelia@docker
       # service
-      traefik.http.services.llama-cpp.loadbalancer.server.port: "9931"
+      traefik.http.services.llama-cpp.loadbalancer.server.port: "8080"
 
   ##################################################################
   # Monitoring
