@@ -1502,7 +1502,7 @@ services:
       LLAMA_ARG_BATCH: "2048"
       LLAMA_ARG_IMAGE_MIN_TOKENS: "1024"
       LLAMA_CACHE: "/data"
-      LLAMA_ARG_HF_REPO: "lmstudio-community/Qwen3.5-4B-GGUF:Q5_K_M"
+      LLAMA_ARG_HF_REPO: "lmstudio-community/Qwen3.5-4B-GGUF:Q4_K_M"
       LLAMA_ARG_HOST: "0.0.0.0"
       LLAMA_ARG_CORS_ORIGINS: "localhost"
       # LLAMA_ARG_UI_CONFIG:
