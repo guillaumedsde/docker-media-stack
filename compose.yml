@@ -1473,8 +1473,8 @@ services:
     image: ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
     user: ${UID}:${RENDER_GROUP_GID}
     cpu_count: 6
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 3G
+    memswap_limit: 3G
     read_only: true
     cap_drop:
       - ALL
@@ -1490,14 +1490,19 @@ services:
       XDG_CACHE_HOME: "/data/.cache"
       LLAMA_ARG_THREADS: "4"
       LLAMA_ARG_CTX_SIZE: "32768"
-      LLAMA_ARG_N_PARALLEL: "1"
+      LLAMA_ARG_IMAGE_MAX_TOKENS: "2048"
+      LLAMA_ARG_N_PARALLEL: "2"
       LLAMA_ARG_N_GPU_LAYERS: "all"
       LLAMA_ARG_FIT: "off"
       LLAMA_ARG_FLASH_ATTN: "on"
       LLAMA_ARG_CACHE_TYPE_K: "q8_0"
       LLAMA_ARG_CACHE_TYPE_V: "q8_0"
+      LLAMA_ARG_CACHE_RAM: "1024"
+      LLAMA_ARG_UBATCH_SIZE: "1024"
+      LLAMA_ARG_BATCH: "2048"
+      LLAMA_ARG_IMAGE_MIN_TOKENS: "1024"
       LLAMA_CACHE: "/data"
-      LLAMA_ARG_HF_REPO: "lmstudio-community/Qwen3.5-4B-GGUF:Q4_K_M"
+      LLAMA_ARG_HF_REPO: "lmstudio-community/Qwen3.5-4B-GGUF:Q5_K_M"
       LLAMA_ARG_HOST: "0.0.0.0"
       LLAMA_ARG_CORS_ORIGINS: "localhost"
       # LLAMA_ARG_UI_CONFIG:
