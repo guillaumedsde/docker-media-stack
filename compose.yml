@@ -174,6 +174,7 @@ services:
       traefik-wireguard:
       traefik-maintainerr:
       traefik-cleanuparr:
+      traefik-llama-cpp:
     <<: *common
     mem_limit: 500M
     memswap_limit: 500M
@@ -1466,11 +1467,13 @@ services:
     command:
       - /crontab
 
-  ollama:
+  llama-cpp:
     <<: *common
-    image: docker.io/ollama/ollama:0.40.16@sha256:910d0d8107b538fb0894e63163eb195de0cc7aefcbc666dc62d3b18f71124592
+    # v0.9.0
+    image: >
+      ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
     user: ${UID}:${RENDER_GROUP_GID}
-    cpu_count: 3
+    cpu_count: 6
     mem_limit: 2G
     memswap_limit: 2G
     read_only: true
@@ -1480,20 +1483,30 @@ services:
       - /dev/dri/${RENDER_DEVICE:-renderD129}:/dev/dri/${RENDER_DEVICE:-renderD129}
     volumes:
       - type: bind
-        source: ${docker_data_folder}/ollama
-        target: /.ollama
+        source: ${docker_data_folder}/llama-cpp
+        target: /data
     networks:
-      - openwebui-ollama
+      - traefik-llama-cpp
     environment:
-      OLLAMA_HOST: "0.0.0.0:11434"
-      OLLAMA_NOHISTORY: "1"
-      OLLAMA_NO_CLOUD: "1"
-      OLLAMA_MAX_LOADED_MODELS: "1"
-      OLLAMA_KEEP_ALIVE: "15m"
-      OLLAMA_MAX_QUEUE: "256"
-      OLLAMA_NUM_PARALLEL: "4"
-      OLLAMA_KV_CACHE_TYPE: "q8_0"
-      OLLAMA_FLASH_ATTENTION: "1"
+      LLAMA_ARG_THREADS: "4"
+      LLAMA_ARG_N_GPU_LAYERS: "all"
+      LLAMA_ARG_FIT: "off"
+      LLAMA_ARG_SPEC_DRAFT_N_CPU_MOE: "0"
+      LLAMA_ARG_FLASH_ATTN: "on"
+      LLAMA_ARG_CACHE_TYPE_K: "q8_0"
+      LLAMA_ARG_CACHE_TYPE_V: "q8_0"
+      LLAMA_CACHE: "/data"
+      LLAMA_ARG_HF_REPO: "lmstudio-community/Qwen3.5-4B-GGUF:Q4_K_M"
+      LLAMA_ARG_HOST: "0.0.0.0"
+      LLAMA_ARG_CORS_ORIGINS: "localhost"
+      # LLAMA_ARG_UI_CONFIG:
+      LLAMA_ARG_MODELS_MAX: "1"
+    labels:
+      <<: *traefik
+      traefik.http.routers.llama-cpp.rule: Host(`chat.${root_domain}`)
+      traefik.http.routers.llama-cpp.middlewares: authelia@docker
+      # service
+      traefik.http.services.llama-cpp.loadbalancer.server.port: "9931"
 
   ##################################################################
   # Monitoring
@@ -2085,7 +2098,14 @@ networks:
     internal: true
   cleanuparr-qbittorrent:
     internal: true
-  openwebui-ollama:
+  traefik-llama-cpp:
+    enable_ipv6: false
+    # NOTE: subnet pinned so that llamma-cpp's "known proxies" can be
+    #       configured with a stable traefik address
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.246.0/24
 volumes:
   robots-nginx-cache:
   robots-nginx-pid:
