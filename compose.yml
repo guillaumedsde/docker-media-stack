@@ -1467,56 +1467,56 @@ services:
     command:
       - /crontab
 
-  llama-cpp:
-    <<: *common
-    # v0.9.0
-    image: ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
-    user: ${UID}:${RENDER_GROUP_GID}
-    cpu_count: 6
-    mem_limit: 3G
-    memswap_limit: 3G
-    read_only: true
-    cap_drop:
-      - ALL
-    devices:
-      - /dev/dri/${RENDER_DEVICE:-renderD129}:/dev/dri/${RENDER_DEVICE:-renderD129}
-    volumes:
-      - type: bind
-        source: ${docker_data_folder}/llama-cpp
-        target: /data
-    networks:
-      - traefik-llama-cpp
-    environment:
-      XDG_CACHE_HOME: "/data/.cache"
-      GGML_VK_ALLOW_GRAPHICS_QUEUE: "1"
-      LLAMA_ARG_MODELS_MAX: "1"
-      LLAMA_ARG_THREADS: "4"
-      LLAMA_ARG_CTX_SIZE: "98304"
-      LLAMA_ARG_IMAGE_MIN_TOKENS: "256"
-      LLAMA_ARG_IMAGE_MAX_TOKENS: "2048"
-      LLAMA_ARG_N_PARALLEL: "2"
-      LLAMA_ARG_KV_UNIFIED: "1"
-      LLAMA_ARG_N_GPU_LAYERS: "all"
-      LLAMA_ARG_FIT: "off"
-      LLAMA_ARG_FLASH_ATTN: "on"
-      LLAMA_ARG_CACHE_RAM: "512"
-      LLAMA_ARG_CACHE_TYPE_K: "q8_0"
-      LLAMA_ARG_CACHE_TYPE_V: "q8_0"
-      LLAMA_ARG_UBATCH: "2048"
-      LLAMA_ARG_BATCH: "2048"
-      LLAMA_ARG_SPEC_TYPE: "draft-mtp"
-      LLAMA_ARG_SPEC_DRAFT_N_MAX: "3"
-      LLAMA_ARG_SPEC_DRAFT_N_UBATCH: "512"
-      LLAMA_CACHE: "/data"
-      LLAMA_ARG_HF_REPO: "unsloth/Qwen3.5-4B-MTP-GGUF:UD-Q4_K_XL"
-      LLAMA_ARG_HOST: "0.0.0.0"
-      LLAMA_ARG_CORS_ORIGINS: "localhost"
-    labels:
-      <<: *traefik
-      traefik.http.routers.llama-cpp.rule: Host(`chat.${root_domain}`)
-      traefik.http.routers.llama-cpp.middlewares: authelia@docker
-      # service
-      traefik.http.services.llama-cpp.loadbalancer.server.port: "8080"
+  # llama-cpp:
+  #   <<: *common
+  #   # v0.9.0
+  #   image: ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
+  #   user: ${UID}:${RENDER_GROUP_GID}
+  #   cpu_count: 6
+  #   mem_limit: 3G
+  #   memswap_limit: 3G
+  #   read_only: true
+  #   cap_drop:
+  #     - ALL
+  #   devices:
+  #     - /dev/dri/${RENDER_DEVICE:-renderD129}:/dev/dri/${RENDER_DEVICE:-renderD129}
+  #   volumes:
+  #     - type: bind
+  #       source: ${docker_data_folder}/llama-cpp
+  #       target: /data
+  #   networks:
+  #     - traefik-llama-cpp
+  #   environment:
+  #     XDG_CACHE_HOME: "/data/.cache"
+  #     GGML_VK_ALLOW_GRAPHICS_QUEUE: "1"
+  #     LLAMA_ARG_MODELS_MAX: "1"
+  #     LLAMA_ARG_THREADS: "4"
+  #     LLAMA_ARG_CTX_SIZE: "98304"
+  #     LLAMA_ARG_IMAGE_MIN_TOKENS: "256"
+  #     LLAMA_ARG_IMAGE_MAX_TOKENS: "2048"
+  #     LLAMA_ARG_N_PARALLEL: "2"
+  #     LLAMA_ARG_KV_UNIFIED: "1"
+  #     LLAMA_ARG_N_GPU_LAYERS: "all"
+  #     LLAMA_ARG_FIT: "off"
+  #     LLAMA_ARG_FLASH_ATTN: "on"
+  #     LLAMA_ARG_CACHE_RAM: "512"
+  #     LLAMA_ARG_CACHE_TYPE_K: "q8_0"
+  #     LLAMA_ARG_CACHE_TYPE_V: "q8_0"
+  #     LLAMA_ARG_UBATCH: "2048"
+  #     LLAMA_ARG_BATCH: "2048"
+  #     LLAMA_ARG_SPEC_TYPE: "draft-mtp"
+  #     LLAMA_ARG_SPEC_DRAFT_N_MAX: "3"
+  #     LLAMA_ARG_SPEC_DRAFT_N_UBATCH: "512"
+  #     LLAMA_CACHE: "/data"
+  #     LLAMA_ARG_HF_REPO: "unsloth/Qwen3.5-4B-MTP-GGUF:UD-Q4_K_XL"
+  #     LLAMA_ARG_HOST: "0.0.0.0"
+  #     LLAMA_ARG_CORS_ORIGINS: "localhost"
+  #   labels:
+  #     <<: *traefik
+  #     traefik.http.routers.llama-cpp.rule: Host(`chat.${root_domain}`)
+  #     traefik.http.routers.llama-cpp.middlewares: authelia@docker
+  #     # service
+  #     traefik.http.services.llama-cpp.loadbalancer.server.port: "8080"
 
   ##################################################################
   # Monitoring
