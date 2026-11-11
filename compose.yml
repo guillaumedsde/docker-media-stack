@@ -176,8 +176,8 @@ services:
       traefik-cleanuparr:
       traefik-llama-cpp:
     <<: *common
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 250M
+    memswap_limit: 250M
     cpu_count: 4
     ports:
       - target: 80
@@ -352,8 +352,8 @@ services:
       - CAP_NET_RAW
       - CHOWN
     cpu_count: 4
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 200M
+    memswap_limit: 200M
     tmpfs:
       - /tmp/gluetun:mode=777,uid=${UID},gid=0
     volumes:
@@ -490,8 +490,8 @@ services:
     <<: *common
     image: ghcr.io/home-operations/prowlarr:3.0.0.5737@sha256:0954599432e16ccd86129f1eb8eb0247fd0d1591aab400f73e2010a1cda37be8
     cpu_count: 4
-    mem_limit: 3G
-    memswap_limit: 3G
+    mem_limit: 1G
+    memswap_limit: 1G
     read_only: true
     user: ${UID}:${GID}
     cap_drop:
@@ -551,8 +551,8 @@ services:
     <<: *common
     image: ghcr.io/home-operations/radarr:7.0.1.10859@sha256:ffe1f4d7c30b33a1e1256e14ace0eefddf120b37d8defceba208e9c190772f8d
     cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 1G
+    memswap_limit: 1G
     read_only: true
     user: ${UID}:${GID}
     cap_drop:
@@ -608,8 +608,8 @@ services:
     <<: *common
     image: ghcr.io/home-operations/sonarr:5.0.0.2941@sha256:93b0923dd12afd43247739e19dac59d74c52a15ea12e036b7ced264cffb42574
     cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 1G
+    memswap_limit: 1G
     read_only: true
     user: ${UID}:${GID}
     cap_drop:
@@ -715,8 +715,8 @@ services:
     <<: *common
     image: ghcr.io/maintainerr/maintainerr:3.31@sha256:c5574a7f3939b46b68461250fe5e60c4895649e97ade91184be2e02ec0960cee
     cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 500M
+    memswap_limit: 500M
     read_only: true
     user: ${UID}:${GID}
     cap_drop:
@@ -769,8 +769,8 @@ services:
       qbittorrent:
         condition: service_healthy
     cpu_count: 4
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 250M
+    memswap_limit: 250M
     read_only: true
     user: ${UID}:${GID}
     cap_drop:
@@ -816,8 +816,8 @@ services:
     <<: *common
     image: docker.io/postgres:18-trixie
     cpu_count: 2
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 250M
+    memswap_limit: 250M
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
@@ -877,8 +877,8 @@ services:
     image: ghcr.io/jellyfin/jellyfin:12.4@sha256:7da5184caa38c553f219f6772476540081f392a68049e2b68c923f6daf877f8e
     user: ${UID}:${RENDER_GROUP_GID}
     cpu_count: 15
-    mem_limit: 8G
-    memswap_limit: 8G
+    mem_limit: 4G
+    memswap_limit: 4G
     read_only: true
     cap_drop:
       - ALL
@@ -888,8 +888,8 @@ services:
     devices:
       - /dev/dri/renderD128:/dev/dri/renderD128
     tmpfs:
-      - /config/data/transcodes:mode=770,size=6G,uid=${UID},gid=${GID}
-      - /tmp:mode=770,noexec,size=3G,uid=${UID},gid=${GID}
+      - /config/data/transcodes:mode=770,size=3G,uid=${UID},gid=${GID}
+      - /tmp:mode=770,noexec,size=500M,uid=${UID},gid=${GID}
     volumes:
       - type: bind
         source: ${docker_data_folder}/jellyfin
@@ -943,8 +943,8 @@ services:
     user: ${UID}:${GID}
     init: true
     cpu_count: 2
-    mem_limit: 1G
-    memswap_limit: 1G
+    mem_limit: 500M
+    memswap_limit: 500M
     read_only: true
     cap_drop:
       - ALL
@@ -1003,8 +1003,8 @@ services:
         condition: service_healthy
       authelia:
         condition: service_healthy
-    mem_limit: 8G
-    memswap_limit: 8G
+    mem_limit: 1G
+    memswap_limit: 1G
     cpu_count: 8
     image: docker.io/nextcloud:35.0.2-apache@sha256:6b015097ca6c30f97d172365f886c27f865e16f8e6ac2d1e80bc1433bc2580da
     user: ${NEXTCLOUD_UID}:${GID}
@@ -1089,8 +1089,8 @@ services:
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 250M
+    memswap_limit: 250M
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
@@ -1110,8 +1110,8 @@ services:
   nextcloud-redis:
     <<: *common
     cpu_count: 2
-    mem_limit: 250M
-    memswap_limit: 250M
+    mem_limit: 100M
+    memswap_limit: 100M
     read_only: true
     user: ${UID}:${GID}
     image: docker.io/valkey/valkey:9.1.3-alpine@sha256:bf09d58e96d6b4524a15396b65b242bbe18beebbcc15a04d8ee75ddac62fae0b
@@ -1134,8 +1134,8 @@ services:
     <<: *common
     image: docker.io/nextcloud/aio-imaginary:20261014_095932@sha256:ad144635b5ae068c35b3ebd3e9eef5265a91bbe522a2e656dfccd314dbba5a8f
     cpu_count: 6
-    mem_limit: 4G
-    memswap_limit: 4G
+    mem_limit: 2G
+    memswap_limit: 2G
     read_only: true
     user: ${UID}:${GID}
     cap_add:
@@ -1147,7 +1147,7 @@ services:
     command:
       - "-cpus=6"
       - "-enable-url-source"
-      - "-concurrency=50"
+      - "-concurrency=25"
     networks:
       - nextcloud
     healthcheck:
@@ -1204,8 +1204,8 @@ services:
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 250M
+    memswap_limit: 250M
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
@@ -1225,8 +1225,8 @@ services:
     <<: *common
     image: ghcr.io/librespeed/speedtest-rust:v1.4.0@sha256:8094b51e5b08964591ee844ebbd6cd301ae8a9b82f4f1918fae6f6dff22089e4
     cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 250M
+    memswap_limit: 250M
     user: ${UID}:${GID}
     read_only: true
     cap_drop:
@@ -1249,8 +1249,8 @@ services:
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 250M
+    memswap_limit: 250M
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
@@ -1269,8 +1269,8 @@ services:
   tandoor:
     <<: [*common, *tandoor-image]
     cpu_count: 4
-    mem_limit: 4G
-    memswap_limit: 4G
+    mem_limit: 1G
+    memswap_limit: 1G
     user: ${UID}:${GID}
     read_only: true
     cap_drop:
@@ -1379,8 +1379,8 @@ services:
   robots:
     <<: *common
     image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine-slim
-    mem_limit: 200M
-    memswap_limit: 200M
+    mem_limit: 100M
+    memswap_limit: 100M
     cpu_count: 2
     user: ${UID}:${GID}
     read_only: true
@@ -1902,8 +1902,8 @@ services:
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
-    mem_limit: 500M
-    memswap_limit: 500M
+    mem_limit: 250M
+    memswap_limit: 250M
     shm_size: 128mb
     user: ${UID}:${GID}
     read_only: true
@@ -1922,8 +1922,8 @@ services:
   authelia-valkey:
     <<: *common
     cpu_count: 2
-    mem_limit: 250M
-    memswap_limit: 250M
+    mem_limit: 100M
+    memswap_limit: 100M
     read_only: true
     user: ${UID}:${GID}
     cap_drop:
