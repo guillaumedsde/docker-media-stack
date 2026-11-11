@@ -1473,8 +1473,8 @@ services:
     image: ghcr.io/ggml-org/llama.cpp:server-vulkan-b12110@sha256:729a566c7d51c91377874119e6a65b25e812f863b80361c03d3fb05e752359f9
     user: ${UID}:${RENDER_GROUP_GID}
     cpu_count: 6
-    mem_limit: 2G
-    memswap_limit: 2G
+    mem_limit: 3G
+    memswap_limit: 3G
     read_only: true
     cap_drop:
       - ALL
@@ -1489,7 +1489,6 @@ services:
     environment:
       XDG_CACHE_HOME: "/data/.cache"
       GGML_VK_ALLOW_GRAPHICS_QUEUE: "1"
-      LLAMA_ARG_LOAD_MODE: "dio"
       LLAMA_ARG_MODELS_MAX: "1"
       LLAMA_ARG_THREADS: "4"
       LLAMA_ARG_CTX_SIZE: "98304"
