@@ -47,4 +47,4 @@ http:
       loadBalancer:
         servers:
           - url: '{{ env "TMPL_LLAMA_ADDRESS" }}'
-        serversTransport: lan-transport
+        serversTransport: llama-transport
