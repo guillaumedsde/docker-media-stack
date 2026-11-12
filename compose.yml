@@ -138,6 +138,7 @@ services:
       # NOTE: template variables
       TMPL_ROOT_DOMAIN: "${root_domain}"
       TMPL_LLAMA_ADDRESS: "${llama_address}"
+      TMPL_LLAMA_API_KEY: "${llama_api_key}"
     labels:
       <<: *traefik
       # Dashboard

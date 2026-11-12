@@ -31,6 +31,10 @@ http:
         customRequestHeaders:
           remote-user: ""
           x-remote-user: ""
+    llamaAuth:
+      headers:
+        customRequestHeaders:
+          Authorization: 'Bearer {{ env "TMPL_LLAMA_API_KEY" }}'
   serversTransports:
     llama-transport:
       serverName: "llama-server"
@@ -42,6 +46,9 @@ http:
       service: llama
       entryPoints:
         - websecure
+      middlewares:
+        - authelia
+        - llamaAuth
   services:
     llama:
       loadBalancer:
