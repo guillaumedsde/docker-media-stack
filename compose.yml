@@ -74,7 +74,7 @@ services:
       TRAEFIK_PROVIDERS_DOCKER: "true"
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
-      TRAEFIK_PROVIDERS_FILE_FILENAME: "/etc/traefik/dynamic_configuration.yml.tmpl"
+      TRAEFIK_PROVIDERS_FILE_FILENAME: "/etc/traefik/dynamic_configuration.yml"
       # NOTE: entrypoints
       TRAEFIK_ENTRYPOINTS_WEB: "true"
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
@@ -150,7 +150,7 @@ services:
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
-      - ./config/traefik/dynamic_configuration.yml.tmpl:/etc/traefik/dynamic_configuration.yml.tmpl:ro
+      - ./config/traefik/dynamic_configuration.yml:/etc/traefik/dynamic_configuration.yml:ro
       - ./llama.crt:/etc/traefik/llama.crt:ro
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
