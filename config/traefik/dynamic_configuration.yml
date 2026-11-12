@@ -47,8 +47,8 @@ http:
       entryPoints:
         - websecure
       middlewares:
-        - authelia
-        - llamaAuth
+        - authelia@docker
+        - llamaAuth@file
   services:
     llama:
       loadBalancer:
