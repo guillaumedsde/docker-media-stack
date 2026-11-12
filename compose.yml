@@ -74,7 +74,7 @@ services:
       TRAEFIK_PROVIDERS_DOCKER: "true"
       TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
-      TRAEFIK_PROVIDERS_FILE_FILENAME: "/etc/traefik/dynamic_configuration.yml"
+      TRAEFIK_PROVIDERS_FILE_FILENAME: "/etc/traefik/dynamic_configuration.yml.tmpl"
       # NOTE: entrypoints
       TRAEFIK_ENTRYPOINTS_WEB: "true"
       TRAEFIK_ENTRYPOINTS_WEB_ADDRESS: ":80"
@@ -135,6 +135,9 @@ services:
       TRAEFIK_METRICS_OTLP: "true"
       TRAEFIK_METRICS_OTLP_HTTP: "true"
       TRAEFIK_METRICS_OTLP_HTTP_ENDPOINT: "http://prometheus:9090/api/v1/otlp/v1/metrics"
+      # NOTE: template variables
+      TMPL_ROOT_DOMAIN: "${root_domain}"
+      TMPL_LLAMA_ADDRESS: "${llama_address}"
     labels:
       <<: *traefik
       # Dashboard
@@ -147,7 +150,8 @@ services:
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
-      - ./config/traefik/dynamic_configuration.yml:/etc/traefik/dynamic_configuration.yml:ro
+      - ./config/traefik/dynamic_configuration.yml.tmpl:/etc/traefik/dynamic_configuration.yml.tmpl:ro
+      - ./llama.crt:/etc/traefik/llama.crt:ro
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     networks:

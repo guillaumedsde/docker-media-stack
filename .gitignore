@@ -1,3 +1,4 @@
 .env
 .secret*
 compose.override.yaml
+*.crt

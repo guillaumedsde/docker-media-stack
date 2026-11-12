@@ -31,3 +31,20 @@ http:
         customRequestHeaders:
           remote-user: ""
           x-remote-user: ""
+  serversTransports:
+    llama-transport:
+      serverName: "llama-server"
+      rootCAs:
+        - /etc/traefik/llama.crt
+  routers:
+    llama:
+      rule: 'Host(`chat.{{ env "TMPL_ROOT_DOMAIN" }}`)'
+      service: llama
+      entryPoints:
+        - websecure
+  services:
+    llama:
+      loadBalancer:
+        servers:
+          - url: '{{ env "TMPL_LLAMA_ADDRESS" }}'
+        serversTransport: lan-transport
