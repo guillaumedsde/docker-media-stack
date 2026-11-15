@@ -1,12 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3-file-provider.json
 
-tls:
-  options:
-    default:
-      minVersion: VersionTLS12
-      # allow routing to honeypot
-      sniStrict: false
-
 http:
   middlewares:
     denyMetrics:
@@ -35,21 +28,440 @@ http:
       headers:
         customRequestHeaders:
           Authorization: 'Bearer {{ env "TMPL_LLAMA_API_KEY" }}'
+    nextcloud-redirectregex:
+      redirectRegex:
+        permanent: true
+        regex: "https://cloud.{{ env \"TMPL_ROOT_DOMAIN\" }}/.well-known/(card|cal)dav"
+        replacement: "https://cloud.{{ env \"TMPL_ROOT_DOMAIN\" }}/remote.php/dav/"
+    ombi-jellyseer-redirect:
+      redirectRegex:
+        permanent: false
+        regex: "^https?://ombi.{{ env \"TMPL_ROOT_DOMAIN\" }}/(.*)"
+        replacement: "https://jellyseer.{{ env \"TMPL_ROOT_DOMAIN\" }}/"
+    qb-headers:
+      headers:
+        customRequestHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+          Referer: ""
+          Origin: ""
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/verify?rd=https://authelia.{{ env \"TMPL_ROOT_DOMAIN\" }}/"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Name
+          - Remote-Email
+    anubis:
+      forwardAuth:
+        address: "http://anubis:8080/.within.website/x/cmd/anubis/api/check"
+
   serversTransports:
     llama-transport:
       serverName: "llama-server"
       rootCAs:
         - /etc/traefik/llama.crt
+
   routers:
+    # Dashboard
+    dashboard:
+      rule: Host(`traefik.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: api@internal
+      entryPoints:
+        - websecure
+      middlewares:
+        - authelia
+        - securityHeaders
+
+    # Healthcheck
+    ping:
+      rule: Host(`ping.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: ping@internal
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+
+    # honeycut
+    honeycut:
+      rule: '{{ env "TMPL_HONEYCUT_TRAEFIK_RULE" }}'
+      service: honeycut
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+      priority: 0
+
+    # anubis
+    anubis:
+      rule: Host(`anubis.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: anubis
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # Prowlarr (via wireguard)
+    prowlarr:
+      rule: Host(`prowlarr.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: prowlarr
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # qBittorrent (via wireguard)
+    qbittorrent:
+      rule: Host(`torrent.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: qbittorrent
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+        - qb-headers
+
+    # radarr
+    radarr:
+      rule: Host(`movies.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: radarr
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # sonarr
+    sonarr:
+      rule: Host(`series.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: sonarr
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # bazarr
+    bazarr:
+      rule: Host(`subtitles.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: bazarr
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # maintainerr
+    maintainerr:
+      rule: Host(`maintainerr.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: maintainerr
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # cleanuparr
+    cleanuparr:
+      rule: Host(`cleanuparr.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: cleanuparr
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # homer
+    homer:
+      rule: Host(`home.{{ env "TMPL_ROOT_DOMAIN" }}`) || Host(`{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: homer
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # jellyfin
+    jellyfin:
+      rule: Host(`jellyfin.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: jellyfin
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - denyMetrics
+
+    # jellyseer
+    jellyseer:
+      rule: Host(`jellyseer.{{ env "TMPL_ROOT_DOMAIN" }}`) || Host(`ombi.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: jellyseer
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - ombi-jellyseer-redirect
+        - anubis
+
+    # nextcloud
+    nextcloud:
+      rule: Host(`cloud.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: nextcloud
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - nextcloud-redirectregex
+
+    # miniflux
+    miniflux:
+      rule: Host(`miniflux.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: miniflux
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - denyMetrics
+        - authelia
+
+    # librespeed
+    librespeed:
+      rule: Host(`librespeed.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: librespeed
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # tandoor
+    tandoor:
+      rule: Host(`tandoor.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: tandoor
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # robots
+    robots:
+      rule: ( Host(`{{ env "TMPL_ROOT_DOMAIN" }}`) || HostRegexp(`[a-z]+.{{ env "TMPL_ROOT_DOMAIN" }}`) ) && Path(`/robots.txt`)
+      service: robots
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+
+    # scrutiny
+    scrutiny:
+      rule: Host(`scrutiny.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: scrutiny
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # prometheus
+    prometheus:
+      rule: Host(`prometheus.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: prometheus
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # grafana
+    grafana:
+      rule: Host(`grafana.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: grafana
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - authelia
+
+    # lldap
+    lldap:
+      rule: Host(`lldap.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: lldap
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+        - anubis
+
+    # authelia
+    authelia:
+      rule: Host(`authelia.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      service: authelia
+      entryPoints:
+        - websecure
+      middlewares:
+        - securityHeaders
+
+    # llama (from file)
     llama:
       rule: 'Host(`chat.{{ env "TMPL_ROOT_DOMAIN" }}`)'
       service: llama
       entryPoints:
         - websecure
       middlewares:
-        - authelia@docker
-        - llamaAuth@file
+        - authelia
+        - llamaAuth
+
   services:
+    # Service definitions
+    honeycut:
+      loadBalancer:
+        servers:
+          - url: "http://honeycut:8080"
+
+    anubis:
+      loadBalancer:
+        servers:
+          - url: "http://anubis:8080"
+
+    prowlarr:
+      loadBalancer:
+        servers:
+          - url: "http://prowlarr:9696"
+        healthCheck:
+          path: /ping
+
+    qbittorrent:
+      loadBalancer:
+        servers:
+          - url: "http://qbittorrent:8080"
+        passHostHeader: false
+        healthCheck:
+          path: /
+
+    radarr:
+      loadBalancer:
+        servers:
+          - url: "http://radarr:7878"
+        healthCheck:
+          path: /ping
+
+    sonarr:
+      loadBalancer:
+        servers:
+          - url: "http://sonarr:8989"
+        healthCheck:
+          path: /ping
+
+    bazarr:
+      loadBalancer:
+        servers:
+          - url: "http://bazarr:6767"
+        healthCheck:
+          path: /
+
+    maintainerr:
+      loadBalancer:
+        servers:
+          - url: "http://maintainerr:6246"
+        healthCheck:
+          path: /api/health/ready
+
+    cleanuparr:
+      loadBalancer:
+        servers:
+          - url: "http://cleanuparr:11011"
+        healthCheck:
+          path: /health
+
+    homer:
+      loadBalancer:
+        servers:
+          - url: "http://homer:8080"
+        healthCheck:
+          path: /
+
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://jellyfin:8096"
+        healthCheck:
+          path: /health
+
+    jellyseer:
+      loadBalancer:
+        servers:
+          - url: "http://jellyseer:5055"
+        healthCheck:
+          path: /
+
+    nextcloud:
+      loadBalancer:
+        servers:
+          - url: "http://nextcloud:80"
+        healthCheck:
+          path: /status.php
+
+    miniflux:
+      loadBalancer:
+        servers:
+          - url: "http://miniflux:8080"
+        healthCheck:
+          path: /healthcheck
+
+    librespeed:
+      loadBalancer:
+        servers:
+          - url: "http://librespeed:8080"
+        healthCheck:
+          path: /
+
+    tandoor:
+      loadBalancer:
+        servers:
+          - url: "http://tandoor:8080"
+        healthCheck:
+          path: /openapi/
+
+    robots:
+      loadBalancer:
+        servers:
+          - url: "http://robots:8080"
+        healthCheck:
+          path: /
+
+    scrutiny:
+      loadBalancer:
+        servers:
+          - url: "http://scrutiny:8080"
+        healthCheck:
+          path: /api/health
+
+    prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://prometheus:9090"
+        healthCheck:
+          path: /-/ready
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+        healthCheck:
+          path: /api/health
+
+    lldap:
+      loadBalancer:
+        servers:
+          - url: "http://lldap:17170"
+
+    authelia:
+      loadBalancer:
+        servers:
+          - url: "http://authelia:9091"
+
     llama:
       loadBalancer:
         servers:

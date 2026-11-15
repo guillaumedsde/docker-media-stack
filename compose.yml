@@ -46,8 +46,6 @@ services:
     hostname: traefik
     user: ${UID}:${GID}
     depends_on:
-      traefik-socket-proxy:
-        condition: service_healthy
       authelia:
         condition: service_healthy
       prometheus:
@@ -71,9 +69,7 @@ services:
       TRAEFIK_API: "true"
       TRAEFIK_API_DISABLEDASHBOARDAD: "true"
       # NOTE: providers
-      TRAEFIK_PROVIDERS_DOCKER: "true"
-      TRAEFIK_PROVIDERS_DOCKER_ENDPOINT: "tcp://traefik-socket-proxy:2375"
-      TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
+      TRAEFIK_PROVIDERS_DOCKER: "false"
       TRAEFIK_PROVIDERS_FILE_FILENAME: "/etc/traefik/dynamic_configuration.yml"
       # NOTE: entrypoints
       TRAEFIK_ENTRYPOINTS_WEB: "true"
@@ -137,17 +133,9 @@ services:
       TRAEFIK_METRICS_OTLP_HTTP_ENDPOINT: "http://prometheus:9090/api/v1/otlp/v1/metrics"
       # NOTE: template variables
       TMPL_ROOT_DOMAIN: "${root_domain}"
+      TMPL_HONEYCUT_TRAEFIK_RULE: "${HONEYCUT_TRAEFIK_RULE}"
       TMPL_LLAMA_ADDRESS: "${llama_address}"
       TMPL_LLAMA_API_KEY: "${llama_api_key}"
-    labels:
-      <<: *traefik
-      # Dashboard
-      traefik.http.routers.dashboard.rule: Host(`traefik.${root_domain}`)
-      traefik.http.routers.dashboard.service: api@internal
-      traefik.http.routers.dashboard.middlewares: authelia@docker
-      # Healthcheck
-      traefik.http.routers.ping.rule: Host(`ping.${root_domain}`)
-      traefik.http.routers.ping.service: ping@internal
     read_only: true
     volumes:
       - ${docker_data_folder}/traefik/data:/traefik
@@ -156,7 +144,6 @@ services:
     tmpfs:
       - /tmp:mode=770,noexec,size=5M,uid=${UID},gid=${GID}
     networks:
-      traefik-socket-proxy:
       homer:
       nextcloud-proxy:
       robots:
@@ -206,46 +193,6 @@ services:
       timeout: 3s
       retries: 5
 
-  traefik-socket-proxy: &socket-proxy
-    <<: *common
-    image: ghcr.io/wollomatic/socket-proxy:1.13.2@sha256:82db5c4728e4fd68d969ec3d74d99bf6d990d06428b583a6f1daabab27de1bd3
-    cpu_count: 2
-    mem_limit: 50M
-    memswap_limit: 50M
-    user: ${UID}:${docker_group_id}
-    read_only: true
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        read_only: true
-    entrypoint:
-      - "/socket-proxy"
-      - "-loglevel=info"
-      - "-listenip=0.0.0.0"
-      - "-shutdowngracetime=5"
-      - "-watchdoginterval=600"
-      - "-stoponwatchdog"
-      - "-allowhealthcheck"
-    command:
-      - "-allowfrom=traefik"
-      # NOTE: https://github.com/wollomatic/traefik-hardened/blob/da4ae73cff183dbce880354dd1ac6a08e4a6875b/docker-compose.yaml#L12
-      - '-allowGET=/v1\..{1,2}/(version|containers/.*|events.*)'
-      - '-allowHEAD=/_ping'
-    networks:
-      - traefik-socket-proxy
-    healthcheck:
-      test:
-        - "CMD"
-        - "./healthcheck"
-      interval: 10s
-      timeout: 5s
-      retries: 2
-
   honeycut:
     image: "ghcr.io/guillaumedsde/honeycut:main@sha256:168ad2bebdbe172055980a8f521cf1edd89e6eeddcfa997d25165ffec5984ba9"
     <<: *common
@@ -269,12 +216,6 @@ services:
         source: "/var/run/couic"
         target: "/var/run/couic"
         read_only: true
-    labels:
-      <<: *traefik
-      traefik.http.routers.honeycut.rule: "${HONEYCUT_TRAEFIK_RULE}"
-      traefik.http.routers.honeycut.priority: "-1"
-      # service
-      traefik.http.services.honeycut.loadbalancer.server.port: "8080"
 
   anubis:
     image: ghcr.io/techarohq/anubis:v1.28.2@sha256:5fcbce70ee6168be5b226d19bec90111d0acd0daf13028fa06b044cf3ebbbd5f
@@ -308,13 +249,6 @@ services:
       timeout: 30s
       retries: 5
       start_period: 500ms
-    labels:
-      <<: *traefik
-      traefik.http.routers.anubis.rule: Host(`anubis.${root_domain}`)
-      # service
-      traefik.http.services.anubis.loadbalancer.server.port: "8080"
-      # Middleware
-      traefik.http.middlewares.anubis.forwardauth.address: "http://anubis:8080/.within.website/x/cmd/anubis/api/check"
 
   wireguard-tun-device-creator:
     image: docker.io/busybox:1-musl
@@ -407,28 +341,21 @@ services:
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: '/bin/sh /wg_tunnel_up.sh "{{VPN_INTERFACE}}" "{{PORT}}"'
       HEALTH_RESTART_VPN: "off"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-wireguard"
-      # Prowlarr
-      # service
-      traefik.http.services.prowlarr.loadbalancer.server.port: "9696"
-      # Router
-      traefik.http.routers.prowlarr.rule: Host(`prowlarr.${root_domain}`)
-      traefik.http.routers.prowlarr.service: prowlarr
-      traefik.http.routers.prowlarr.middlewares: authelia@docker
-      # qBittorrent
-      # https://github.com/qbittorrent/qBittorrent/wiki/Traefik-Reverse-Proxy-for-Web-UI
-      # service
-      traefik.http.services.qbittorrent.loadbalancer.server.port: "8080"
-      traefik.http.services.qbittorrent.loadbalancer.passhostheader: "false"
-      # router
-      traefik.http.routers.qbittorrent.rule: Host(`torrent.${root_domain}`)
-      traefik.http.routers.qbittorrent.service: qbittorrent
-      traefik.http.routers.qbittorrent.middlewares: authelia@docker,qb-headers@docker
-      traefik.http.middlewares.qb-headers.headers.customrequestheaders.X-Frame-Options: "SAMEORIGIN"
-      traefik.http.middlewares.qb-headers.headers.customrequestheaders.Referer: ""
-      traefik.http.middlewares.qb-headers.headers.customrequestheaders.Origin: ""
+      wireguard-internet:
+      prometheus-flaresolverr:
+        aliases: &wireguard-aliases
+          - qbittorrent
+          - prowlarr
+          - flaresolverr
+      wireguard-radarr:
+        aliases: *wireguard-aliases
+      wireguard-sonarr:
+        aliases: *wireguard-aliases
+      traefik-wireguard:
+      maintainerr-qbittorrent:
+        aliases: *wireguard-aliases
+      cleanuparr-qbittorrent:
+        aliases: *wireguard-aliases
 
   # Torrent client
   qbittorrent:
@@ -587,13 +514,6 @@ services:
       RADARR__AUTH__METHOD: "External"
       RADARR__SERVER__ALLOWEDHOSTS: "radarr, movies.${root_domain}"
       RADARR__LOG__ANALYTICSENABLED: "False"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-radarr"
-      traefik.http.routers.radarr.rule: Host(`movies.${root_domain}`)
-      traefik.http.routers.radarr.middlewares: authelia@docker
-      # service
-      traefik.http.services.radarr.loadbalancer.server.port: "7878"
     healthcheck:
       test:
         - CMD
@@ -647,13 +567,6 @@ services:
       SONARR__AUTH__METHOD: "External"
       SONARR__SERVER__ALLOWEDHOSTS: "sonarr, series.${root_domain}"
       SONARR__LOG__ANALYTICSENABLED: "False"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-sonarr"
-      traefik.http.routers.sonarr.rule: Host(`series.${root_domain}`)
-      traefik.http.routers.sonarr.middlewares: authelia@docker
-      # service
-      traefik.http.services.sonarr.loadbalancer.server.port: "8989"
     healthcheck:
       test:
         - CMD
@@ -695,13 +608,6 @@ services:
       - traefik-bazarr
       - bazarr-sonarr
       - bazarr-radarr
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-bazarr"
-      traefik.http.routers.bazarr.rule: Host(`subtitles.${root_domain}`)
-      traefik.http.routers.bazarr.middlewares: authelia@docker
-      # service
-      traefik.http.services.bazarr.loadbalancer.server.port: "6767"
     healthcheck:
       test:
         - CMD
@@ -753,13 +659,6 @@ services:
     environment:
       <<: *conf
       TELEMETRY: "off"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-maintainerr"
-      traefik.http.routers.maintainerr.rule: Host(`maintainerr.${root_domain}`)
-      traefik.http.routers.maintainerr.middlewares: authelia@docker
-      # service
-      traefik.http.services.maintainerr.loadbalancer.server.port: "6246"
 
   cleanuparr:
     <<: *common
@@ -809,13 +708,6 @@ services:
       POSTGRES_USER: cleanuparr
       POSTGRES_PASS: "${CLEANUPARR_DB_PASSWORD}"
       POSTGRES_DB: cleanuparr
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-cleanuparr"
-      traefik.http.routers.cleanuparr.rule: Host(`cleanuparr.${root_domain}`)
-      traefik.http.routers.cleanuparr.middlewares: authelia@docker
-      # service
-      traefik.http.services.cleanuparr.loadbalancer.server.port: "11011"
 
   cleanuparr-db:
     <<: *common
@@ -870,11 +762,6 @@ services:
     volumes:
       - ${docker_data_folder}/homer/config.yml:/www/assets/config.yml:ro
       - ${docker_data_folder}/homer/assets:/www/assets:ro
-    labels:
-      <<: *traefik
-      traefik.http.routers.homer.rule: Host(`home.${root_domain}`) || Host(`${root_domain}`)
-      traefik.http.routers.homer.middlewares: "authelia@docker"
-      traefik.http.services.homer.loadbalancer.server.port: "8080"
 
   # jellyfin media server
   jellyfin:
@@ -934,13 +821,6 @@ services:
       JELLYFIN_FFmpeg__probesize: "2G"
       JELLYFIN_FFmpeg__analyzeduration: "800M"
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-jellyfin"
-      traefik.http.routers.jellyfin.rule: Host(`jellyfin.${root_domain}`)
-      traefik.http.routers.jellyfin.middlewares: "denyMetrics@file"
-      # service
-      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
 
   jellyseer:
     <<: *common
@@ -972,16 +852,6 @@ services:
       - maintainerr-seer
     environment:
       <<: *conf
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_traefik-jellyseer"
-      traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.regex: "^https?://ombi.${root_domain}/(.*)"
-      traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.replacement: "https://jellyseer.${root_domain}/"
-      traefik.http.middlewares.ombi-jellyseer-redirect.redirectregex.permanent: "false"
-      traefik.http.routers.jellyseer.rule: Host(`jellyseer.${root_domain}`) || Host(`ombi.${root_domain}`)
-      traefik.http.routers.jellyseer.middlewares: ombi-jellyseer-redirect,anubis@docker
-      # service
-      traefik.http.services.jellyseer.loadbalancer.server.port: "5055"
     healthcheck:
       test:
         - CMD
@@ -1060,16 +930,6 @@ services:
       MAIL_DOMAIN: ${root_domain}
       PHP_UPLOAD_LIMIT: 1G
       APACHE_BODY_LIMIT: "1073741824"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_nextcloud-proxy"
-      traefik.http.routers.nextcloud.rule: Host(`cloud.${root_domain}`)
-      traefik.http.routers.nextcloud.middlewares: nextcloud-redirectregex
-      # service
-      traefik.http.services.nextcloud.loadbalancer.server.port: "80"
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.permanent: "true"
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.regex: https://cloud.${root_domain}/.well-known/(card|cal)dav
-      traefik.http.middlewares.nextcloud-redirectregex.redirectregex.replacement: https://cloud.${root_domain}/remote.php/dav/
     healthcheck:
       test: curl -sSf 'http://localhost/status.php' | grep '"installed":true' | grep '"maintenance":false' | grep '"needsDbUpgrade":false' || exit 1
       interval: 10s
@@ -1079,7 +939,6 @@ services:
   nextcloud-cron:
     <<: *nextcloud
     restart: unless-stopped
-    labels: {}
     entrypoint:
       - /bin/bash
       - -c
@@ -1197,13 +1056,6 @@ services:
       METRICS_ALLOWED_NETWORKS: "172.16.249.0/24"
       METRICS_USERNAME: "miniflux-metrics"
       METRICS_PASSWORD: "miniflux-metrics"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_miniflux-proxy"
-      traefik.http.routers.miniflux.rule: Host(`miniflux.${root_domain}`)
-      traefik.http.routers.miniflux.middlewares: denyMetrics@file,authelia@docker
-      # service
-      traefik.http.services.miniflux.loadbalancer.server.port: "8080"
 
   miniflux-db:
     <<: *common
@@ -1243,12 +1095,6 @@ services:
         read_only: true
     networks:
       - librespeed
-    labels:
-      <<: *traefik
-      traefik.http.routers.librespeed.rule: Host(`librespeed.${root_domain}`)
-      traefik.http.routers.librespeed.middlewares: authelia@docker
-      # service
-      traefik.http.services.librespeed.loadbalancer.server.port: "8080"
 
   tandoor-db:
     <<: *common
@@ -1327,12 +1173,6 @@ services:
       #       (REMOTE_USER_AUTH), see the welephant/tandoor-db services below
       - tandoor
       - tandoor-db
-    labels:
-      <<: *traefik
-      traefik.http.routers.tandoor.rule: Host(`tandoor.${root_domain}`)
-      traefik.http.routers.tandoor.middlewares: authelia@docker
-      # service
-      traefik.http.services.tandoor.loadbalancer.server.port: "8080"
     healthcheck:
       test:
         - CMD
@@ -1406,11 +1246,6 @@ services:
         read_only: true
     networks:
       - robots
-    labels:
-      <<: *traefik
-      traefik.http.routers.robots.rule: ( Host(`${root_domain}`) || HostRegexp(`[a-z]+.${root_domain}`) ) && Path(`/robots.txt`)
-      # service
-      traefik.http.services.robots.loadbalancer.server.port: "8080"
     healthcheck:
       test:
         - "CMD"
@@ -1542,12 +1377,6 @@ services:
       - scrutiny
     environment:
       <<: *conf
-    labels:
-      <<: *traefik
-      traefik.http.routers.scrutiny.rule: Host(`scrutiny.${root_domain}`)
-      traefik.http.routers.scrutiny.middlewares: authelia@docker
-      # service
-      traefik.http.services.scrutiny.loadbalancer.server.port: "8080"
     healthcheck:
       test:
         - CMD
@@ -1591,13 +1420,6 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--web.enable-otlp-receiver"
-    labels:
-      <<: *traefik
-      traefik.http.routers.prometheus.rule: Host(`prometheus.${root_domain}`)
-      traefik.http.routers.prometheus.middlewares: authelia@docker
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_prometheus"
-      # service
-      traefik.http.services.prometheus.loadbalancer.server.port: "9090"
     healthcheck:
       test:
         - CMD
@@ -1676,13 +1498,6 @@ services:
       GF_ANALYTICS_FEEDBACK_LINKS_ENABLED: "false"
       GF_SNAPSHOTS_ENABLED: "false"
       GF_DISABLE_SIGNOUT_MENU: "true"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_grafana"
-      traefik.http.routers.grafana.rule: Host(`grafana.${root_domain}`)
-      traefik.http.routers.grafana.middlewares: authelia@docker
-      # service
-      traefik.http.services.grafana.loadbalancer.server.port: "3000"
     healthcheck:
       test:
         - CMD
@@ -1809,13 +1624,6 @@ services:
       LLDAP_SMTP_OPTIONS__PASSWORD: "${SMTP_PASSWORD}"
       LLDAP_SMTP_OPTIONS__FROM: "lldap <lldap@${root_domain}>"
       LLDAP_SMTP_OPTIONS__TO: "${ADMIN_EMAIL}"
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_lldap"
-      traefik.http.routers.lldap.rule: "Host(`lldap.${root_domain}`)"
-      traefik.http.routers.lldap.middlewares: anubis@docker
-      # service
-      traefik.http.services.lldap.loadbalancer.server.port: "17170"
 
   lldap-db:
     <<: *common
@@ -1893,16 +1701,6 @@ services:
       - lldap
       - authelia
       - prometheus-authelia
-    labels:
-      <<: *traefik
-      traefik.docker.network: "${COMPOSE_PROJECT_NAME}_authelia-proxy"
-      traefik.http.routers.authelia.rule: Host(`authelia.${root_domain}`)
-      # traefik.http.routers.authelia.middlewares: anubis@docker
-      # service
-      traefik.http.services.authelia.loadbalancer.server.port: "9091"
-      traefik.http.middlewares.authelia.forwardauth.address: "http://authelia:9091/api/verify?rd=https://authelia.${root_domain}/"
-      traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: "true"
-      traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: Remote-User, Remote-Name, Remote-Email
     healthcheck:
       start_period: 2m
 
@@ -1973,9 +1771,6 @@ networks:
     internal: true
   authelia-proxy:
     enable_ipv6: false
-  traefik-socket-proxy:
-    enable_ipv6: false
-    internal: true
   librespeed:
     enable_ipv6: false
     internal: true
