@@ -95,7 +95,6 @@ http:
       rule: Host(`anubis.{{ $domain }}`)
       service: anubis
       entryPoints: [websecure]
-      middlewares: [authelia]
 
     # Prowlarr (via wireguard)
     prowlarr:
