@@ -10,12 +10,6 @@
 # basic common configuration for most containers
 x-conf: &conf
   TZ: ${TZ}
-  PGID: ${GID}
-  PUID: ${UID}
-  # NOTE: this umask env var is mostly used by lsio containers
-  #       docker does not have an option to set umask, see:
-  #       https://github.com/moby/moby/issues/19189
-  UMASK: "077"
 
 # container restart policy
 x-common: &common
@@ -38,6 +32,7 @@ x-tandoor-image: &tandoor-image
 services:
   # reverse proxy
   traefik:
+    umask: 077
     image: docker.io/traefik:v3.7.19@sha256:aa942a00bce033c909bf1f7e861d93761be4b31a035f10d2410d33e38a8f41cf
     hostname: traefik
     user: ${UID}:${GID}
@@ -189,6 +184,7 @@ services:
       retries: 5
 
   honeycut:
+    umask: 077
     image: "ghcr.io/guillaumedsde/honeycut:main@sha256:168ad2bebdbe172055980a8f521cf1edd89e6eeddcfa997d25165ffec5984ba9"
     <<: *common
     mem_limit: 100M
@@ -213,6 +209,7 @@ services:
         read_only: true
 
   anubis:
+    umask: 077
     image: ghcr.io/techarohq/anubis:v1.28.2@sha256:5fcbce70ee6168be5b226d19bec90111d0acd0daf13028fa06b044cf3ebbbd5f
     <<: *common
     mem_limit: 100M
@@ -246,6 +243,7 @@ services:
       start_period: 500ms
 
   wireguard-tun-device-creator:
+    umask: 077
     image: docker.io/busybox:1-musl
     cpu_count: 2
     mem_limit: 20M
@@ -272,6 +270,7 @@ services:
 
   # Wireguard VPN client
   wireguard:
+    umask: 077
     <<: *common
     depends_on:
       wireguard-tun-device-creator:
@@ -319,7 +318,7 @@ services:
     environment:
       <<: *conf
       PUID: "${UID}"
-      GUID: "${GID}"
+      PGID: "${GID}"
       LOG_LEVEL: ${GLUETUN_LOG_LEVEL:-info}
       VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
       VPN_TYPE: "wireguard"
@@ -354,6 +353,7 @@ services:
 
   # Torrent client
   qbittorrent:
+    umask: 077
     <<: *common
     depends_on:
       wireguard:
@@ -414,6 +414,7 @@ services:
         - "http://localhost:8080/"
 
   prowlarr:
+    umask: 077
     <<: *common
     image: ghcr.io/home-operations/prowlarr:3.0.1.5752@sha256:83cc967a3b7b754634e31773d4d58ea606714490b7e8592d41b608f7c249afe6
     cpu_count: 4
@@ -455,6 +456,7 @@ services:
       start_period: 15s
 
   flaresolverr:
+    umask: 077
     <<: *common
     image: ghcr.io/flaresolverr/flaresolverr:v3.5.2@sha256:c80ae007ce2ccdcd217a12426e4f039ef763ff90738c808d38810c3e59323767
     depends_on:
@@ -475,6 +477,7 @@ services:
 
   # radarr, webapp for downloading movies through torrent client
   radarr:
+    umask: 077
     <<: *common
     image: ghcr.io/home-operations/radarr:7.0.2.10888@sha256:69ea515df6e2a3ea1490cfa127ffaaf9597a9db84fffa2fa150a6fae98fe04cb
     cpu_count: 4
@@ -525,6 +528,7 @@ services:
 
   # sonarr, webapp for downloading series through torrent client
   sonarr:
+    umask: 077
     <<: *common
     image: ghcr.io/home-operations/sonarr:5.0.0.2941@sha256:93b0923dd12afd43247739e19dac59d74c52a15ea12e036b7ced264cffb42574
     cpu_count: 4
@@ -578,6 +582,7 @@ services:
 
   # bazarr, webapp for downloading subtitles
   bazarr:
+    umask: 077
     <<: *common
     depends_on:
       radarr:
@@ -618,6 +623,7 @@ services:
       start_period: 5s
 
   maintainerr:
+    umask: 077
     <<: *common
     image: ghcr.io/maintainerr/maintainerr:3.32@sha256:144b59149ab9c64752e7f7428b6eb54c7f6faf5c987ec4025fe699b47b669d34
     cpu_count: 4
@@ -656,6 +662,7 @@ services:
       TELEMETRY: "off"
 
   cleanuparr:
+    umask: 077
     <<: *common
     image: ghcr.io/cleanuparr/cleanuparr:2.11.1@sha256:beae078782dff687877e202924ed279ae6d904f0bc444ed5613e8ccf4bdf5669
     depends_on:
@@ -705,6 +712,7 @@ services:
       POSTGRES_DB: cleanuparr
 
   cleanuparr-db:
+    umask: 077
     <<: *common
     image: docker.io/postgres:18-trixie
     cpu_count: 2
@@ -743,6 +751,7 @@ services:
 
   # homer is a homepage container
   homer:
+    umask: 077
     <<: *common
     image: docker.io/b4bz/homer:v26.11.3@sha256:6fd0c32e9f37d1d4916bcbb29484c4b7c1b656ff7171e0d03c68c8f06abe0bed
     user: ${UID}:${GID}
@@ -760,6 +769,7 @@ services:
 
   # jellyfin media server
   jellyfin:
+    umask: 077
     <<: *common
     image: ghcr.io/jellyfin/jellyfin:12.4@sha256:7da5184caa38c553f219f6772476540081f392a68049e2b68c923f6daf877f8e
     user: ${UID}:${RENDER_GROUP_GID}
@@ -818,6 +828,7 @@ services:
       JELLYFIN_PublishedServerUrl: https://jellyfin.${root_domain}
 
   jellyseer:
+    umask: 077
     <<: *common
     image: ghcr.io/seerr-team/seerr:v3.5.2@sha256:ccddd8e5c5b026790b447f4c97937751083227584c793864db218b460def7959
     user: ${UID}:${GID}
@@ -863,6 +874,7 @@ services:
 
   # personal cloud
   nextcloud: &nextcloud
+    umask: 077
     <<: *common
     depends_on:
       nextcloud-db:
@@ -932,6 +944,7 @@ services:
       retries: 10
 
   nextcloud-cron:
+    umask: 077
     <<: *nextcloud
     restart: unless-stopped
     entrypoint:
@@ -945,6 +958,7 @@ services:
 
   # database for nextcloud
   nextcloud-db:
+    umask: 077
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
@@ -967,6 +981,7 @@ services:
 
   # cache for nextcloud
   nextcloud-redis:
+    umask: 077
     <<: *common
     cpu_count: 2
     mem_limit: 100M
@@ -990,6 +1005,7 @@ services:
         - "ping"
 
   nextcloud-imaginary:
+    umask: 077
     <<: *common
     image: docker.io/nextcloud/aio-imaginary:20261014_095932@sha256:ad144635b5ae068c35b3ebd3e9eef5265a91bbe522a2e656dfccd314dbba5a8f
     cpu_count: 6
@@ -1018,6 +1034,7 @@ services:
       retries: 3
 
   miniflux:
+    umask: 077
     <<: *common
     depends_on:
       miniflux-db:
@@ -1053,6 +1070,7 @@ services:
       METRICS_PASSWORD: "miniflux-metrics"
 
   miniflux-db:
+    umask: 077
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
@@ -1074,6 +1092,7 @@ services:
     healthcheck: *postgres-healthcheck
 
   librespeed:
+    umask: 077
     <<: *common
     image: ghcr.io/librespeed/speedtest-rust:v1.4.0@sha256:8094b51e5b08964591ee844ebbd6cd301ae8a9b82f4f1918fae6f6dff22089e4
     cpu_count: 2
@@ -1092,6 +1111,7 @@ services:
       - librespeed
 
   tandoor-db:
+    umask: 077
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
@@ -1113,6 +1133,7 @@ services:
     healthcheck: *postgres-healthcheck
 
   tandoor:
+    umask: 077
     <<: [*common, *tandoor-image]
     cpu_count: 4
     mem_limit: 1G
@@ -1185,6 +1206,7 @@ services:
       start_period: 5s
 
   tandoor-setup:
+    umask: 077
     <<: [*common, *tandoor-image]
     cpu_count: 2
     mem_limit: 750M
@@ -1217,6 +1239,7 @@ services:
         chown -R "${UID}:${GID}" staticfiles
 
   robots:
+    umask: 077
     <<: *common
     image: docker.io/nginxinc/nginx-unprivileged:1.31-alpine-slim
     mem_limit: 100M
@@ -1254,6 +1277,7 @@ services:
       retries: 5
 
   welephant:
+    umask: 077
     <<: *common
     depends_on:
       nextcloud-db:
@@ -1306,6 +1330,7 @@ services:
   # Monitoring
 
   scrutiny:
+    umask: 077
     image: ghcr.io/analogj/scrutiny:v0.10.0-omnibus@sha256:90062edac57a2bd891d641344184f5f730f19394b1124f6fc53904a3d8cb21c2
     <<: *common
     mem_limit: 500M
@@ -1333,6 +1358,7 @@ services:
       start_period: 5s
 
   prometheus:
+    umask: 077
     <<: *common
     image: docker.io/prom/prometheus:v3.16.0@sha256:e04987641b57704f408e31f6373ba4138ecf27cb4a165d24aabb6c38fddd0f06
     mem_limit: 500M
@@ -1379,6 +1405,7 @@ services:
       start_period: 10s
 
   grafana:
+    umask: 077
     <<: *common
     depends_on:
       prometheus:
@@ -1457,6 +1484,7 @@ services:
       start_period: 10s
 
   loki:
+    umask: 077
     <<: *common
     image: docker.io/grafana/loki:3.7.10@sha256:b43c257ccfc925d4a50b8717cac61a3b51df8c48d01847936057e5c4075a24a7
     mem_limit: 500M
@@ -1490,6 +1518,7 @@ services:
       start_period: 10s
 
   node-exporter:
+    umask: 077
     <<: *common
     image: docker.io/prom/node-exporter:v1.12.1@sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0
     mem_limit: 250M
@@ -1529,6 +1558,7 @@ services:
   # Authentication
 
   lldap:
+    umask: 077
     <<: *common
     depends_on:
       lldap-db:
@@ -1570,6 +1600,7 @@ services:
       LLDAP_SMTP_OPTIONS__TO: "${ADMIN_EMAIL}"
 
   lldap-db:
+    umask: 077
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
@@ -1592,6 +1623,7 @@ services:
 
   # SSO
   authelia:
+    umask: 077
     <<: *common
     depends_on:
       authelia-db:
@@ -1650,6 +1682,7 @@ services:
 
   # DB for authelia
   authelia-db:
+    umask: 077
     <<: *common
     image: docker.io/postgres:17-trixie
     cpu_count: 2
@@ -1671,6 +1704,7 @@ services:
     healthcheck: *postgres-healthcheck
 
   authelia-valkey:
+    umask: 077
     <<: *common
     cpu_count: 2
     mem_limit: 100M
