@@ -335,21 +335,6 @@ services:
       VPN_PORT_FORWARDING: "on"
       VPN_PORT_FORWARDING_UP_COMMAND: '/bin/sh /wg_tunnel_up.sh "{{VPN_INTERFACE}}" "{{PORT}}"'
       HEALTH_RESTART_VPN: "off"
-      wireguard-internet:
-      prometheus-flaresolverr:
-        aliases: &wireguard-aliases
-          - qbittorrent
-          - prowlarr
-          - flaresolverr
-      wireguard-radarr:
-        aliases: *wireguard-aliases
-      wireguard-sonarr:
-        aliases: *wireguard-aliases
-      traefik-wireguard:
-      maintainerr-qbittorrent:
-        aliases: *wireguard-aliases
-      cleanuparr-qbittorrent:
-        aliases: *wireguard-aliases
 
   # Torrent client
   qbittorrent:
