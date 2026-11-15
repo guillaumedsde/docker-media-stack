@@ -311,6 +311,7 @@ services:
       wireguard-sonarr:
         aliases: *wireguard-aliases
       traefik-wireguard:
+        aliases: *wireguard-aliases
       maintainerr-qbittorrent:
         aliases: *wireguard-aliases
       cleanuparr-qbittorrent:
