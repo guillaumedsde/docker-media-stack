@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/traefik-v3-file-provider.json
-
+# {{ $domain := env "TMPL_ROOT_DOMAIN" }}
 http:
   middlewares:
     denyMetrics:
@@ -9,6 +9,8 @@ http:
     securityHeaders:
       # NOTE: all headers are case insensitive
       # NOTE: set to empty string to remove header (yaml null value does not work)
+      # NOTE: applied to all routers on the websecure entrypoint via
+      #       TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_MIDDLEWARES
       headers:
         customResponseHeaders:
           x-robots-tag: "noindex, nofollow"
@@ -31,13 +33,13 @@ http:
     nextcloud-redirectregex:
       redirectRegex:
         permanent: true
-        regex: "https://cloud.{{ env \"TMPL_ROOT_DOMAIN\" }}/.well-known/(card|cal)dav"
-        replacement: "https://cloud.{{ env \"TMPL_ROOT_DOMAIN\" }}/remote.php/dav/"
+        regex: 'https://cloud.{{ $domain }}/.well-known/(card|cal)dav'
+        replacement: 'https://cloud.{{ $domain }}/remote.php/dav/'
     ombi-jellyseer-redirect:
       redirectRegex:
         permanent: false
-        regex: "^https?://ombi.{{ env \"TMPL_ROOT_DOMAIN\" }}/(.*)"
-        replacement: "https://jellyseer.{{ env \"TMPL_ROOT_DOMAIN\" }}/"
+        regex: '^https?://ombi.{{ $domain }}/(.*)'
+        replacement: 'https://jellyseer.{{ $domain }}/'
     qb-headers:
       headers:
         customRequestHeaders:
@@ -46,7 +48,7 @@ http:
           Origin: ""
     authelia:
       forwardAuth:
-        address: "http://authelia:9091/api/verify?rd=https://authelia.{{ env \"TMPL_ROOT_DOMAIN\" }}/"
+        address: 'http://authelia:9091/api/verify?rd=https://authelia.{{ $domain }}/'
         trustForwardHeader: true
         authResponseHeaders:
           - Remote-User
@@ -63,258 +65,167 @@ http:
         - /etc/traefik/llama.crt
 
   routers:
+    # NOTE: securityHeaders is applied to all routers on the websecure
+    #       entrypoint (see TRAEFIK_ENTRYPOINTS_WEBSECURE_HTTP_MIDDLEWARES)
+    #       and is therefore not repeated per-router
     # Dashboard
     dashboard:
-      rule: Host(`traefik.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`traefik.{{ $domain }}`)
       service: api@internal
-      entryPoints:
-        - websecure
-      middlewares:
-        - authelia
-        - securityHeaders
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
     # Healthcheck
     ping:
-      rule: Host(`ping.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`ping.{{ $domain }}`)
       service: ping@internal
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
+      entryPoints: [websecure]
 
     # honeycut
     honeycut:
       rule: '{{ env "TMPL_HONEYCUT_TRAEFIK_RULE" }}'
       service: honeycut
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-      priority: 0
+      entryPoints: [websecure]
+      # NOTE: keep the honeypot below every other router, default router
+      #       priority is the length of the rule (always > 1 here)
+      priority: 1
 
     # anubis
     anubis:
-      rule: Host(`anubis.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`anubis.{{ $domain }}`)
       service: anubis
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
     # Prowlarr (via wireguard)
     prowlarr:
-      rule: Host(`prowlarr.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`prowlarr.{{ $domain }}`)
       service: prowlarr
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
     # qBittorrent (via wireguard)
     qbittorrent:
-      rule: Host(`torrent.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`torrent.{{ $domain }}`)
       service: qbittorrent
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
-        - qb-headers
+      entryPoints: [websecure]
+      middlewares: [authelia, qb-headers]
 
-    # radarr
     radarr:
-      rule: Host(`movies.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`movies.{{ $domain }}`)
       service: radarr
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # sonarr
     sonarr:
-      rule: Host(`series.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`series.{{ $domain }}`)
       service: sonarr
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # bazarr
     bazarr:
-      rule: Host(`subtitles.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`subtitles.{{ $domain }}`)
       service: bazarr
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # maintainerr
     maintainerr:
-      rule: Host(`maintainerr.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`maintainerr.{{ $domain }}`)
       service: maintainerr
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # cleanuparr
     cleanuparr:
-      rule: Host(`cleanuparr.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`cleanuparr.{{ $domain }}`)
       service: cleanuparr
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # homer
     homer:
-      rule: Host(`home.{{ env "TMPL_ROOT_DOMAIN" }}`) || Host(`{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`home.{{ $domain }}`) || Host(`{{ $domain }}`)
       service: homer
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # jellyfin
     jellyfin:
-      rule: Host(`jellyfin.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`jellyfin.{{ $domain }}`)
       service: jellyfin
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - denyMetrics
+      entryPoints: [websecure]
+      middlewares: [denyMetrics]
 
-    # jellyseer
     jellyseer:
-      rule: Host(`jellyseer.{{ env "TMPL_ROOT_DOMAIN" }}`) || Host(`ombi.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`jellyseer.{{ $domain }}`) || Host(`ombi.{{ $domain }}`)
       service: jellyseer
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - ombi-jellyseer-redirect
-        - anubis
+      entryPoints: [websecure]
+      middlewares: [ombi-jellyseer-redirect, anubis]
 
-    # nextcloud
     nextcloud:
-      rule: Host(`cloud.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`cloud.{{ $domain }}`)
       service: nextcloud
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - nextcloud-redirectregex
+      entryPoints: [websecure]
+      middlewares: [nextcloud-redirectregex]
 
-    # miniflux
     miniflux:
-      rule: Host(`miniflux.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`miniflux.{{ $domain }}`)
       service: miniflux
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - denyMetrics
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [denyMetrics, authelia]
 
-    # librespeed
     librespeed:
-      rule: Host(`librespeed.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`librespeed.{{ $domain }}`)
       service: librespeed
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # tandoor
     tandoor:
-      rule: Host(`tandoor.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`tandoor.{{ $domain }}`)
       service: tandoor
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # robots
     robots:
-      rule: ( Host(`{{ env "TMPL_ROOT_DOMAIN" }}`) || HostRegexp(`[a-z]+.{{ env "TMPL_ROOT_DOMAIN" }}`) ) && Path(`/robots.txt`)
+      rule: ( Host(`{{ $domain }}`) || HostRegexp(`[a-z]+.{{ $domain }}`) ) && Path(`/robots.txt`)
       service: robots
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
+      entryPoints: [websecure]
 
-    # scrutiny
     scrutiny:
-      rule: Host(`scrutiny.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`scrutiny.{{ $domain }}`)
       service: scrutiny
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # prometheus
     prometheus:
-      rule: Host(`prometheus.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`prometheus.{{ $domain }}`)
       service: prometheus
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # grafana
     grafana:
-      rule: Host(`grafana.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`grafana.{{ $domain }}`)
       service: grafana
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - authelia
+      entryPoints: [websecure]
+      middlewares: [authelia]
 
-    # lldap
     lldap:
-      rule: Host(`lldap.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`lldap.{{ $domain }}`)
       service: lldap
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
-        - anubis
+      entryPoints: [websecure]
+      middlewares: [anubis]
 
-    # authelia
     authelia:
-      rule: Host(`authelia.{{ env "TMPL_ROOT_DOMAIN" }}`)
+      rule: Host(`authelia.{{ $domain }}`)
       service: authelia
-      entryPoints:
-        - websecure
-      middlewares:
-        - securityHeaders
+      entryPoints: [websecure]
 
     # llama (from file)
     llama:
-      rule: 'Host(`chat.{{ env "TMPL_ROOT_DOMAIN" }}`)'
+      rule: 'Host(`chat.{{ $domain }}`)'
       service: llama
-      entryPoints:
-        - websecure
-      middlewares:
-        - authelia
-        - llamaAuth
+      entryPoints: [websecure]
+      middlewares: [authelia, llamaAuth]
 
   services:
-    # Service definitions
+    # NOTE: no healthCheck for honeycut/anubis (no known health endpoint)
     honeycut:
       loadBalancer:
         servers:
@@ -329,141 +240,126 @@ http:
       loadBalancer:
         servers:
           - url: "http://prowlarr:9696"
-        healthCheck:
-          path: /ping
+        healthCheck: {path: /ping}
 
     qbittorrent:
       loadBalancer:
         servers:
           - url: "http://qbittorrent:8080"
         passHostHeader: false
-        healthCheck:
-          path: /
+        healthCheck: {path: /}
 
     radarr:
       loadBalancer:
         servers:
           - url: "http://radarr:7878"
-        healthCheck:
-          path: /ping
+        healthCheck: {path: /ping}
 
     sonarr:
       loadBalancer:
         servers:
           - url: "http://sonarr:8989"
-        healthCheck:
-          path: /ping
+        healthCheck: {path: /ping}
 
     bazarr:
       loadBalancer:
         servers:
           - url: "http://bazarr:6767"
-        healthCheck:
-          path: /
+        healthCheck: {path: /}
 
     maintainerr:
       loadBalancer:
         servers:
           - url: "http://maintainerr:6246"
-        healthCheck:
-          path: /api/health/ready
+        healthCheck: {path: /api/health/ready}
 
     cleanuparr:
       loadBalancer:
         servers:
           - url: "http://cleanuparr:11011"
-        healthCheck:
-          path: /health
+        healthCheck: {path: /health}
 
     homer:
       loadBalancer:
         servers:
           - url: "http://homer:8080"
-        healthCheck:
-          path: /
+        healthCheck: {path: /}
 
     jellyfin:
       loadBalancer:
         servers:
           - url: "http://jellyfin:8096"
-        healthCheck:
-          path: /health
+        healthCheck: {path: /health}
 
     jellyseer:
       loadBalancer:
         servers:
           - url: "http://jellyseer:5055"
-        healthCheck:
-          path: /
+        healthCheck: {path: /}
 
     nextcloud:
       loadBalancer:
         servers:
           - url: "http://nextcloud:80"
-        healthCheck:
-          path: /status.php
+        healthCheck: {path: /status.php}
 
     miniflux:
       loadBalancer:
         servers:
           - url: "http://miniflux:8080"
-        healthCheck:
-          path: /healthcheck
+        healthCheck: {path: /healthcheck}
 
     librespeed:
       loadBalancer:
         servers:
           - url: "http://librespeed:8080"
-        healthCheck:
-          path: /
+        healthCheck: {path: /}
 
     tandoor:
       loadBalancer:
         servers:
           - url: "http://tandoor:8080"
-        healthCheck:
-          path: /openapi/
+        healthCheck: {path: /openapi/}
 
     robots:
       loadBalancer:
         servers:
           - url: "http://robots:8080"
-        healthCheck:
-          path: /
+        healthCheck: {path: /robots.txt}
 
     scrutiny:
       loadBalancer:
         servers:
           - url: "http://scrutiny:8080"
-        healthCheck:
-          path: /api/health
+        healthCheck: {path: /api/health}
 
     prometheus:
       loadBalancer:
         servers:
           - url: "http://prometheus:9090"
-        healthCheck:
-          path: /-/ready
+        healthCheck: {path: /-/ready}
 
     grafana:
       loadBalancer:
         servers:
           - url: "http://grafana:3000"
-        healthCheck:
-          path: /api/health
+        healthCheck: {path: /api/health}
 
     lldap:
       loadBalancer:
         servers:
           - url: "http://lldap:17170"
+        healthCheck: {path: /health}
 
     authelia:
       loadBalancer:
         servers:
           - url: "http://authelia:9091"
+        healthCheck: {path: /api/health}
 
     llama:
       loadBalancer:
         servers:
           - url: '{{ env "TMPL_LLAMA_ADDRESS" }}'
         serversTransport: llama-transport
+        healthCheck: {path: /health}
