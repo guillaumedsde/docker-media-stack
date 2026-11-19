@@ -465,7 +465,7 @@ services:
   radarr:
     umask: 077
     <<: *common
-    image: ghcr.io/home-operations/radarr:7.0.2.10888@sha256:69ea515df6e2a3ea1490cfa127ffaaf9597a9db84fffa2fa150a6fae98fe04cb
+    image: ghcr.io/home-operations/radarr:7.0.3.10918@sha256:55d3cf8a4c4c531bb8b5c1ba88eb270d4435e01e228fbdb16cdfc910a17e3b06
     cpu_count: 4
     mem_limit: 1G
     memswap_limit: 1G
