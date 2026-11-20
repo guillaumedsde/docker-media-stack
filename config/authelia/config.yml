@@ -63,6 +63,12 @@ access_control:
       resources: "^/openapi/$"
       methods:
         - HEAD
+      # Allow Llama.cpp healthcheck endpoint access
+    - domain_regex: '^chat\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
+      policy: bypass
+      resources: "^/health$"
+      methods:
+        - HEAD
     # 2FA on admin apps
     - domain_regex: '^scrutiny\.{{ env "ROOT_DOMAIN" | replace "." "\\." }}$'
       policy: two_factor
