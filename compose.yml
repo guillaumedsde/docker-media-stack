@@ -651,7 +651,7 @@ services:
   cleanuparr:
     umask: 077
     <<: *common
-    image: ghcr.io/cleanuparr/cleanuparr:2.11.1@sha256:beae078782dff687877e202924ed279ae6d904f0bc444ed5613e8ccf4bdf5669
+    image: ghcr.io/cleanuparr/cleanuparr:2.11.2@sha256:ca6ce93e7e646fa6dbf98a8dbe3969df892b6675ae4a8f4bbd5093610e001797
     depends_on:
       cleanuparr-db:
         condition: service_healthy
