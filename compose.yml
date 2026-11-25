@@ -27,7 +27,7 @@ x-common: &common
 
 # see https://github.com/renovatebot/renovate/issues/34369#issuecomment-2674092131
 x-tandoor-image: &tandoor-image
-  image: ghcr.io/tandoorrecipes/recipes:2.7.6@sha256:35a3037b167bc62286636c0a82afcd51fbe4ad9c4910d8c565cef6e86af612c1
+  image: ghcr.io/tandoorrecipes/recipes:2.7.8@sha256:080c1b1520e8689b57ad217571c8c4e042678f973aff9e1790f79b54603840c1
 
 services:
   # reverse proxy
