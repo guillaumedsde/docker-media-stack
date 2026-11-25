@@ -701,7 +701,7 @@ services:
   cleanuparr-db:
     umask: 077
     <<: *common
-    image: docker.io/postgres:18-trixie
+    image: docker.io/postgres:19-trixie
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -947,7 +947,7 @@ services:
   nextcloud-db:
     umask: 077
     <<: *common
-    image: docker.io/postgres:17-trixie
+    image: docker.io/postgres:19-trixie
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -1059,7 +1059,7 @@ services:
   miniflux-db:
     umask: 077
     <<: *common
-    image: docker.io/postgres:17-trixie
+    image: docker.io/postgres:19-trixie
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -1100,7 +1100,7 @@ services:
   tandoor-db:
     umask: 077
     <<: *common
-    image: docker.io/postgres:17-trixie
+    image: docker.io/postgres:19-trixie
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -1589,7 +1589,7 @@ services:
   lldap-db:
     umask: 077
     <<: *common
-    image: docker.io/postgres:17-trixie
+    image: docker.io/postgres:19-trixie
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
@@ -1671,7 +1671,7 @@ services:
   authelia-db:
     umask: 077
     <<: *common
-    image: docker.io/postgres:17-trixie
+    image: docker.io/postgres:19-trixie
     cpu_count: 2
     mem_limit: 250M
     memswap_limit: 250M
