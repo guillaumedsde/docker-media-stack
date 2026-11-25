@@ -612,7 +612,7 @@ services:
   maintainerr:
     umask: 077
     <<: *common
-    image: ghcr.io/maintainerr/maintainerr:3.32@sha256:144b59149ab9c64752e7f7428b6eb54c7f6faf5c987ec4025fe699b47b669d34
+    image: ghcr.io/maintainerr/maintainerr:3.33@sha256:b122b719d48decb82ab09606089b7e1b8323f3ab9eb5d0646f5bdc95d1c7d9e6
     cpu_count: 4
     mem_limit: 500M
     memswap_limit: 500M
